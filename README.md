@@ -4,7 +4,31 @@
 
 XVcache is a local MCP server that journals every read and write in a Markdown vault as a sha256-chained JSONL log, so you can later prove a note is intact (**V**) or was changed outside XVcache (**X**), without putting the note's content into the journal. It talks MCP over STDIO. The intended first user is an AI agent, which can also look up plans, suggest a bundle, and ask its human to approve a paid upgrade when billing exists.
 
-This repository is prepared for a public release. **Nothing has been published** (no GitHub repository, no npm package, no directory listing, no live payment).
+Published source: [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache) (Apache-2.0). npm: [`xvcache-mcp`](https://www.npmjs.com/package/xvcache-mcp) 0.1.0. Official MCP Registry: `io.github.xvcache/xvcache`. Site: [xvcache.com](https://xvcache.com). Payment is not live.
+
+## Why XVcache (vs other Obsidian MCP servers)
+
+Most Obsidian MCP servers help an agent **read and write** a vault. XVcache does that too, but its job is narrower: leave a **tamper-evident proof** that a note is still intact (**V**) or was changed outside these tools (**X**), without putting the note body in the log. It can run **alongside** a fuller Obsidian MCP server: use the other server for rich editing or search, and use XVcache when a later proof may be needed (prefer `write_note` / `read_note` for those notes).
+
+Star counts and registry entries below were checked on 22 November 2026 (GitHub API; official MCP Registry).
+
+| Server | Read/write notes | Tamper detection on a note | Chained audit / provenance journal | Content kept out of the log |
+|---|---|---|---|---|
+| **XVcache** | Yes (`read_note`, `search_notes`, `write_note`) | Yes: `verify_journal` compares the file on disk to the last fingerprint and returns **V** or **X** | Yes: sha256-chained JSONL of **reads and writes** | Yes (fingerprints and metadata only) |
+| [obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server) (716 stars; registry `io.github.cyanheads/obsidian-mcp-server`) | Yes — 14 tools, surgical edits, tags, frontmatter (via Local REST API) | Not documented | Not documented | n/a (no such journal documented) |
+| [obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) (752 stars) | Yes — local filesystem, Obsidian app not required | Conflict/recovery if a note changed since a transaction; not a V/X proof of outside edits | Transaction snapshots for atomic writes and rollback (`.obsidian-mcp/transactions`), not a hash chain | No: recovery snapshots store note bytes |
+| [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) (831 stars; **archived**) | Yes, as an Obsidian plugin + local MCP server (semantic search, templates) | Not for notes. SLSA provenance in the README applies to **downloaded binaries**, not vault files | Not documented | n/a |
+| [obsidian-mcp-secure](https://github.com/dewtech-technologies/obsidian-mcp-secure) (registry `io.github.dewtech-technologies/obsidian-mcp-secure`) | Yes (via Local REST API) | Not documented | Rotating winston audit log (5 MB / 10 files), not described as hash-chained | No: the README states previous content goes to the audit log |
+| [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) (13 stars; formerly `obsidian-tc`; that registry entry is deprecated after the rename) | Yes — large governed surface (ACLs, human-in-the-loop, search) | `provenance verify` checks the **record chain** (signatures, links). `get_provenance` returns write history with before/after sha256. Those documented tools do not return a one-letter current-file **V**/**X** | Yes, for **writes**: signed, hash-chained provenance in `cache.db` | Yes: hashes and attribution only, never note content |
+
+Where others are ahead: [cyanheads/obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server), [StevenStavrakis/obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) and [jacksteamdev/obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) have far more adoption and a much richer editing or search surface. [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) already ships **EdDSA-signed** write provenance, folder ACLs and confirmation on destructive operations — XVcache's independent witness is still **à venir**. Reliquary-TC does not document journaling of **reads**.
+
+### When to choose XVcache
+
+- You may later need to show that a note is intact (**V**) or was changed outside the MCP tools (**X**), without storing the note body in the log.
+- You want a small, local-first STDIO server whose journal you can inspect as JSONL, including **reads**, not only writes.
+- You already use a fuller Obsidian MCP server and want a proof layer beside it — XVcache does not replace surgical edits, graph or semantic search, or plugin features.
+
 
 ## Français
 
@@ -12,7 +36,7 @@ This repository is prepared for a public release. **Nothing has been published**
 
 XVcache est un serveur MCP local (transport STDIO) qui journalise les lectures et écritures d'un coffre Markdown dans un journal JSONL chaîné par sha256. L'outil `verify_journal` rend le verdict **V** (intacte) ou **X** (MODIFIÉE hors XVcache), sans exposer le contenu de la note dans le journal. Le client visé en premier est un agent IA : il peut lister les offres, recommander un forfait, et demander l'accord d'un humain pour un passage à l'offre payante — quand la facturation existera.
 
-Le témoin certificateur indépendant (signature Ed25519 / horodatage qualifié) est **à venir**. Les prix du catalogue sont des **placeholders clairement marqués TBD**. Aucun paiement n'est en service. Ce dépôt n'est pas encore public.
+Le témoin certificateur indépendant (signature Ed25519 / horodatage qualifié) est **à venir**. Les prix du catalogue sont des **placeholders clairement marqués TBD**. Aucun paiement n'est en service. Dépôt public : [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache). Comparaison avec d'autres serveurs MCP Obsidian : [Why XVcache](#why-xvcache-vs-other-obsidian-mcp-servers).
 
 ## For AI agents
 
@@ -27,7 +51,7 @@ Read [AGENTS.md](./AGENTS.md) and [llms.txt](./llms.txt) for the full agent brie
 
 ## Quickstart
 
-**Once the npm package is published** (it is not published today):
+From npm:
 
 ```bash
 XVCACHE_VAULT=/absolute/path/to/vault npx -y xvcache-mcp
@@ -48,7 +72,7 @@ The vault must already exist. Only `.md` notes inside it are in scope.
 
 ## Configuration
 
-Replace `/absolute/path/to/vault` with the vault directory. Until `xvcache-mcp` is on npm, point `command` at `node` and `args` at this repo's `dist/server.js`, or use the `npx` form after publication.
+Replace `/absolute/path/to/vault` with the vault directory. The `npx` form below uses the published `xvcache-mcp` package. For a local build, point `command` at `node` and `args` at this repo's `dist/server.js`.
 
 ### Codex (`~/.codex/config.toml` or a project `.codex/config.toml`)
 
