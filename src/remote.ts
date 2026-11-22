@@ -1,6 +1,6 @@
 import http from "node:http";
 import { randomBytes } from "node:crypto";
-import { promises as fs } from "node:fs";
+import { promises as fs, readFileSync } from "node:fs";
 import path from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -36,7 +36,10 @@ export type RemoteOptions = {
 export const HASH_RE = /^[0-9a-fA-F]{64}$/;
 export const MAX_LABEL = 120;
 const PDF_TTL_MS = 24 * 3600 * 1000;
-const VERSION = "0.3.0";
+/** Same version as package.json (0.2.x line); the hosted server is not released yet. */
+const VERSION: string = (() => {
+  try { return (JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version: string }).version; } catch { return "0.0.0"; }
+})();
 
 type Content = { type: "text"; text: string } | { type: "resource"; resource: { uri: string; mimeType: string; blob: string } };
 type Result = { isError?: boolean; content: Content[] };
