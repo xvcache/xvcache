@@ -42,6 +42,7 @@ export type PlansCatalog = {
   plans: Plan[];
   upgrade: Record<string, unknown>;
   reseller: Record<string, unknown>;
+  certified_proofs?: Record<string, unknown>;
 };
 
 let cached: PlansCatalog | undefined;
@@ -65,6 +66,7 @@ export function getOffer(): Record<string, unknown> {
     prices_status: catalog.prices_status,
     notice: catalog.notice,
     current_tier: current,
+    certified_proofs: catalog.certified_proofs ?? null,
     upgrade: catalog.upgrade,
     reseller: catalog.reseller,
     how_to_upgrade:
@@ -125,11 +127,11 @@ export function recommendPlan(input: RecommendInput): Recommendation {
     if (fitting) {
       plan = fitting;
       reason =
-        `Certified witness was requested (or a monthly certification volume was given). Placeholder bundle ${fitting.id} is the smallest illustrative bundle whose TBD quotas cover the stated volume. Quotas and prices are placeholders, not a real offer. The witness itself is à venir.`;
+        `Certified witness was requested (or a monthly certification volume was given). Placeholder bundle ${fitting.id} is the smallest illustrative bundle whose TBD quotas cover the stated volume. Quotas and prices are placeholders, not a real offer. Certified proofs run locally via certify_note; billing is not live.`;
     } else {
       plan = catalog.plans.find((p) => p.id === "usage") ?? plan;
       reason =
-        "Certified witness was requested. No placeholder bundle covers the stated volume, so the usage-based plan (price per certification, TBD) is suggested. This is not a real offer. The witness itself is à venir.";
+        "Certified witness was requested. No placeholder bundle covers the stated volume, so the usage-based plan (price per certification, TBD) is suggested. This is not a real offer. Certified proofs run locally via certify_note; billing is not live.";
     }
   }
 
@@ -142,7 +144,7 @@ export function recommendPlan(input: RecommendInput): Recommendation {
     recommended_plan: plan,
     reason,
     alternatives,
-    certified_witness_status: plan.certified_witness ? "à venir" : "not_included",
+    certified_witness_status: plan.certified_witness ? (plan.certified_witness_status ?? "preview") : "not_included",
   };
   if (input.reseller) {
     result.reseller = catalog.reseller;
@@ -183,17 +185,5 @@ export function requestUpgrade(planId: string): Record<string, unknown> {
     },
     next_step_for_agent:
       "Present the plan name, that prices are TBD, and that payment is not live. Ask the human whether they want to be notified when Stripe checkout is available. Do not invent a price or a payment link.",
-  };
-}
-
-export function certifyNoteStub(rel?: string): Record<string, unknown> {
-  return {
-    ok: false,
-    certified: false,
-    status: "unavailable",
-    payment_live: false,
-    message:
-      "Witness certification à venir. The independent certifying witness (Ed25519 / qualified timestamp) is not available yet. Use verify_journal for a local V (intacte) or X (MODIFIÉE hors XVcache) verdict. That local verdict is not a qualified timestamp.",
-    path: rel ?? null,
   };
 }

@@ -12,3 +12,5 @@ xvcache-journal.jsonl
 .jaycache-tmp-*
 .DS_Store
 Thumbs.db
+.xvcache/
+!certs/*.pem

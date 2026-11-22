@@ -1,9 +1,9 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "prices_status": "TBD",
   "payment_live": false,
   "currency": null,
-  "notice": "Every amount, quota and fee in this catalog is a clearly marked placeholder (TBD). No payment is collected. Do not treat these figures as a real offer or invoice.",
+  "notice": "Every amount, quota and fee in this catalog is a clearly marked placeholder (TBD). No payment is collected. Do not treat these figures as a real offer or invoice. Local V/X (verify_journal) is free. Certified proofs (certify_note / verify_proof) are the paid feature: they already run locally (FreeTSA test mode, or qualified eIDAS with the operator's own Certigna account), but XVcache's hosted certified witness and its price are TBD.",
   "updated": "2026-11-22",
   "current_tier_id": "free",
   "plans": [
@@ -22,11 +22,22 @@
       "includes": [
         "Local Markdown vault over MCP STDIO",
         "sha256-chained JSONL journal",
-        "verify_journal verdicts: V intacte, X MODIFIÉE hors XVcache"
+        "verify_journal verdicts: V intacte, X MODIFIÉE hors XVcache",
+        "certify_note / verify_proof in test mode (FreeTSA, non qualifié) for evaluation"
       ],
       "limits": {
-        "notes_per_month": { "value": null, "status": "TBD", "placeholder": true, "note": "No paid cap is enforced today." },
-        "certifications_per_month": { "value": 0, "status": "available", "placeholder": false, "note": "The independent certifying witness is not available yet (à venir)." }
+        "notes_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "No paid cap is enforced today."
+        },
+        "certifications_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Test-mode proofs (FreeTSA, not qualified) are not billed. Qualified certified proofs are the paid feature (price TBD)."
+        }
       },
       "certified_witness": false
     },
@@ -45,14 +56,23 @@
       },
       "includes": [
         "Everything in the free local journal",
-        "Independent certifying witness (Ed25519 / qualified timestamp) — à venir"
+        "Certified proofs via certify_note: one batched timestamp (RFC 3161, qualified eIDAS via Certigna) + OpenTimestamps anchor, individual Merkle proof per note — price TBD"
       ],
       "limits": {
-        "notes_per_month": { "value": null, "status": "TBD", "placeholder": true },
-        "certifications_per_month": { "value": null, "status": "TBD", "placeholder": true, "note": "Pay per certification once the witness ships. Volume and price are TBD." }
+        "notes_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true
+        },
+        "certifications_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Pay per certified proof (one batched timestamp covers many notes). Volume and price are TBD."
+        }
       },
       "certified_witness": true,
-      "certified_witness_status": "à venir"
+      "certified_witness_status": "preview"
     },
     {
       "id": "bundle-starter",
@@ -69,14 +89,24 @@
       },
       "includes": [
         "Everything in the free local journal",
-        "A monthly bundle of notes and witness certifications — à venir"
+        "A monthly bundle of notes and certified proofs (certify_note) — price TBD"
       ],
       "limits": {
-        "notes_per_month": { "value": 100, "status": "TBD", "placeholder": true, "note": "Illustrative placeholder, not a real quota." },
-        "certifications_per_month": { "value": 20, "status": "TBD", "placeholder": true, "note": "Illustrative placeholder, not a real quota." }
+        "notes_per_month": {
+          "value": 100,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Illustrative placeholder, not a real quota."
+        },
+        "certifications_per_month": {
+          "value": 20,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Illustrative placeholder, not a real quota."
+        }
       },
       "certified_witness": true,
-      "certified_witness_status": "à venir"
+      "certified_witness_status": "preview"
     },
     {
       "id": "bundle-standard",
@@ -93,14 +123,24 @@
       },
       "includes": [
         "Everything in the free local journal",
-        "A larger monthly bundle of notes and witness certifications — à venir"
+        "A larger monthly bundle of notes and certified proofs (certify_note) — price TBD"
       ],
       "limits": {
-        "notes_per_month": { "value": 500, "status": "TBD", "placeholder": true, "note": "Illustrative placeholder, not a real quota." },
-        "certifications_per_month": { "value": 100, "status": "TBD", "placeholder": true, "note": "Illustrative placeholder, not a real quota." }
+        "notes_per_month": {
+          "value": 500,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Illustrative placeholder, not a real quota."
+        },
+        "certifications_per_month": {
+          "value": 100,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Illustrative placeholder, not a real quota."
+        }
       },
       "certified_witness": true,
-      "certified_witness_status": "à venir"
+      "certified_witness_status": "preview"
     },
     {
       "id": "bundle-plus",
@@ -117,14 +157,24 @@
       },
       "includes": [
         "Everything in the free local journal",
-        "A high-volume monthly bundle of notes and witness certifications — à venir"
+        "A high-volume monthly bundle of notes and certified proofs (certify_note) — price TBD"
       ],
       "limits": {
-        "notes_per_month": { "value": 2000, "status": "TBD", "placeholder": true, "note": "Illustrative placeholder, not a real quota." },
-        "certifications_per_month": { "value": 500, "status": "TBD", "placeholder": true, "note": "Illustrative placeholder, not a real quota." }
+        "notes_per_month": {
+          "value": 2000,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Illustrative placeholder, not a real quota."
+        },
+        "certifications_per_month": {
+          "value": 500,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Illustrative placeholder, not a real quota."
+        }
       },
       "certified_witness": true,
-      "certified_witness_status": "à venir"
+      "certified_witness_status": "preview"
     }
   ],
   "upgrade": {
@@ -146,5 +196,22 @@
     "status": "TBD",
     "terms": null,
     "note": "An agent or agent-builder may later resell or bundle XVcache for its own clients. Partner terms, revenue share and limits are TBD. Nothing is offered or signed today."
+  },
+  "certified_proofs": {
+    "status": "preview",
+    "tools": [
+      "certify_note",
+      "certify_batch",
+      "verify_proof"
+    ],
+    "paid_feature": true,
+    "price": "TBD",
+    "payment_live": false,
+    "model": "One timestamp covers a Merkle root of many notes (tampon groupé); each note gets its own proof (preuve vendue à l'unité).",
+    "layers": {
+      "A": "RFC 3161 token: qualified eIDAS only when a qualified TSA (Certigna) is configured; FreeTSA default is test, non qualifié.",
+      "B": "OpenTimestamps anchor of the same root (public, Bitcoin, pending for a few hours)."
+    },
+    "free_local_verdict": "verify_journal V/X stays free."
   }
 }

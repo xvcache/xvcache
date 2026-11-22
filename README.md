@@ -4,7 +4,7 @@
 
 XVcache is a local MCP server that journals every read and write in a Markdown vault as a sha256-chained JSONL log, so you can later prove a note is intact (**V**) or was changed outside XVcache (**X**), without putting the note's content into the journal. It talks MCP over STDIO. The intended first user is an AI agent, which can also look up plans, suggest a bundle, and ask its human to approve a paid upgrade when billing exists.
 
-Published source: [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache) (Apache-2.0). npm: [`xvcache-mcp`](https://www.npmjs.com/package/xvcache-mcp) 0.1.0. Official MCP Registry: `io.github.xvcache/xvcache`. Site: [xvcache.com](https://xvcache.com). Payment is not live.
+Published source: [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache) (Apache-2.0). npm: [`xvcache-mcp`](https://www.npmjs.com/package/xvcache-mcp) (0.1.0 published; 0.2.0 with certified proofs in this repo). Official MCP Registry: `io.github.xvcache/xvcache`. Site: [xvcache.com](https://xvcache.com). Payment is not live.
 
 ## Why XVcache (vs other Obsidian MCP servers)
 
@@ -21,7 +21,7 @@ Star counts and registry entries below were checked on 22 November 2026 (GitHub 
 | [obsidian-mcp-secure](https://github.com/dewtech-technologies/obsidian-mcp-secure) (registry `io.github.dewtech-technologies/obsidian-mcp-secure`) | Yes (via Local REST API) | Not documented | Rotating winston audit log (5 MB / 10 files), not described as hash-chained | No: the README states previous content goes to the audit log |
 | [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) (13 stars; formerly `obsidian-tc`; that registry entry is deprecated after the rename) | Yes — large governed surface (ACLs, human-in-the-loop, search) | `provenance verify` checks the **record chain** (signatures, links). `get_provenance` returns write history with before/after sha256. Those documented tools do not return a one-letter current-file **V**/**X** | Yes, for **writes**: signed, hash-chained provenance in `cache.db` | Yes: hashes and attribution only, never note content |
 
-Where others are ahead: [cyanheads/obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server), [StevenStavrakis/obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) and [jacksteamdev/obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) have far more adoption and a much richer editing or search surface. [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) already ships **EdDSA-signed** write provenance, folder ACLs and confirmation on destructive operations — XVcache's independent witness is still **à venir**. Reliquary-TC does not document journaling of **reads**.
+Where others are ahead: [cyanheads/obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server), [StevenStavrakis/obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) and [jacksteamdev/obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) have far more adoption and a much richer editing or search surface. [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) already ships **EdDSA-signed** write provenance, folder ACLs and confirmation on destructive operations — XVcache answers with **batched RFC 3161 + OpenTimestamps proofs per note** (`certify_note`), qualified eIDAS when Certigna is configured. Reliquary-TC does not document journaling of **reads** or third-party timestamps.
 
 ### When to choose XVcache
 
@@ -36,7 +36,7 @@ Where others are ahead: [cyanheads/obsidian-mcp-server](https://github.com/cyanh
 
 XVcache est un serveur MCP local (transport STDIO) qui journalise les lectures et écritures d'un coffre Markdown dans un journal JSONL chaîné par sha256. L'outil `verify_journal` rend le verdict **V** (intacte) ou **X** (MODIFIÉE hors XVcache), sans exposer le contenu de la note dans le journal. Le client visé en premier est un agent IA : il peut lister les offres, recommander un forfait, et demander l'accord d'un humain pour un passage à l'offre payante — quand la facturation existera.
 
-Le témoin certificateur indépendant (signature Ed25519 / horodatage qualifié) est **à venir**. Les prix du catalogue sont des **placeholders clairement marqués TBD**. Aucun paiement n'est en service. Dépôt public : [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache). Comparaison avec d'autres serveurs MCP Obsidian : [Why XVcache](#why-xvcache-vs-other-obsidian-mcp-servers).
+La preuve certifiée (`certify_note` / `verify_proof`) horodate un lot de notes avec un seul tampon : jeton RFC 3161 (FreeTSA par défaut = test, non qualifié ; qualifié eIDAS avec Certigna) et ancrage OpenTimestamps dans Bitcoin, avec une preuve individuelle par note. C'est la fonction payante (prix TBD) ; le V/X local reste gratuit. Les prix du catalogue sont des **placeholders clairement marqués TBD**. Aucun paiement n'est en service. Dépôt public : [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache). Comparaison avec d'autres serveurs MCP Obsidian : [Why XVcache](#why-xvcache-vs-other-obsidian-mcp-servers).
 
 ## For AI agents
 
@@ -45,7 +45,7 @@ If you are an agent (Codex, Claude, Cursor, or any MCP client):
 1. Use `write_note` / `read_note` instead of editing vault files yourself when your human may later need a proof.
 2. Call `verify_journal` with a path to get **V** (intacte) or **X** (MODIFIÉE hors XVcache). That is a local check, not a qualified timestamp.
 3. When your human asks about buying, certifying, or reselling: call `get_offer` or `list_plans`. If you know a volume, call `recommend_plan`. To start a purchase, call `request_upgrade` and **show the result to your human**. Do not invent a price or a payment link. Payment is not live.
-4. `certify_note` is a stub: it always answers that independent witness certification is **à venir**.
+4. When an independent date is needed, call `certify_note` (or queue with `defer: true` and stamp with `certify_batch`), then `verify_proof`. Tell your human whether the proof is `qualified` (eIDAS, Certigna) or test mode (FreeTSA). See [Certified proofs](#certified-proofs-certify_note--verify_proof).
 
 Read [AGENTS.md](./AGENTS.md) and [llms.txt](./llms.txt) for the full agent brief, including how to request human approval and how resale / partner bundling is described (terms TBD). Tool contracts are in [docs/TOOLS.md](./docs/TOOLS.md). The catalog is [plans.json](./plans.json).
 
@@ -158,7 +158,7 @@ These steps assume the server is already attached to your agent and `XVCACHE_VAU
 2. Ask it to call `verify_journal` with that path. You should see **V** and `intacte depuis`.
 3. Change the file **outside** XVcache (a text editor, or `printf` appended to the file). Do not call `write_note` or `read_note` in between if you want a clean X.
 4. Call `verify_journal` on the same path again. You should see **X** and `MODIFIÉE hors XVcache`.
-5. Optional: call `verify_journal` with no path — the journal chain itself should still be intact. `certify_note` will tell you that independent witness certification is à venir.
+5. Optional: call `verify_journal` with no path — the journal chain itself should still be intact. 6. Optional: `npm run demo:certify` shows the certified layer: one timestamp, V, then X after a manual edit.
 
 ## Tools
 
@@ -166,7 +166,7 @@ See [docs/TOOLS.md](./docs/TOOLS.md) for the full contract.
 
 Available now: `read_note`, `search_notes`, `write_note`, `verify_journal`.
 
-For agents that need to buy, certify, or resell, also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human-approval stub, no live payment), `certify_note` (stub, witness à venir).
+For agents that need to buy, certify, or resell, also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human-approval stub, no live payment), `certify_note`, `certify_batch`, `verify_proof` (batched RFC 3161 + OpenTimestamps proofs; paid feature, price TBD).
 
 ## Journal format
 
@@ -186,21 +186,45 @@ npm run verify-journal -- /path/to/xvcache-journal.jsonl
 
 ## Security notes
 
-- The chain is **tamper-evident**, not tamper-proof. Someone who can rewrite the journal can build a new, internally consistent chain. The independent certifying witness is **à venir**.
+- The chain is **tamper-evident**, not tamper-proof. Someone who can rewrite the journal can build a new, internally consistent chain. `certify_note` anchors the chain head and note hashes with an external timestamp, which makes a later rewrite detectable.
 - The journal must live outside the vault (`XVCACHE_LOG`).
 - Absolute paths, `..` segments, and writes through symbolic links are rejected. Only `.md` files are in scope.
-- This is not a qualified electronic timestamp and not legal advice. See [SECURITY.md](./SECURITY.md).
+- `verify_journal` alone is not a qualified electronic timestamp; `certify_note` is qualified only with a qualified TSA (Certigna). Not legal advice. See [SECURITY.md](./SECURITY.md).
 
 ## Limits
 
 - STDIO only: this server does not open a network port.
 - `write_note` is capped at 256 KiB per call.
-- Local V/X is not an independent certification.
+- Local V/X is not an independent certification; use `certify_note` for that. FreeTSA proofs are test-only.
 - Prices and most bundle quotas in `plans.json` are placeholders marked **TBD**. Payment is not live.
 
-## Independent witness (à venir)
+## Certified proofs: `certify_note` / `verify_proof`
 
-A paid, independent witness that can horodate and sign verdicts (Ed25519 / qualified timestamp) is planned. It is not in this repository. `certify_note` exists so agents can already discover that path and tell their human it is à venir.
+Local V/X proves a note did not change **since XVcache last saw it**, but the date comes from your own machine. `certify_note` adds an **independent date**:
+
+1. XVcache computes the note's sha256 locally. **The note content never leaves the machine**, and proofs contain hashes only.
+2. Pending notes (plus the current journal head) become the leaves of a **Merkle tree**. Only the **root** is stamped, so **one timestamp covers many notes** (10 or 10,000). Queue with `certify_note(path, defer: true)`, stamp with `certify_batch`; without `defer`, the batch is stamped immediately.
+3. The root is stamped twice:
+   - **Layer A — RFC 3161** token from a Time-Stamp Authority. Default: **FreeTSA = test, non qualifié** (no legal presumption). With a qualified provider (**Certigna**, eIDAS qualified trust service), the token carries the eIDAS presumption of accurate date and integrity (art. 41) across the EU. `qualified: true` only appears when Certigna is configured.
+   - **Layer B — OpenTimestamps** anchor of the same root in Bitcoin: public, free, verifiable by anyone without trusting XVcache. It stays `pending` for a few hours until a block confirms it; that is normal.
+4. Each note gets its **own proof** JSON (note sha256, Merkle path, root, token base64, `genTime`, provider, `qualified`, OTS status) under `.xvcache/proofs/<note path>/<batch id>.json` (next to the journal by default, or `XVCACHE_DATA`).
+
+`verify_proof(path | proof)` returns **V** (the note existed exactly like this at `genTime`) or **X** (note changed, Merkle path broken, token not over this root, bad TSA signature, or bad OTS anchor), with each check detailed. TSA signatures are checked with `openssl ts -verify` against the provider's root certificate; a pending OTS anchor is upgraded from the calendars and checked against the Bitcoin block header when online (`online: false` skips the network).
+
+Configuration (environment only, never hardcode secrets):
+
+| Variable | Meaning |
+|---|---|
+| `XVCACHE_TSA_PROVIDER` | `freetsa` (default, test, non qualifié), `certigna` (qualified eIDAS), `custom`, or `off` |
+| `XVCACHE_TSA_URL` | RFC 3161 endpoint override (Certigna default: `https://timestamp.dhimyotis.com/api/v1/`) |
+| `XVCACHE_TSA_USER` / `XVCACHE_TSA_PASSWORD` | HTTP Basic credentials of the TSA user account (Certigna "compte utilisateur Horodatage") |
+| `XVCACHE_TSA_CA_FILE` | PEM root/chain used to verify the TSA signature (FreeTSA root is bundled in `certs/`) |
+| `XVCACHE_OTS` | `on` (default) or `off` |
+| `XVCACHE_DATA` | Folder for the queue, batches and proofs |
+
+Certified proofs are the **paid feature** (price TBD, payment not live); local V/X with `verify_journal` stays free. A qualified timestamp proves **existence and integrity at a date**; it is not registered mail (it does not prove sending or receipt) and not legal advice. Outside the EU no single timestamp is recognised everywhere; the OpenTimestamps layer gives a public, jurisdiction-neutral anchor of the same root.
+
+Demo: `npm run demo:certify` (temp vault, 3 notes, one timestamp, V, tamper one note, X).
 
 ## License and trademark
 

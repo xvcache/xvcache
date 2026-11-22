@@ -16,7 +16,9 @@ import {
   type JournalArgs,
   type JournalEntry,
 } from "./journal.js";
-import { getOffer, loadPlansCatalog, recommendPlan, requestUpgrade, certifyNoteStub } from "./plans.js";
+import { getOffer, loadPlansCatalog, recommendPlan, requestUpgrade } from "./plans.js";
+import { resolveTsaProvider } from "./tsa.js";
+import { Certifier, certifyConfigFromEnv } from "./certify.js";
 
 function envVault(): string | undefined {
   return process.env.XVCACHE_VAULT || process.env.JAYCACHE_VAULT;
@@ -38,6 +40,14 @@ if (journalPath === vaultRoot || journalPath.startsWith(vaultRoot + path.sep)) {
   process.exit(1);
 }
 const journal = new JournalWriter(journalPath);
+
+const tsaResolved = resolveTsaProvider();
+const tsaConfigError = tsaResolved && "error" in tsaResolved ? tsaResolved.error : null;
+const certifier = new Certifier(certifyConfigFromEnv({
+  vaultRoot,
+  journalPath,
+  tsa: tsaResolved && !("error" in tsaResolved) ? tsaResolved : null,
+}));
 
 function clientName(): string | null {
   return server.server.getClientVersion()?.name ?? null;
@@ -316,7 +326,7 @@ async function writeAtomic(target: string, content: string, mode: "create" | "ov
   }
 }
 
-const server = new McpServer({ name: "xvcache-mcp", version: "0.1.0" });
+const server = new McpServer({ name: "xvcache-mcp", version: "0.2.0" });
 
 server.registerTool(
   "read_note",
@@ -432,7 +442,7 @@ server.registerTool(
 server.registerTool(
   "verify_journal",
   {
-    description: "Verify the XVcache journal and, optionally, a note. Call with no path to check the sha256 chain of the JSONL journal. Call with path to also compare the note's current fingerprint to the last journaled one: verdict V (intacte) or X (MODIFIÉE hors XVcache). Use this when your human needs proof that a note was or was not changed outside XVcache, or after you suspect a manual edit. This local verdict is not a qualified timestamp. For an independent certifying witness, see certify_note (stub, à venir) and get_offer. This tool is not written into the journal.",
+    description: "Verify the XVcache journal and, optionally, a note. Call with no path to check the sha256 chain of the JSONL journal. Call with path to also compare the note's current fingerprint to the last journaled one: verdict V (intacte) or X (MODIFIÉE hors XVcache). Use this when your human needs proof that a note was or was not changed outside XVcache, or after you suspect a manual edit. This local verdict is not a qualified timestamp. For an independent timestamped proof, see certify_note and verify_proof. This tool is not written into the journal.",
     inputSchema: {
       path: z.string().min(1).optional().describe("Vault-relative note to compare, e.g. Tests/Memo.md"),
     },
@@ -479,7 +489,7 @@ server.registerTool(
 server.registerTool(
   "get_offer",
   {
-    description: "Return the current XVcache offer in machine-readable JSON: the free local-journal tier (available now), paid certified-witness plans (à venir), and how to upgrade (human approval via Stripe later, x402 later). All prices are placeholders marked TBD. Payment is not live. Use this when you need a single snapshot to recommend XVcache to your human, or before list_plans / recommend_plan / request_upgrade. Not written into the journal.",
+    description: "Return the current XVcache offer in machine-readable JSON: the free local-journal tier (available now), paid certified-proof plans (certify_note works locally; price TBD), and how to upgrade (human approval via Stripe later, x402 later). All prices are placeholders marked TBD. Payment is not live. Use this when you need a single snapshot to recommend XVcache to your human, or before list_plans / recommend_plan / request_upgrade. Not written into the journal.",
     inputSchema: {},
   },
   async () => ok(JSON.stringify(getOffer(), null, 2))
@@ -522,15 +532,88 @@ server.registerTool(
   }
 );
 
+function witnessSummary(): Record<string, unknown> {
+  const t = certifier.cfg.tsa;
+  return {
+    tsa: t ? { provider: t.id, label: t.label, qualified: t.qualified } : null,
+    tsa_config_error: tsaConfigError,
+    opentimestamps: certifier.cfg.ots.enabled,
+  };
+}
+
 server.registerTool(
   "certify_note",
   {
-    description: "Request an independent witness certification (Ed25519 / qualified timestamp) for a vault note. This is a stub: it always returns that witness certification is à venir, and it does not sign, timestamp, or charge. Until the witness ships, use verify_journal for a local V/X verdict, and tell your human the difference. Not written into the journal.",
+    description: "Certify a vault note with an independent timestamp. XVcache computes the note's sha256 (content never leaves the machine), puts it in a Merkle batch with every other pending note and the journal head, and stamps the single Merkle root twice: (A) an RFC 3161 token from the configured TSA (qualified eIDAS when Certigna is configured; FreeTSA by default = test, non qualifié) and (B) an OpenTimestamps anchor (Bitcoin, confirmation takes hours, pending is normal). Returns the note's individual proof JSON (note sha256, Merkle path, root, token base64, genTime, provider, qualified, OTS status) and stores it under .xvcache/proofs/. Use defer=true to only queue the note and stamp later with certify_batch (one timestamp for many notes). Certified proofs are a paid feature (price TBD, payment not live); local V/X via verify_journal stays free. Check later with verify_proof. Not written into the journal.",
     inputSchema: {
-      path: z.string().min(1).optional().describe("Vault-relative note to certify, e.g. Tests/Memo.md"),
+      path: z.string().min(1).describe("Vault-relative note to certify, e.g. Tests/Memo.md"),
+      defer: z.boolean().optional().describe("true = queue only, stamp later with certify_batch (default false = stamp now)"),
     },
   },
-  async ({ path: rel }) => ok(JSON.stringify(certifyNoteStub(rel), null, 2))
+  async ({ path: rel, defer }) => {
+    if (tsaConfigError) return fail(JSON.stringify({ ok: false, error: tsaConfigError, witness: witnessSummary() }, null, 2));
+    const q = await certifier.enqueue(rel);
+    if ("error" in q) return fail(q.error);
+    if (defer) {
+      const pending = await certifier.pending();
+      return ok(JSON.stringify({ ok: true, status: "pending", path: q.path, note_sha256: q.note_sha256, journal_status: q.journal_status, pending_notes: pending.length, next_step: "Call certify_batch to stamp all pending notes with one timestamp.", witness: witnessSummary() }, null, 2));
+    }
+    const b = await certifier.runBatch();
+    if ("error" in b) return fail(JSON.stringify({ ok: false, error: b.error, witness: witnessSummary() }, null, 2));
+    const mine = b.proofs.find((p) => p.path === q.path);
+    return ok(JSON.stringify({
+      ok: true,
+      status: "certified",
+      batch_id: b.batch_id,
+      notes_in_batch: b.proofs.length,
+      proof_file: mine ? certifier.proofFile(mine.path, b.batch_id) : null,
+      ots_error: b.ots_error ?? null,
+      proof: mine,
+    }, null, 2));
+  }
+);
+
+server.registerTool(
+  "certify_batch",
+  {
+    description: "Stamp every note queued with certify_note(defer=true) now, with ONE timestamp over their Merkle root (plus the journal head). Writes one individual proof per note under .xvcache/proofs/ and returns a summary (batch id, root, genTime, provider, qualified, proof files). Paid feature (price TBD, payment not live). Not written into the journal.",
+    inputSchema: {},
+  },
+  async () => {
+    if (tsaConfigError) return fail(JSON.stringify({ ok: false, error: tsaConfigError, witness: witnessSummary() }, null, 2));
+    const b = await certifier.runBatch();
+    if ("error" in b) return fail(JSON.stringify({ ok: false, error: b.error, witness: witnessSummary() }, null, 2));
+    const first = b.proofs[0];
+    return ok(JSON.stringify({
+      ok: true,
+      batch_id: b.batch_id,
+      root: b.root,
+      leaf_count: b.leaf_count,
+      gen_time: first?.tsa?.gen_time ?? null,
+      provider: first?.tsa?.provider ?? null,
+      qualified: first?.tsa?.qualified ?? false,
+      ots_status: first?.ots?.status ?? (b.ots_error ? "error" : "disabled"),
+      ots_error: b.ots_error ?? null,
+      proofs: b.proofs.map((p) => ({ path: p.path, note_sha256: p.note_sha256, proof_file: certifier.proofFile(p.path, b.batch_id) })),
+    }, null, 2));
+  }
+);
+
+server.registerTool(
+  "verify_proof",
+  {
+    description: "Verify a certified proof from certify_note. Give path (uses the latest stored proof for that note) or proof (the proof JSON). Checks: the note's current sha256 equals the certified one, the Merkle path leads to the root, the RFC 3161 token covers that root and its signature/certificate chain is valid (openssl), and the OpenTimestamps anchor (upgrades a pending anchor from the calendars and checks the Bitcoin block when online). Returns V (certifiée: the note existed exactly like this at genTime) or X (note changed or proof invalid) with details. Not written into the journal.",
+    inputSchema: {
+      path: z.string().min(1).optional().describe("Vault-relative note, e.g. Tests/Memo.md"),
+      proof: z.string().optional().describe("Proof JSON as returned by certify_note (optional if path is given)"),
+      online: z.boolean().optional().describe("false = no network (skip OTS upgrade and Bitcoin check). Default true."),
+    },
+  },
+  async ({ path: rel, proof, online }) => {
+    const rep = await certifier.verify({ path: rel, proof, online });
+    const text = rep.message + "\n" + JSON.stringify(rep, null, 2);
+    return rep.glyph === "V" ? ok(text) : fail(text);
+  }
 );
 
 await server.connect(new StdioServerTransport());

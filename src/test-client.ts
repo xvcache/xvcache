@@ -11,18 +11,26 @@ import {
   parseEntry,
   type JournalEntry,
 } from "./journal.js";
+import { startFakeTsa } from "./test-tsa.js";
 
 const execFileAsync = promisify(execFile);
 
 const vaultDir = path.resolve(process.env.XVCACHE_VAULT ?? process.env.JAYCACHE_VAULT ?? "./test-vault");
 const journalPath = path.join(os.tmpdir(), `xvcache-journal-test-${process.pid}.jsonl`);
 await fs.rm(journalPath, { force: true }).catch(() => {});
+const fakeTsa = await startFakeTsa();
+const certDataDir = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-data-test-"));
 
 function serverEnv(logFile: string): Record<string, string> {
   return {
     ...process.env,
     XVCACHE_VAULT: process.env.XVCACHE_VAULT ?? process.env.JAYCACHE_VAULT ?? "./test-vault",
     XVCACHE_LOG: logFile,
+    XVCACHE_DATA: certDataDir,
+    XVCACHE_TSA_PROVIDER: "custom",
+    XVCACHE_TSA_URL: fakeTsa.url,
+    XVCACHE_TSA_CA_FILE: fakeTsa.caFile,
+    XVCACHE_OTS: "off",
   } as Record<string, string>;
 }
 
@@ -182,7 +190,7 @@ try {
   const names = tools.tools.map((t) => t.name);
   const required = [
     "write_note", "read_note", "search_notes", "verify_journal",
-    "get_offer", "list_plans", "recommend_plan", "request_upgrade", "certify_note",
+    "get_offer", "list_plans", "recommend_plan", "request_upgrade", "certify_note", "certify_batch", "verify_proof",
   ];
   const missing = required.filter((n) => !names.includes(n));
   if (missing.length) {
@@ -450,8 +458,9 @@ try {
   const rUp = await client.callTool({ name: "request_upgrade", arguments: { plan_id: "bundle-starter" } });
   const rUpBad = await client.callTool({ name: "request_upgrade", arguments: { plan_id: "does-not-exist" } });
   const rCert = await client.callTool({ name: "certify_note", arguments: { path: "Bienvenue.md" } });
+  const rVerif = await client.callTool({ name: "verify_proof", arguments: { path: "Bienvenue.md", online: false } });
   const after21 = await readJournalEntries(journalPath);
-  console.log("21) get_offer/list_plans/recommend_plan/request_upgrade/certify_note appelés");
+  console.log("21) get_offer/list_plans/recommend_plan/request_upgrade/certify_note/verify_proof appelés");
 
   function asJson(result: Awaited<ReturnType<typeof client.callTool>>): Record<string, unknown> {
     return JSON.parse(toolText(result)) as Record<string, unknown>;
@@ -503,13 +512,16 @@ try {
       console.error("FAIL 21: request_upgrade sur un plan inconnu doit échouer");
       failed = true;
     }
-    if (cert.certified !== false || cert.status !== "unavailable") {
-      console.error("FAIL 21: certify_note est un stub et ne doit pas certifier :", cert);
+    const proof = cert.proof as { merkle?: { root?: string }; tsa?: { qualified?: boolean; token_base64?: string; gen_time?: string } } | undefined;
+    if (cert.ok !== true || cert.status !== "certified" || !proof?.merkle?.root || !proof.tsa?.token_base64 || !proof.tsa.gen_time) {
+      console.error("FAIL 21: certify_note doit renvoyer une preuve horodatée :", cert);
+      failed = true;
+    } else if (proof.tsa.qualified !== false) {
+      console.error("FAIL 21: une TSA custom non déclarée ne doit pas être marquée qualifiée");
       failed = true;
     }
-    const msg = String(cert.message ?? "");
-    if (!msg.toLowerCase().includes("à venir") && !msg.toLowerCase().includes("a venir")) {
-      console.error("FAIL 21: certify_note doit indiquer que la certification témoin est à venir :", msg);
+    if (rVerif.isError || !toolText(rVerif).startsWith("V")) {
+      console.error("FAIL 21: verify_proof doit rendre V sur une note certifiée intacte :", toolText(rVerif));
       failed = true;
     }
   }
@@ -644,8 +656,11 @@ if (vaultAfter.join("\n") !== vaultBefore.join("\n")) {
 if (failed) {
   console.error("FAIL: un ou plusieurs tests ont échoué");
   await client.close().catch(() => {});
+  await fakeTsa.close().catch(() => {});
   process.exit(1);
 }
 
 console.log("OK: tests 1-21 passés");
 await client.close();
+await fakeTsa.close();
+await fs.rm(certDataDir, { recursive: true, force: true });

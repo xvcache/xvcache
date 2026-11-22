@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadPlansCatalog, recommendPlan, requestUpgrade, certifyNoteStub, getOffer } from "./plans.js";
+import { loadPlansCatalog, recommendPlan, requestUpgrade, getOffer } from "./plans.js";
 
 test("plans catalog marks every price as TBD and payment as not live", () => {
   const catalog = loadPlansCatalog();
@@ -24,7 +24,7 @@ test("recommend_plan: free without witness, bundle for moderate volume, reseller
   const starter = recommendPlan({ notes_per_month: 80, certifications_per_month: 15, needs_certified_witness: true });
   assert.equal(starter.recommended_plan_id, "bundle-starter");
   assert.equal(starter.prices_status, "TBD");
-  assert.equal(starter.certified_witness_status, "à venir");
+  assert.equal(starter.certified_witness_status, "preview");
 
   const plus = recommendPlan({ notes_per_month: 2000, certifications_per_month: 400, needs_certified_witness: true });
   assert.equal(plus.recommended_plan_id, "bundle-plus");
@@ -50,11 +50,14 @@ test("request_upgrade is a human-approval stub with no checkout URL", () => {
   assert.equal(bad.ok, false);
 });
 
-test("certify_note stub returns witness certification à venir", () => {
-  const r = certifyNoteStub("Tests/Memo.md");
-  assert.equal(r.certified, false);
-  assert.equal(r.status, "unavailable");
-  assert.match(String(r.message), /à venir/i);
+test("catalog marks certified proofs as paid (price TBD) and local V/X as free", () => {
+  const cat = loadPlansCatalog();
+  const free = cat.plans.find((p) => p.id === "free")!;
+  assert.equal(free.certified_witness, false);
+  const usage = cat.plans.find((p) => p.id === "usage")!;
+  assert.equal(usage.price.status, "TBD");
+  assert.equal(usage.certified_witness, true);
+  assert.match(usage.includes.join(" "), /certify_note/);
   const offer = getOffer();
   assert.equal(offer.payment_live, false);
 });

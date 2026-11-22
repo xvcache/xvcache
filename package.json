@@ -1,7 +1,7 @@
 {
   "name": "xvcache-mcp",
-  "version": "0.1.0",
-  "description": "Local MCP server: sha256-chained Markdown vault journal. Verdicts V (intact) and X (modified outside XVcache).",
+  "version": "0.2.0",
+  "description": "Local MCP server: sha256-chained Markdown vault journal. Verdicts V (intact) and X (modified outside XVcache). Batched RFC 3161 + OpenTimestamps proofs per note (certify_note / verify_proof).",
   "type": "module",
   "main": "dist/server.js",
   "bin": {
@@ -13,6 +13,12 @@
     "dist/journal.js",
     "dist/verify-journal.js",
     "dist/plans.js",
+    "dist/merkle.js",
+    "dist/der.js",
+    "dist/tsa.js",
+    "dist/ots.js",
+    "dist/certify.js",
+    "certs/freetsa-cacert.pem",
     "LICENSE",
     "NOTICE",
     "README.md",
@@ -26,7 +32,8 @@
   "scripts": {
     "build": "tsc && chmod +x dist/server.js",
     "start": "node dist/server.js",
-    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/merkle.test.js dist/certify.test.js dist/certify.integration.test.js",
+    "demo:certify": "npm run build && node scripts/demo-certify.mjs",
     "verify-journal": "node dist/verify-journal.js"
   },
   "engines": {
@@ -40,7 +47,12 @@
     "integrity",
     "markdown",
     "vault",
-    "xvcache"
+    "xvcache",
+    "rfc3161",
+    "timestamp",
+    "opentimestamps",
+    "eidas",
+    "merkle-proof"
   ],
   "author": "Julien Dietemann",
   "license": "Apache-2.0",

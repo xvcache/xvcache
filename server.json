@@ -2,18 +2,18 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.xvcache/xvcache",
   "title": "XVcache",
-  "description": "Tamper-evident Markdown vault journal. Verdicts: V intact, X modified outside XVcache.",
+  "description": "Tamper-evident Markdown vault journal (V intact / X modified) + batched RFC 3161 and OpenTimestamps proofs per note.",
   "repository": {
     "url": "https://github.com/xvcache/xvcache",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "xvcache-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       },
@@ -28,6 +28,55 @@
         {
           "name": "XVCACHE_LOG",
           "description": "Optional path to the JSONL journal file; must stay outside the vault",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "XVCACHE_DATA",
+          "description": "Optional folder for pending queue, batches and proofs (default: .xvcache next to the journal)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "XVCACHE_TSA_PROVIDER",
+          "description": "freetsa (default, test, not qualified), certigna (qualified eIDAS), custom, or off",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "XVCACHE_TSA_URL",
+          "description": "Optional RFC 3161 endpoint override (required for custom)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "XVCACHE_TSA_USER",
+          "description": "TSA user account for HTTP Basic auth (Certigna Horodatage user account)",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "XVCACHE_TSA_PASSWORD",
+          "description": "TSA password for HTTP Basic auth",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "XVCACHE_TSA_CA_FILE",
+          "description": "PEM root/chain used to verify TSA token signatures with openssl",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "XVCACHE_OTS",
+          "description": "on (default) or off: OpenTimestamps anchoring of each batch root",
           "isRequired": false,
           "isSecret": false,
           "format": "string"
