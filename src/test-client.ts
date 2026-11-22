@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { promises as fs } from "node:fs";
+import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { execFile } from "node:child_process";
@@ -190,7 +190,7 @@ try {
   const names = tools.tools.map((t) => t.name);
   const required = [
     "write_note", "read_note", "search_notes", "verify_journal",
-    "get_offer", "list_plans", "recommend_plan", "request_upgrade", "certify_note", "certify_batch", "verify_proof",
+    "get_offer", "list_plans", "recommend_plan", "request_upgrade", "certify_note", "certify_batch", "verify_proof", "certify_document",
   ];
   const missing = required.filter((n) => !names.includes(n));
   if (missing.length) {
@@ -459,8 +459,9 @@ try {
   const rUpBad = await client.callTool({ name: "request_upgrade", arguments: { plan_id: "does-not-exist" } });
   const rCert = await client.callTool({ name: "certify_note", arguments: { path: "Bienvenue.md" } });
   const rVerif = await client.callTool({ name: "verify_proof", arguments: { path: "Bienvenue.md", online: false } });
+  const rDoc = await client.callTool({ name: "certify_document", arguments: { path: "Bienvenue.md", stamp: false, online: false } });
   const after21 = await readJournalEntries(journalPath);
-  console.log("21) get_offer/list_plans/recommend_plan/request_upgrade/certify_note/verify_proof appelés");
+  console.log("21) get_offer/list_plans/recommend_plan/request_upgrade/certify_note/verify_proof/certify_document appelés");
 
   function asJson(result: Awaited<ReturnType<typeof client.callTool>>): Record<string, unknown> {
     return JSON.parse(toolText(result)) as Record<string, unknown>;
@@ -524,9 +525,22 @@ try {
       console.error("FAIL 21: verify_proof doit rendre V sur une note certifiée intacte :", toolText(rVerif));
       failed = true;
     }
+    if (rDoc.isError) {
+      console.error("FAIL 21: certify_document doit réussir sur une note déjà certifiée :", toolText(rDoc));
+      failed = true;
+    } else {
+      const doc = asJson(rDoc);
+      if (doc.glyph !== "V" || doc.stamped !== false || typeof doc.pdf !== "string" || doc.verdict !== "intact") {
+        console.error("FAIL 21: certify_document doit réutiliser la preuve et renvoyer le chemin du PDF :", doc);
+        failed = true;
+      } else if (!existsSync(doc.pdf as string)) {
+        console.error("FAIL 21: le PDF annoncé est introuvable :", doc.pdf);
+        failed = true;
+      }
+    }
   }
   if (after21.length !== before21.length) {
-    console.error("FAIL 21: get_offer, list_plans, recommend_plan, request_upgrade et certify_note ne doivent pas s'écrire dans le journal");
+    console.error("FAIL 21: get_offer, list_plans, recommend_plan, request_upgrade, certify_note et certify_document ne doivent pas s'écrire dans le journal");
     failed = true;
   }
 

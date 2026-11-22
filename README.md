@@ -166,7 +166,7 @@ See [docs/TOOLS.md](./docs/TOOLS.md) for the full contract.
 
 Available now: `read_note`, `search_notes`, `write_note`, `verify_journal`.
 
-For agents that need to buy, certify, or resell, also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human-approval stub, no live payment), `certify_note`, `certify_batch`, `verify_proof` (batched RFC 3161 + OpenTimestamps proofs; paid feature, price TBD).
+For agents that need to buy, certify, or resell, also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human-approval stub, no live payment), `certify_note`, `certify_batch`, `verify_proof`, `certify_document` (batched RFC 3161 + OpenTimestamps proofs, plus a one-page French PDF; paid feature, price TBD).
 
 ## Journal format
 
@@ -239,6 +239,16 @@ Configuration (environment and gitignored `.env.local`; never hardcode secrets):
 | `XVCACHE_DATA` | Folder for the queue, batches and proofs |
 
 Certified proofs are the **paid feature** (price TBD, payment not live); local V/X with `verify_journal` stays free.
+
+### Human-readable certificate and local demo
+
+`certify_document(path)` is the simple path for a human (a lawyer dropping a brief, for example). It reuses an existing proof when the file is unchanged — **no new timestamp, no Certigna token spent** — and writes a **one-page French PDF** under `.xvcache/certificates/`: file name, SHA-256 fingerprint, date and time in Paris time, the provider (Certigna as a qualified eIDAS timestamp, with policy OID `1.2.250.1.177.2.9.1`, or a clear warning that FreeTSA is **not** qualified), the token serial, verdict **V**, the OpenTimestamps status, and three lines on how to re-check. The technical files (`.tst`, `.ots`, Merkle path) sit next to the PDF and are attached to it. If the file changed, the tool returns « Modifié depuis le … » and does not issue a V certificate. The PDF states plainly that this is not a bailiff's report (*constat d'huissier*), not a qualified electronic signature, and not legal advice.
+
+CLI (export only, never stamps): `npx xvcache-certificate --path Journal/2026-11-22.md`.
+
+Local demo page (listens on **127.0.0.1 only**, no Docker, no public port): `npm run demo:ui -- --vault /path/to/vault`. Drop a file to see a green **Intact** (with a PDF link) or a red **Modifié depuis le …**. It does not stamp unless `XVCACHE_DEMO_STAMP=1`.
+
+
 
 Demo: `npm run demo:certify` (3 notes, one timestamp, V, tamper one note, X). Add `-- --keep-dir=/path` to keep the vault, journal and proofs.
 

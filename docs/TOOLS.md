@@ -2,9 +2,9 @@
 
 Transport: MCP over **STDIO** only. Server name: `xvcache-mcp`. Version: `0.2.0` (local, not yet published).
 
-The journal tools and the certification tools (`certify_note`, `certify_batch`, `verify_proof`) are implemented. The catalog is live; `request_upgrade` is a human-approval stub. **Payment is not live.** No tool charges a card, opens a checkout, or speaks x402 yet.
+The journal tools and the certification tools (`certify_note`, `certify_batch`, `verify_proof`, `certify_document`) are implemented. The catalog is live; `request_upgrade` is a human-approval stub. **Payment is not live.** No tool charges a card, opens a checkout, or speaks x402 yet.
 
-Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`, `request_upgrade`, `certify_note`, `certify_batch`, `verify_proof`) are **not** written into the journal.
+Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`, `request_upgrade`, `certify_note`, `certify_batch`, `verify_proof`, `certify_document`) are **not** written into the journal.
 
 ## Journal tools (available now)
 
@@ -26,5 +26,6 @@ Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`,
 | `certify_note` | Your human needs an independent date for a note. `defer: true` only queues it. | Batched Merkle root stamped by RFC 3161 (FreeTSA test by default, Certigna qualified eIDAS) + OpenTimestamps. Returns the note's proof JSON; stored under `.xvcache/proofs/`. Paid feature, price TBD. |
 | `certify_batch` | Stamp every queued note now with one timestamp. | One proof per note, one TSA token for the batch. |
 | `verify_proof` | Check a proof (by note path or proof JSON). | **V** or **X** with checks: note hash, Merkle path, token imprint, TSA signature (openssl), OTS anchor. |
+| `certify_document` | Human-facing shortcut: reuse an existing proof when the document is unchanged, otherwise stamp (unless `stamp: false`), then return a one-page French PDF and a plain verdict (« Intact » or « Modifié depuis le … »). | Returns `pdf` (path), technical files next to it, `gen_time_paris`. Does not spend a token when a matching proof already exists. |
 
 Input schemas and output shapes are implemented in `src/plans.ts` and `src/server.ts`. The catalog file is `plans.json`.

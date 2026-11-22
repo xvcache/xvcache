@@ -291,7 +291,7 @@ export class Certifier {
   }
 
   /** Check a proof: note hash, Merkle path, TSA token, OpenTimestamps anchor. */
-  async verify(input: { path?: string; proof?: unknown; online?: boolean }): Promise<VerifyReport> {
+  async verify(input: { path?: string; proof?: unknown; online?: boolean; content?: Buffer | Uint8Array }): Promise<VerifyReport> {
     const checks: Record<string, CheckResult> = {};
     const report = (glyphOk: boolean, p: Partial<Proof> | null, extra: Partial<VerifyReport> = {}): VerifyReport => {
       const qualified = !!p?.tsa?.qualified;
@@ -348,14 +348,21 @@ export class Certifier {
       if (want !== proof.path) checks.path = { ok: false, detail: `La preuve concerne ${proof.path}, pas ${want}.` };
     }
 
-    // 1) note content now vs certified fingerprint
-    const r = await resolveNoteInVault(this.cfg.vaultRoot, proof.path);
-    if ("error" in r) checks.note = { ok: false, detail: r.error };
-    else {
-      const cur = sha256Hex(await fs.readFile(r.real));
+    // 1) note content now vs certified fingerprint (uploaded bytes, if given, win over the vault copy)
+    if (input.content !== undefined) {
+      const cur = sha256Hex(Buffer.from(input.content));
       checks.note = cur === proof.note_sha256
         ? { ok: true, detail: "Empreinte actuelle identique à l'empreinte certifiée." }
         : { ok: false, detail: "Note MODIFIÉE depuis la certification (empreinte différente)." };
+    } else {
+      const r = await resolveNoteInVault(this.cfg.vaultRoot, proof.path);
+      if ("error" in r) checks.note = { ok: false, detail: r.error };
+      else {
+        const cur = sha256Hex(await fs.readFile(r.real));
+        checks.note = cur === proof.note_sha256
+          ? { ok: true, detail: "Empreinte actuelle identique à l'empreinte certifiée." }
+          : { ok: false, detail: "Note MODIFIÉE depuis la certification (empreinte différente)." };
+      }
     }
 
     // 2) leaf + Merkle path -> root

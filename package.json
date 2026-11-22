@@ -5,7 +5,8 @@
   "type": "module",
   "main": "dist/server.js",
   "bin": {
-    "xvcache-mcp": "dist/server.js"
+    "xvcache-mcp": "dist/server.js",
+    "xvcache-certificate": "dist/export-certificate.js"
   },
   "mcpName": "io.github.xvcache/xvcache",
   "files": [
@@ -19,6 +20,9 @@
     "dist/ots.js",
     "dist/certify.js",
     "dist/env.js",
+    "dist/demo-server.js",
+    "dist/certificate.js",
+    "dist/export-certificate.js",
     "certs/freetsa-cacert.pem",
     "certs/certigna-chain.pem",
     "certs/certigna-untrusted.pem",
@@ -30,13 +34,16 @@
     "server.json",
     "plans.json",
     "AGENTS.md",
-    "llms.txt"
+    "llms.txt",
+    "scripts/demo-ui.mjs"
   ],
   "scripts": {
-    "build": "tsc && chmod +x dist/server.js",
+    "build": "tsc && chmod +x dist/server.js dist/export-certificate.js",
     "start": "node dist/server.js",
-    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js",
     "demo:certify": "npm run build && node scripts/demo-certify.mjs",
+    "demo:ui": "npm run build && node scripts/demo-ui.mjs",
+    "certificate": "npm run build && node dist/export-certificate.js",
     "verify-journal": "node dist/verify-journal.js"
   },
   "engines": {
@@ -61,6 +68,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
+    "pdf-lib": "^1.17.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -25,7 +25,7 @@ Closest overlap, do not overclaim: [Reliquary-TC](https://github.com/The-40-Thie
 - [src/server.ts](./src/server.ts): MCP tools over STDIO
 - [src/journal.ts](./src/journal.ts): journal format, chain verify, V/X wording
 - [src/plans.ts](./src/plans.ts): catalog, recommend_plan, request_upgrade stub
-- [src/certify.ts](./src/certify.ts): batches, Merkle proofs, verify_proof; [src/tsa.ts](./src/tsa.ts) RFC 3161 providers (FreeTSA test, Certigna qualified); [src/ots.ts](./src/ots.ts) OpenTimestamps
+- [src/certify.ts](./src/certify.ts): batches, Merkle proofs, verify_proof; [src/certificate.ts](./src/certificate.ts) one-page French PDF; [src/tsa.ts](./src/tsa.ts) RFC 3161 providers (FreeTSA test, Certigna qualified); [src/ots.ts](./src/ots.ts) OpenTimestamps
 - [src/verify-journal.ts](./src/verify-journal.ts): CLI for the JSONL chain
 - [server.json](./server.json): official MCP Registry metadata template (`io.github.xvcache/xvcache`)
 
@@ -42,6 +42,6 @@ Journal, available now: `read_note`, `search_notes`, `write_note`, `verify_journ
 
 Buy / certify / resell, stubs except the catalog: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human approval, Stripe intended, not live; x402 later), `certify_note`.
 
-Certified proofs (paid feature, price TBD): `certify_note(path, defer?)`, `certify_batch()`, `verify_proof(path | proof)`. One timestamp covers a Merkle root of many notes; each note gets its own proof (sha256, Merkle path, root, RFC 3161 token, genTime, provider, qualified, OpenTimestamps status). Layer A RFC 3161: FreeTSA by default = test, non qualifié; qualified eIDAS only with Certigna (policy OID `1.2.250.1.177.2.9.1`; bundled chain `certs/certigna-chain.pem` + `certs/certigna-untrusted.pem`). Layer B: OpenTimestamps anchor in Bitcoin (pending a few hours). Only hashes leave the machine. verify_proof returns V or X.
+Certified proofs (paid feature, price TBD): `certify_note(path, defer?)`, `certify_batch()`, `verify_proof(path | proof)`, `certify_document(path)` (one-page French PDF, verdict « Intact » / « Modifié depuis le … »; reuses an existing proof when unchanged). One timestamp covers a Merkle root of many notes; each note gets its own proof (sha256, Merkle path, root, RFC 3161 token, genTime, provider, qualified, OpenTimestamps status). Layer A RFC 3161: FreeTSA by default = test, non qualifié; qualified eIDAS only with Certigna (policy OID `1.2.250.1.177.2.9.1`; bundled chain `certs/certigna-chain.pem` + `certs/certigna-untrusted.pem`). Layer B: OpenTimestamps anchor in Bitcoin (pending a few hours). Only hashes leave the machine. verify_proof returns V or X.
 
 Env: `XVCACHE_VAULT` (required), `XVCACHE_LOG` (optional, outside the vault). Aliases: `JAYCACHE_VAULT`, `JAYCACHE_LOG`. TSA: `XVCACHE_TSA_PROVIDER` / `XVCACHE_TSA_USER` may be set in gitignored `.env.local`; `XVCACHE_TSA_PASSWORD` comes from the process environment only.

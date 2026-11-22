@@ -19,6 +19,7 @@ import {
 import { getOffer, loadPlansCatalog, recommendPlan, requestUpgrade } from "./plans.js";
 import { resolveTsaProvider } from "./tsa.js";
 import { Certifier, certifyConfigFromEnv } from "./certify.js";
+import { handleDocument } from "./certificate.js";
 import { loadLocalEnv } from "./env.js";
 
 loadLocalEnv();
@@ -616,6 +617,42 @@ server.registerTool(
     const rep = await certifier.verify({ path: rel, proof, online });
     const text = rep.message + "\n" + JSON.stringify(rep, null, 2);
     return rep.glyph === "V" ? ok(text) : fail(text);
+  }
+);
+
+
+server.registerTool(
+  "certify_document",
+  {
+    description: "Simple path for a human: certify a vault note if needed, then return a one-page French PDF certificate and a plain-language verdict. If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent) and the PDF path is returned, with verdict « Intact ». If the document changed since the timestamp, no new stamp is taken: the verdict is « Modifié depuis le <date> » and no V certificate is issued. stamp=false never stamps (export or re-check only). Technical files (.tst, .ots, Merkle path) are written next to the PDF and attached to it. FreeTSA certificates clearly say they are not a qualified eIDAS timestamp. Not a bailiff report, not a qualified signature, not legal advice. Not written into the journal.",
+    inputSchema: {
+      path: z.string().min(1).describe("Vault-relative note, e.g. Contrats/Devis-042.md"),
+      stamp: z.boolean().optional().describe("true (default) = stamp if no proof exists. false = reuse or report only, never spend a token."),
+      online: z.boolean().optional().describe("true = allow OpenTimestamps upgrade. Default false."),
+    },
+  },
+  async ({ path: rel, stamp, online }) => {
+    if (stamp !== false && tsaConfigError) return fail(JSON.stringify({ ok: false, error: tsaConfigError, witness: witnessSummary() }, null, 2));
+    const result = await handleDocument(certifier, { path: rel, stamp: stamp !== false, online: online === true });
+    if (!result.ok) return fail(JSON.stringify({ ok: false, error: result.error, witness: witnessSummary() }, null, 2));
+    return ok(JSON.stringify({
+      ok: true,
+      glyph: result.glyph,
+      verdict: result.verdict?.kind,
+      message: result.verdict?.sentence,
+      pdf: result.pdf,
+      pack: result.pack,
+      attachments: result.attachments,
+      path: result.path,
+      stamped: result.stamped,
+      provider: result.provider,
+      qualified: result.qualified,
+      qualified_confirmed: result.qualified_confirmed,
+      gen_time: result.gen_time,
+      gen_time_paris: result.gen_time_paris,
+      batch_id: result.batch_id,
+      witness: witnessSummary(),
+    }, null, 2));
   }
 );
 
