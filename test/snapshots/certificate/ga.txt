@@ -1,0 +1,47 @@
+XVcache
+DEIMHNIÚ STAMPA AMA
+V
+Doiciméad slán
+Breith V — níor athraigh an méarlorg ón stampa ama.
+DOICIMÉAD
+Contrat-de-cession-2026-11.pdf
+MÉARLORG SHA-256
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+DÁTA AGUS AM
+22 Samhain 2026 ag 20:08:39 (am áitiúil, Europe/Brussels)
+22 Samhain 2026 ag 19:08:39 UTC
+SOLÁTHRAÍ
+Certigna
+Stampa ama leictreonach cáilithe (eIDAS)
+Tagairt beartais: 1.2.250.1.177.2.9.1
+SRAITHUIMHIR AN STAMPA
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+CÁILITHE EIDAS
+tá
+ANCAIRE POIBLÍ (OPENTIMESTAMPS)
+Ag feitheamh le deimhniú ar líonra Bitcoin (d'fhéadfadh sé cúpla uair an chloig a thógáil).
+AITHEANTÓIR AN CHRUTHÚNAIS
+20261122T190839000Z-1a2b3c4d.0
+Conas fíorú arís
+1. Cuir an comhad céanna isteach arís (verify_document), nó seiceáil an stampa ceangailte le openssl ts
+-verify.
+2. Cuirtear a mhéarlorg i gcomparáid leis an gceann atá ar an deimhniú seo.
+3. Is é an toradh «Slán» nó «Athraithe ó 22 Samhain 2026 ag 20:08:39».
+Comhaid theicniúla ceangailte leis an deimhniú seo
+token.tst — RFC 3161
+merkle-path.json — Merkle
+FÓGRA DLÍTHIÚIL
+Rialachán (AE) Uimh. 910/2014 (eIDAS), Airteagal 41: ní dhiúltófar éifeacht dhlíthiúil do stampa ama leictreonach ar an aon chúis amháin gur i bhfoirm
+leictreonach atá sé; beidh toimhde ann maidir le cruinneas an dáta agus an ama a léiríonn stampa ama leictreonach cáilithe agus maidir le sláine na
+sonraí lena bhfuil an dáta agus an t-am sin ceangailte, agus aithneofar é i ngach Ballstát. Ní soláthraí cáilithe seirbhísí iontaoibhe é XVcache. Is é
+Certigna a eisíonn an stampa cáilithe. Ní tuarascáil ó oifigeach breithiúnach (báille), ní síniú leictreonach cáilithe ná comhairle dhlíthiúil é an deimhniú
+seo. Cruthaíonn sé go raibh méarlorg ann ar dháta; ní chruthaíonn sé an t-údar ná an t-ábhar. Níor tarchuireadh ábhar an doiciméid riamh, a mhéarlorg
+amháin. Is í an chúirt a mheasann a fhíorfhiúntas fianaise de réir an nós imeachta náisiúnta.
+Aistriúchán nach bhfuil athbhreithnithe fós ag gairmí dlí; is ag an leagan Béarla atá an forlámhas. — Translation not yet reviewed by a
+legal professional; the English version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

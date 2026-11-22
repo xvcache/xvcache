@@ -1,0 +1,47 @@
+XVcache
+IDŐBÉLYEG-TANÚSÍTVÁNY
+V
+A dokumentum változatlan
+V eredmény — a lenyomat az időbélyegzés óta nem változott.
+DOKUMENTUM
+Contrat-de-cession-2026-11.pdf
+SHA-256 LENYOMAT
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+DÁTUM ÉS IDŐ
+2026. november 22. 20:08:39 (helyi idő, Europe/Brussels)
+2026. november 22. 19:08:39 UTC
+SZOLGÁLTATÓ
+Certigna
+Minősített elektronikus időbélyeg (eIDAS)
+Szabályzati hivatkozás: 1.2.250.1.177.2.9.1
+AZ IDŐBÉLYEG SOROZATSZÁMA
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+MINŐSÍTETT (EIDAS)
+igen
+NYILVÁNOS RÖGZÍTÉS (OPENTIMESTAMPS)
+Megerősítésre vár a Bitcoin-hálózaton (ez néhány órát is igénybe vehet).
+A BIZONYÍTÉK AZONOSÍTÓJA
+20261122T190839000Z-1a2b3c4d.0
+Újbóli ellenőrzés
+1. Nyújtsa be újra ugyanazt a fájlt (verify_document), vagy ellenőrizze a csatolt időbélyeget az openssl ts
+-verify paranccsal.
+2. A fájl lenyomatát összevetjük az ezen a tanúsítványon szereplővel.
+3. Az eredmény „Változatlan” vagy „Módosult ekkor óta: 2026. november 22. 20:08:39”.
+A tanúsítványhoz csatolt műszaki fájlok
+token.tst — RFC 3161
+merkle-path.json — Merkle
+JOGI TUDNIVALÓK
+910/2014/EU rendelet (eIDAS), 41. cikk: az elektronikus időbélyegző joghatása nem vitatható el kizárólag azon az alapon, hogy elektronikus formában
+van; a minősített elektronikus időbélyegzőre vonatkozik az általa jelzett dátum és idő pontosságának, valamint azon adatok sértetlenségének vélelme,
+amelyekhez a dátum és az idő kapcsolódik, és azt valamennyi tagállamban elismerik. Az XVcache nem minősített bizalmi szolgáltató. A minősített
+időbélyeget a Certigna bocsátja ki. Ez a tanúsítvány nem végrehajtói jegyzőkönyv, nem minősített elektronikus aláírás és nem jogi tanácsadás. Azt
+bizonyítja, hogy egy lenyomat egy adott időpontban létezett; sem a szerzőt, sem a tartalmat nem bizonyítja. A dokumentum tartalmát soha nem
+továbbították, csak a lenyomatát. Tényleges bizonyító erejét a bíróság a nemzeti eljárás szerint mérlegeli.
+A fordítást jogász még nem ellenőrizte; az angol változat az irányadó. — Translation not yet reviewed by a legal professional; the
+English version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

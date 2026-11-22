@@ -1,0 +1,46 @@
+XVcache
+AJATEMPLI TÕEND
+V
+Dokument muutmata
+Tulemus V — räsi ei ole pärast ajatemplit muutunud.
+DOKUMENT
+Contrat-de-cession-2026-11.pdf
+SHA-256 RÄSI
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+KUUPÄEV JA KELLAAEG
+22. november 2026, kell 20:08:39 (kohalik aeg, Europe/Brussels)
+22. november 2026, kell 19:08:39 UTC
+TEENUSEOSUTAJA
+Certigna
+Kvalifitseeritud elektrooniline ajatempel (eIDAS)
+Poliitika viide: 1.2.250.1.177.2.9.1
+AJATEMPLI SEERIANUMBER
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+KVALIFITSEERITUD (EIDAS)
+jah
+AVALIK ANKURDUS (OPENTIMESTAMPS)
+Ootab kinnitust Bitcoini võrgus (see võib võtta mõne tunni).
+TÕENDI TUNNUS
+20261122T190839000Z-1a2b3c4d.0
+Kuidas uuesti kontrollida
+1. Esitage sama fail uuesti (verify_document) või kontrollige lisatud ajatemplit käsuga openssl ts -verify.
+2. Faili räsi võrreldakse sellele tõendile kantud räsiga.
+3. Tulemus on „Muutmata” või „Muudetud alates 22. november 2026, kell 20:08:39”.
+Sellele tõendile lisatud tehnilised failid
+token.tst — RFC 3161
+merkle-path.json — Merkle
+ÕIGUSLIK TEAVE
+Määrus (EL) nr 910/2014 (eIDAS), artikkel 41: elektroonilise ajatempli õiguslikku toimet ei tohi eitada üksnes põhjusel, et see on elektroonilisel kujul;
+kvalifitseeritud elektroonilise ajatempli puhul eeldatakse selles märgitud kuupäeva ja kellaaja õigsust ning nende andmete terviklust, millega kuupäev ja
+kellaaeg on seotud, ning seda tunnustatakse kõigis liikmesriikides. XVcache ei ole kvalifitseeritud usaldusteenuse osutaja. Kvalifitseeritud ajatempli
+väljastab Certigna. See tõend ei ole kohtutäituri protokoll, kvalifitseeritud elektrooniline allkiri ega õigusnõuanne. See tõendab, et räsi oli olemas teatud
+kuupäeval; see ei tõenda autorit ega sisu. Dokumendi sisu ei ole kunagi edastatud, ainult selle räsi. Selle tegeliku tõendusväärtuse hindab kohus riikliku
+menetluse kohaselt.
+Tõlget ei ole veel juristi poolt üle vaadatud; kehtib ingliskeelne versioon. — Translation not yet reviewed by a legal professional; the
+English version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

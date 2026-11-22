@@ -1,0 +1,47 @@
+XVcache
+TIDSSTÄMPELCERTIFIKAT
+V
+Dokumentet oförändrat
+Resultat V — fingeravtrycket har inte ändrats sedan tidsstämplingen.
+DOKUMENT
+Contrat-de-cession-2026-11.pdf
+SHA-256-FINGERAVTRYCK
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+DATUM OCH TID
+22 november 2026 kl. 20:08:39 (lokal tid, Europe/Brussels)
+22 november 2026 kl. 19:08:39 UTC
+LEVERANTÖR
+Certigna
+Kvalificerad elektronisk tidsstämpel (eIDAS)
+Policyreferens: 1.2.250.1.177.2.9.1
+TIDSSTÄMPELNS SERIENUMMER
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+KVALIFICERAD EIDAS
+ja
+OFFENTLIG FÖRANKRING (OPENTIMESTAMPS)
+Väntar på bekräftelse i Bitcoin-nätverket (det kan ta några timmar).
+BEVISETS ID
+20261122T190839000Z-1a2b3c4d.0
+Så kontrollerar du igen
+1. Lämna in samma fil igen (verify_document) eller kontrollera den bifogade tidsstämpeln med openssl ts
+-verify.
+2. Filens fingeravtryck jämförs med det som står på detta certifikat.
+3. Resultatet blir ”Oförändrat” eller ”Ändrat sedan 22 november 2026 kl. 20:08:39”.
+Tekniska filer bifogade detta certifikat
+token.tst — RFC 3161
+merkle-path.json — Merkle
+RÄTTSLIG INFORMATION
+Förordning (EU) nr 910/2014 (eIDAS), art. 41: en elektronisk tidsstämpel får inte förvägras rättslig verkan enbart av det skälet att den är i elektronisk
+form; en kvalificerad elektronisk tidsstämpel ska presumeras ange korrekt datum och tid och att de uppgifter som datumet och tiden är knutna till är
+intakta, och den ska erkännas i alla medlemsstater. XVcache är inte en kvalificerad tillhandahållare av betrodda tjänster. Den kvalificerade tidsstämpeln
+utfärdas av Certigna. Detta certifikat är varken ett protokoll från en kronofogde eller stämningsman, en kvalificerad elektronisk underskrift eller juridisk
+rådgivning. Det visar att ett fingeravtryck fanns vid ett datum; det visar varken upphovsperson eller innehåll. Dokumentets innehåll har aldrig överförts,
+endast dess fingeravtryck. Dess konkreta bevisvärde bedöms av domstolen enligt nationell processrätt.
+Översättningen har ännu inte granskats av en jurist; den engelska versionen gäller. — Translation not yet reviewed by a legal
+professional; the English version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

@@ -1,0 +1,46 @@
+XVcache
+CERTIFICAT D'HORODATAGE
+V
+Document intact
+Verdict V — l'empreinte n'a pas changé depuis l'horodatage.
+FICHIER
+Contrat-de-cession-2026-11.pdf
+EMPREINTE SHA-256
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+DATE ET HEURE
+22 novembre 2026 à 20:08:39 (heure locale, Europe/Brussels)
+22 novembre 2026 à 19:08:39 UTC
+PRESTATAIRE
+Certigna
+Horodatage électronique qualifié eIDAS
+Référence de politique : 1.2.250.1.177.2.9.1
+NUMÉRO DE SÉRIE DU JETON
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+QUALIFIÉ EIDAS
+oui
+ANCRAGE PUBLIC (OPENTIMESTAMPS)
+En attente de confirmation sur le réseau Bitcoin (cela peut prendre quelques heures).
+IDENTIFIANT DE LA PREUVE
+20261122T190839000Z-1a2b3c4d.0
+Pour revérifier
+1. Redéposez le même fichier (verify_document), ou contrôlez le jeton joint avec openssl ts -verify.
+2. Son empreinte est comparée à celle écrite sur ce certificat.
+3. Le résultat est « Intact » ou « Modifié depuis le 22 novembre 2026 à 20:08:39 ».
+Fichiers techniques joints à ce certificat
+token.tst — RFC 3161
+merkle-path.json — Merkle
+MENTIONS LÉGALES
+Règlement (UE) n° 910/2014 (eIDAS), art. 41 : l'effet juridique d'un horodatage électronique ne peut être refusé au seul motif qu'il se présente sous une
+forme électronique ; un horodatage électronique qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure qu'il indique et d'intégrité des
+données auxquelles il se rapporte, et il est reconnu dans tous les États membres. XVcache n'est pas un prestataire de services de confiance qualifié. Le
+jeton qualifié est émis par Certigna. Ce certificat n'est ni un constat de commissaire de justice (huissier), ni une signature électronique qualifiée, ni un
+avis juridique. Il prouve qu'une empreinte existait à une date ; il ne prouve ni l'auteur ni le contenu. Le contenu du document n'a jamais été transmis,
+seule son empreinte l'a été. Sa force probante concrète est appréciée par le juge selon la procédure nationale.
+Traduction non encore relue par un juriste ; la version anglaise fait foi. — Translation not yet reviewed by a legal professional; the
+English version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

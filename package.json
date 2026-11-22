@@ -36,12 +36,16 @@
     "AGENTS.md",
     "llms.txt",
     "llms-full.txt",
-    "scripts/demo-ui.mjs"
+    "scripts/demo-ui.mjs",
+    "dist/i18n.js",
+    "locales/*.json",
+    "fonts/*.ttf",
+    "fonts/LICENSE-DejaVu.txt"
   ],
   "scripts": {
     "build": "tsc && chmod +x dist/server.js dist/export-certificate.js",
     "start": "node dist/server.js",
-    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js dist/certificate-i18n.test.js",
     "demo:certify": "npm run build && node scripts/demo-certify.mjs",
     "demo:ui": "npm run build && node scripts/demo-ui.mjs",
     "certificate": "npm run build && node dist/export-certificate.js",
@@ -91,6 +95,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
+    "@pdf-lib/fontkit": "^1.1.1",
     "pdf-lib": "^1.17.1",
     "zod": "^4.6.7"
   },

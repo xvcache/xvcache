@@ -1,9 +1,12 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
-  PDFDocument, PDFName, PDFString, PDFArray, StandardFonts, rgb,
+  PDFDocument, PDFName, PDFString, PDFArray, rgb,
   type PDFFont, type RGB,
 } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import { loadLocale, fill, formatLocalDateTime, resolveLang, type Lang } from "./i18n.js";
 import { sha256Hex, normalizeNotePath } from "./journal.js";
 import { Certifier, PROOF_FORMAT, type Proof, type VerifyReport } from "./certify.js";
 
@@ -189,6 +192,8 @@ export async function writeCertificatePack(opts: {
   proofFile?: string | null;
   otsStatus?: string | null;
   otsDetail?: string | null;
+  lang?: string;
+  tz?: string;
 }): Promise<CertificatePack> {
   const { proof } = opts;
   const dir = certificatePackDir(opts.dataDir, proof);
@@ -226,11 +231,14 @@ export async function writeCertificatePack(opts: {
   await fs.writeFile(merklePath, JSON.stringify(merkle, null, 2) + "\n", "utf8");
   attachments.push({ name: "chemin-de-preuve.json", path: merklePath, description: "Lien entre ce fichier et le jeton" });
 
-  const pdfPath = path.join(dir, "certificat.pdf");
+  const lang = opts.lang ?? "fr";
+  const pdfPath = path.join(dir, lang === "fr" ? "certificat.pdf" : `certificate-${lang}.pdf`);
   const bytes = await buildCertificatePdf({
     proof,
     otsText: otsHuman(opts.otsStatus ?? proof.ots?.status, opts.otsDetail ?? proof.ots?.detail),
     attachments,
+    lang,
+    tz: opts.tz,
   });
   await fs.writeFile(pdfPath, bytes);
   return { dir, pdf: pdfPath, attachments };
@@ -252,6 +260,9 @@ export type DocumentResult = {
   gen_time?: string | null;
   gen_time_paris?: string | null;
   batch_id?: string | null;
+  proof_id?: string | null;
+  lang?: Lang;
+  verdict_localized?: string;
 };
 
 function fromReport(
@@ -291,8 +302,12 @@ export async function handleDocument(
     filename?: string;
     stamp?: boolean;
     online?: boolean;
+    /** PDF and verdict language (24 EU codes). Default "fr" for backward compatibility; unknown → "en". */
+    lang?: string;
+    tz?: string;
   },
 ): Promise<DocumentResult> {
+  const lang = input.lang === undefined ? "fr" : resolveLang(input.lang).lang;
   const online = input.online === true;
   const content = input.content !== undefined ? Buffer.from(input.content) : undefined;
   const sha = content ? sha256Hex(content) : undefined;
@@ -324,7 +339,13 @@ export async function handleDocument(
     online,
   });
 
-  if (report.glyph !== "V") return fromReport(report, { stamped, path: found.proof.path });
+  const localized = (r: VerifyReport): string => {
+    const k = humanVerdict(r).kind;
+    return localizedVerdict(k, lang, r.gen_time, input.tz);
+  };
+  if (report.glyph !== "V") {
+    return fromReport(report, { stamped, path: found.proof.path, proof_id: localProofId(found.proof), lang, verdict_localized: localized(report) });
+  }
 
   const pack = await writeCertificatePack({
     proof: JSON.parse(await fs.readFile(found.file, "utf8")) as Proof,
@@ -333,8 +354,13 @@ export async function handleDocument(
     proofFile: found.file,
     otsStatus: report.ots?.status ?? found.proof.ots?.status,
     otsDetail: report.ots?.detail ?? found.proof.ots?.detail,
+    lang,
+    tz: input.tz,
   });
   return fromReport(report, {
+    proof_id: localProofId(found.proof),
+    lang,
+    verdict_localized: localized(report),
     stamped,
     path: found.proof.path,
     pdf: pack.pdf,
@@ -343,50 +369,103 @@ export async function handleDocument(
   });
 }
 
+/**
+ * Reissue the PDF of an existing local proof in another language. Never stamps, never spends a token.
+ * The proof is re-verified against the current note first: a modified note gives X and no PDF.
+ */
+export async function reissueCertificate(
+  certifier: Certifier,
+  input: { proof_id: string; lang?: string; tz?: string; online?: boolean },
+): Promise<DocumentResult> {
+  const lang = resolveLang(input.lang).lang;
+  const proofs = await loadProofs(certifier.proofsDir());
+  const found = proofs.find((p) => localProofId(p.proof) === input.proof_id);
+  if (!found) return { ok: false, stamped: false, error: `PROOF_NOT_FOUND: ${input.proof_id}` };
+  const report = await certifier.verify({ proof: found.proof, path: found.proof.path, online: input.online === true });
+  const verdict_localized = localizedVerdict(humanVerdict(report).kind, lang, report.gen_time, input.tz);
+  if (report.glyph !== "V") return fromReport(report, { path: found.proof.path, proof_id: input.proof_id, lang, verdict_localized });
+  const pack = await writeCertificatePack({
+    proof: found.proof,
+    dataDir: certifier.cfg.dataDir,
+    batchesDir: certifier.batchesDir(),
+    proofFile: found.file,
+    otsStatus: report.ots?.status ?? found.proof.ots?.status,
+    otsDetail: report.ots?.detail ?? found.proof.ots?.detail,
+    lang,
+    tz: input.tz,
+  });
+  return fromReport(report, { path: found.proof.path, proof_id: input.proof_id, lang, verdict_localized, pdf: pack.pdf, pack: pack.dir, attachments: pack.attachments });
+}
+
 /* -------------------------------------------------------------------------- */
-/* PDF                                                                        */
+/* PDF (one page, 24 EU languages, embedded DejaVu fonts)                      */
 /* -------------------------------------------------------------------------- */
 
 const PAGE_W = 595.28;
 const PAGE_H = 841.89;
-const MARGIN_X = 56;
-const MARGIN_TOP = 48;
-const MARGIN_BOTTOM = 42;
+const MARGIN_X = 50;
+const MARGIN_TOP = 44;
+const MARGIN_BOTTOM = 34;
 const INK = rgb(0.12, 0.12, 0.11);
 const MUTED = rgb(0.38, 0.37, 0.35);
 const RULE = rgb(0.78, 0.76, 0.72);
 const GREEN = rgb(0.06, 0.42, 0.28);
 const GREEN_SOFT = rgb(0.93, 0.96, 0.94);
+const RED = rgb(0.62, 0.12, 0.1);
+const AMBER = rgb(0.6, 0.38, 0.05);
 const WARN_BG = rgb(0.99, 0.95, 0.88);
 const WARN_INK = rgb(0.42, 0.25, 0.05);
 const CONTENT_W = PAGE_W - 2 * MARGIN_X;
 
+export function fontsDir(): string {
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "fonts");
+}
+
+const FONT_FILES = {
+  serif: "DejaVuSerif.ttf",
+  serifBold: "DejaVuSerif-Bold.ttf",
+  sans: "DejaVuSans.ttf",
+  sansBold: "DejaVuSans-Bold.ttf",
+} as const;
+type FontKey = keyof typeof FONT_FILES;
+
+const fontBytesCache = new Map<FontKey, Uint8Array>();
+async function fontBytes(key: FontKey): Promise<Uint8Array> {
+  let b = fontBytesCache.get(key);
+  if (!b) {
+    b = new Uint8Array(await fs.readFile(path.join(fontsDir(), FONT_FILES[key])));
+    fontBytesCache.set(key, b);
+  }
+  return b;
+}
+
+type GlyphChecker = { hasGlyphForCodePoint(cp: number): boolean };
+const glyphCheckers = new Map<FontKey, GlyphChecker>();
+async function glyphChecker(key: FontKey): Promise<GlyphChecker> {
+  let g = glyphCheckers.get(key);
+  if (!g) {
+    g = (fontkit as unknown as { create(b: Uint8Array): GlyphChecker }).create(await fontBytes(key));
+    glyphCheckers.set(key, g);
+  }
+  return g;
+}
+
 function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   const lines: string[] = [];
-  const paragraphs = text.split("\n");
-  for (const para of paragraphs) {
-    const words = para.split(/\s+/).filter(Boolean);
+  for (const para of text.split("\n")) {
+    const words = para.split(/[ \t]+/).filter(Boolean);
     if (words.length === 0) { lines.push(""); continue; }
     let line = "";
     for (const word of words) {
       const trial = line ? `${line} ${word}` : word;
-      if (font.widthOfTextAtSize(trial, size) <= maxWidth) {
-        line = trial;
-        continue;
-      }
+      if (font.widthOfTextAtSize(trial, size) <= maxWidth) { line = trial; continue; }
       if (line) lines.push(line);
-      if (font.widthOfTextAtSize(word, size) <= maxWidth) {
-        line = word;
-        continue;
-      }
+      if (font.widthOfTextAtSize(word, size) <= maxWidth) { line = word; continue; }
       let chunk = "";
       for (const ch of word) {
         const next = chunk + ch;
         if (font.widthOfTextAtSize(next, size) <= maxWidth) chunk = next;
-        else {
-          if (chunk) lines.push(chunk);
-          chunk = ch;
-        }
+        else { if (chunk) lines.push(chunk); chunk = ch; }
       }
       line = chunk;
     }
@@ -395,56 +474,117 @@ function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): 
   return lines;
 }
 
-type Fonts = { times: PDFFont; timesBold: PDFFont; helv: PDFFont; helvBold: PDFFont; helvOblique: PDFFont };
+type Fonts = Record<FontKey, PDFFont>;
+type Page = ReturnType<PDFDocument["addPage"]>;
 
-class Pen {
-  constructor(
-    private page: ReturnType<PDFDocument["addPage"]>,
-    private fonts: Fonts,
-    public y: number,
-  ) {}
+/** Draws text, records every line (for snapshots) and every code point per font (for glyph checks). */
+class Canvas {
+  readonly lines: string[] = [];
+  readonly used = new Map<FontKey, Set<number>>();
+  constructor(readonly page: Page, readonly fonts: Fonts, public y: number, readonly scale: number) {}
 
-  rule(color: RGB = RULE, thickness = 0.6): void {
-    this.page.drawLine({
-      start: { x: MARGIN_X, y: this.y },
-      end: { x: PAGE_W - MARGIN_X, y: this.y },
-      thickness,
-      color,
-    });
-    this.y -= 14;
+  private keyOf(font: PDFFont): FontKey {
+    return (Object.keys(this.fonts) as FontKey[]).find((k) => this.fonts[k] === font) ?? "sans";
   }
 
-  gap(n: number): void { this.y -= n; }
+  draw(text: string, x: number, y: number, size: number, font: PDFFont, color: RGB = INK): void {
+    const key = this.keyOf(font);
+    let set = this.used.get(key);
+    if (!set) { set = new Set(); this.used.set(key, set); }
+    for (const ch of text) set.add(ch.codePointAt(0)!);
+    this.lines.push(text);
+    this.page.drawText(text, { x, y, size, font, color });
+  }
 
-  text(raw: string, opts: { font: PDFFont; size: number; color?: RGB; x?: number; width?: number; lineGap?: number; align?: "left" | "right" }): number {
-    const color = opts.color ?? INK;
-    const x = opts.x ?? MARGIN_X;
-    const width = opts.width ?? CONTENT_W;
-    const lineGap = opts.lineGap ?? opts.size * 0.35;
-    const lines = wrapText(raw, opts.font, opts.size, width);
-    for (const line of lines) {
-      const w = opts.font.widthOfTextAtSize(line, opts.size);
-      const tx = opts.align === "right" ? x + width - w : x;
-      this.page.drawText(line, { x: tx, y: this.y - opts.size, size: opts.size, font: opts.font, color });
-      this.y -= opts.size + lineGap;
+  rule(color: RGB = RULE, thickness = 0.6): void {
+    this.page.drawLine({ start: { x: MARGIN_X, y: this.y }, end: { x: PAGE_W - MARGIN_X, y: this.y }, thickness, color });
+    this.y -= 10 * this.scale;
+  }
+
+  gap(n: number): void { this.y -= n * this.scale; }
+
+  text(raw: string, o: { font: PDFFont; size: number; color?: RGB; x?: number; width?: number; lineGap?: number }): void {
+    const size = o.size * this.scale;
+    const x = o.x ?? MARGIN_X;
+    const width = o.width ?? CONTENT_W;
+    const lineGap = (o.lineGap ?? o.size * 0.3) * this.scale;
+    for (const line of wrapText(raw, o.font, size, width)) {
+      this.draw(line, x, this.y - size, size, o.font, o.color ?? INK);
+      this.y -= size + lineGap;
     }
-    return lines.length;
   }
 
   field(label: string, value: string): void {
-    this.text(label.toUpperCase(), { font: this.fonts.helv, size: 7.5, color: MUTED, lineGap: 3 });
-    this.text(value, { font: this.fonts.times, size: 11, color: INK, lineGap: 3.5 });
-    this.gap(10);
+    this.text(label.toUpperCase(), { font: this.fonts.sans, size: 6.8, color: MUTED, lineGap: 2 });
+    this.text(value, { font: this.fonts.serif, size: 9.6, lineGap: 2.6 });
+    this.gap(6);
   }
 }
 
-function drawBadge(page: ReturnType<PDFDocument["addPage"]>, fonts: Fonts, cx: number, cy: number, r: number): void {
-  page.drawCircle({ x: cx, y: cy, size: r + 4, color: GREEN_SOFT });
-  page.drawCircle({ x: cx, y: cy, size: r, color: GREEN });
-  const v = "V";
+export type CertificateVerdict = "V" | "X" | "pending";
+
+/** Everything the one-page certificate shows. Hashes and labels only, never document content. */
+export type CertificateModel = {
+  lang?: string;
+  tz?: string;
+  kind?: "timestamp" | "verification";
+  verdict: CertificateVerdict;
+  label: string;
+  sha256: string;
+  gen_time: string | null;
+  tsa: null | { provider: string; label: string; qualified: boolean; policy?: string; serial?: string };
+  /** true when a qualified (Certigna) token is expected but still missing (pending_qualified). */
+  pending_qualified?: boolean;
+  ots_status?: string | null;
+  ots_detail?: string | null;
+  /** Overrides the localized OpenTimestamps sentence (legacy French callers). */
+  ots_text?: string | null;
+  proof_id?: string | null;
+  attachments: { name: string; description: string; path?: string; bytes?: Uint8Array }[];
+  /** Deterministic output for snapshot tests. */
+  fixed_date?: string;
+};
+
+export type RenderedCertificate = {
+  bytes: Uint8Array;
+  pages: number;
+  overflow: boolean;
+  scale: number;
+  lang: Lang;
+  lines: string[];
+  missing_glyphs: string[];
+};
+
+export function localizedOts(lang: string, status?: string | null, detail?: string | null): string {
+  const L = loadLocale(lang).cert;
+  switch (status) {
+    case "confirmed": return lang === "fr" && detail && detail.trim() ? detail : L.ots_confirmed;
+    case "pending": return L.ots_pending;
+    case "unverified": return L.ots_unverified;
+    case "failed": return L.ots_failed;
+    default: return L.ots_none;
+  }
+}
+
+/** Localized one-line verdict for the AI to show (no question, no advice). */
+export function localizedVerdict(kind: "intact" | "modifie" | "invalide" | "pending", lang: string, genTime: string | null, tz?: string): string {
+  const L = loadLocale(lang).cert;
+  const when = genTime ? formatLocalDateTime(genTime, loadLocale(lang).lang, tz) : null;
+  const date = when ? `${when.local} (${when.tz}) — ${when.utc} UTC` : "?";
+  if (kind === "intact") return fill(L.verdict_intact, { date });
+  if (kind === "modifie") return fill(L.verdict_modified, { date });
+  if (kind === "pending") return L.verdict_pending;
+  return L.verdict_invalid;
+}
+
+function drawBadge(c: Canvas, cx: number, cy: number, r: number, verdict: CertificateVerdict): void {
+  const color = verdict === "V" ? GREEN : verdict === "X" ? RED : AMBER;
+  c.page.drawCircle({ x: cx, y: cy, size: r + 4, color: GREEN_SOFT });
+  c.page.drawCircle({ x: cx, y: cy, size: r, color });
+  const g = verdict === "pending" ? "…" : verdict;
   const size = 13;
-  const w = fonts.timesBold.widthOfTextAtSize(v, size);
-  page.drawText(v, { x: cx - w / 2, y: cy - 4.5, size, font: fonts.timesBold, color: rgb(1, 1, 1) });
+  const w = c.fonts.serifBold.widthOfTextAtSize(g, size);
+  c.draw(g, cx - w / 2, cy - 4.5, size, c.fonts.serifBold, rgb(1, 1, 1));
 }
 
 function attachFiles(doc: PDFDocument, files: { name: string; bytes: Uint8Array; description: string }[]): void {
@@ -452,10 +592,7 @@ function attachFiles(doc: PDFDocument, files: { name: string; bytes: Uint8Array;
   const names = PDFArray.withContext(doc.context);
   const af = PDFArray.withContext(doc.context);
   for (const f of files) {
-    const stream = doc.context.flateStream(f.bytes, {
-      Type: "EmbeddedFile",
-      Params: { Size: f.bytes.length },
-    });
+    const stream = doc.context.flateStream(f.bytes, { Type: "EmbeddedFile", Params: { Size: f.bytes.length } });
     const streamRef = doc.context.register(stream);
     const spec = doc.context.obj({
       Type: "Filespec",
@@ -474,146 +611,201 @@ function attachFiles(doc: PDFDocument, files: { name: string; bytes: Uint8Array;
   doc.catalog.set(PDFName.of("AF"), af);
 }
 
-export async function buildCertificatePdf(opts: {
-  proof: Proof;
-  otsText: string;
-  attachments: Attachment[];
-}): Promise<Uint8Array> {
-  const { proof } = opts;
+async function renderOnce(model: CertificateModel, scale: number): Promise<RenderedCertificate> {
+  const locale = loadLocale(model.lang);
+  const lang = locale.lang;
+  const L = locale.cert;
+  const EN = loadLocale("en").cert;
   const doc = await PDFDocument.create();
-  const fonts: Fonts = {
-    times: await doc.embedFont(StandardFonts.TimesRoman),
-    timesBold: await doc.embedFont(StandardFonts.TimesRomanBold),
-    helv: await doc.embedFont(StandardFonts.Helvetica),
-    helvBold: await doc.embedFont(StandardFonts.HelveticaBold),
-    helvOblique: await doc.embedFont(StandardFonts.HelveticaOblique),
-  };
+  doc.registerFontkit(fontkit);
+  const fonts = {} as Fonts;
+  for (const k of Object.keys(FONT_FILES) as FontKey[]) fonts[k] = await doc.embedFont(await fontBytes(k), { subset: true });
   const page = doc.addPage([PAGE_W, PAGE_H]);
-  const pen = new Pen(page, fonts, PAGE_H - MARGIN_TOP);
+  const c = new Canvas(page, fonts, PAGE_H - MARGIN_TOP, scale);
 
-  const qualified = !!proof.tsa?.qualified;
-  const providerId = proof.tsa?.provider ?? "";
-  const isFreeTsa = providerId === "freetsa";
-  const when = proof.tsa?.gen_time ? formatParisDateTime(proof.tsa.gen_time) : null;
-  const fileName = proof.path;
-  const accent = qualified ? GREEN : RULE;
+  const qualified = !!model.tsa?.qualified && !model.pending_qualified && model.verdict !== "pending";
+  const isFreeTsa = model.tsa?.provider === "freetsa";
+  const verification = model.kind === "verification";
+  const accent = qualified && model.verdict === "V" ? GREEN : RULE;
 
-  page.drawRectangle({ x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: qualified ? GREEN : rgb(0.35, 0.34, 0.32) });
-
-  const brand = "XVcache";
-  page.drawText(brand, { x: MARGIN_X, y: pen.y - 16, size: 13, font: fonts.timesBold, color: INK });
-  const rightTitle = "CERTIFICAT D'HORODATAGE";
-  const rw = fonts.helv.widthOfTextAtSize(rightTitle, 8);
-  page.drawText(rightTitle, { x: PAGE_W - MARGIN_X - rw, y: pen.y - 14, size: 8, font: fonts.helv, color: MUTED });
-  pen.y -= 28;
-  pen.rule(accent, qualified ? 1.2 : 0.6);
-  pen.gap(8);
-
-  const badgeY = pen.y - 16;
-  drawBadge(page, fonts, MARGIN_X + 16, badgeY, 14);
-  const titleX = MARGIN_X + 42;
-  page.drawText("Document intact", { x: titleX, y: badgeY + 2, size: 20, font: fonts.timesBold, color: INK });
-  page.drawText("Verdict V  —  l'empreinte n'a pas changé depuis l'horodatage.", {
-    x: titleX, y: badgeY - 14, size: 9, font: fonts.helv, color: MUTED,
-  });
-  pen.y = badgeY - 32;
-
-  if (!qualified) {
-    const boxTop = pen.y;
-    const warn = isFreeTsa
-      ? "Attention : ceci n'est PAS un horodatage qualifié eIDAS. Le jeton provient de FreeTSA et sert uniquement aux essais. Il n'a pas de présomption légale."
-      : "Attention : ceci n'est PAS un horodatage qualifié eIDAS. Le prestataire n'est pas un service de confiance qualifié.";
-    const warnLines = wrapText(warn, fonts.helv, 9, CONTENT_W - 20);
-    const boxH = warnLines.length * 12 + 16;
-    page.drawRectangle({ x: MARGIN_X, y: boxTop - boxH, width: CONTENT_W, height: boxH, color: WARN_BG });
-    pen.y = boxTop - 10;
-    pen.text(warn, { font: fonts.helv, size: 9, color: WARN_INK, x: MARGIN_X + 10, width: CONTENT_W - 20, lineGap: 3 });
-    pen.y = boxTop - boxH - 14;
-  }
-
-  pen.field("Fichier", fileName);
-  pen.field("Empreinte SHA-256", formatGroupedHex(proof.note_sha256));
-
-  if (when) {
-    pen.field("Date et heure", `${when.long}\n(${when.tz})`);
-  } else {
-    pen.field("Date et heure", "Aucun jeton d'horodatage dans cette preuve.");
-  }
-
-  if (proof.tsa) {
-    const providerName = (proof.tsa.label || "Certigna").replace(/\s*\([^)]*\)\s*$/, "").trim() || "Certigna";
-    const providerLines = qualified
-      ? `${providerName}\nHorodatage électronique qualifié eIDAS\nRéférence de politique : ${proof.tsa.policy || "1.2.250.1.177.2.9.1"}`
-      : isFreeTsa
-        ? "FreeTSA — jeton de test uniquement.\nCeci n'est PAS un horodatage qualifié eIDAS."
-        : `${proof.tsa.label || proof.tsa.provider}\nCeci n'est PAS un horodatage qualifié eIDAS.`;
-    pen.field("Prestataire", providerLines);
-    if (proof.tsa.serial) pen.field("Numéro de série du jeton", formatGroupedHex(proof.tsa.serial));
-  } else {
-    pen.field("Prestataire", "Aucun prestataire d'horodatage dans cette preuve.");
-  }
-
-  pen.field("Ancrage public (OpenTimestamps)", opts.otsText);
-  pen.rule();
-  pen.gap(2);
-
-  pen.text("Pour revérifier", { font: fonts.timesBold, size: 12, lineGap: 8 });
-  const since = when ? when.short : "la date d'horodatage";
-  const steps = [
-    "1.  Redéposez le même fichier dans XVcache.",
-    "2.  L'outil compare son empreinte à celle écrite sur ce certificat.",
-    `3.  Vous obtenez «${NBSP}Intact${NBSP}» ou «${NBSP}Modifié depuis le ${since}${NBSP}».`,
+  // ---- footer (legal notice) is laid out first: content must stay above it ----
+  const legalSize = 6.4 * scale;
+  const legalGap = 1.6 * scale;
+  const legalOwn = [L.legal_art41, L.legal_not_qtsp, L.legal_not, L.legal_hash_only, L.legal_court].join(" ");
+  const footerBlocks: { text: string; font: PDFFont; color: RGB }[] = [
+    { text: L.legal_title.toUpperCase(), font: fonts.sansBold, color: MUTED },
+    { text: legalOwn, font: fonts.sans, color: MUTED },
   ];
-  for (const step of steps) {
-    pen.text(step, { font: fonts.times, size: 11, lineGap: 5 });
-  }
-  pen.gap(8);
-  pen.rule();
-  pen.gap(2);
-
-  pen.text("Fichiers techniques joints à ce certificat", { font: fonts.timesBold, size: 12, lineGap: 8 });
-  if (opts.attachments.length === 0) {
-    pen.text("Aucun fichier technique n'a pu être joint.", { font: fonts.times, size: 11, lineGap: 5 });
-  } else {
-    for (const a of opts.attachments) {
-      pen.text(`${a.name}  —  ${a.description}`, { font: fonts.times, size: 11, lineGap: 5 });
+  if (lang !== "en" || !locale.reviewed) {
+    if (!locale.reviewed) footerBlocks.push({ text: L.mt_notice + (lang !== "en" ? ` — ${EN.mt_notice}` : ""), font: fonts.sansBold, color: WARN_INK });
+    if (lang !== "en") {
+      footerBlocks.push({ text: [EN.legal_art41, EN.legal_not_qtsp, EN.legal_not, EN.legal_hash_only, EN.legal_court].join(" "), font: fonts.sans, color: MUTED });
     }
   }
+  const footerLines: { line: string; font: PDFFont; color: RGB }[] = [];
+  for (const b of footerBlocks) for (const line of wrapText(b.text, b.font, legalSize, CONTENT_W)) footerLines.push({ line, font: b.font, color: b.color });
+  const footerH = footerLines.length * (legalSize + legalGap);
+  const footerTop = MARGIN_BOTTOM + footerH + 6;
 
-  const disclaimer =
-    "Ce document n'est pas un constat d'huissier, ni une signature électronique qualifiée, ni un conseil juridique.";
-  const discLines = wrapText(disclaimer, fonts.helvOblique, 8, CONTENT_W);
-  const footerY = MARGIN_BOTTOM + discLines.length * 11 + 10;
-  if (pen.y < footerY + 8) {
-    /* content already above footer; if not, the footer still draws over the bottom margin */
-  }
-  page.drawLine({
-    start: { x: MARGIN_X, y: footerY + discLines.length * 11 + 8 },
-    end: { x: PAGE_W - MARGIN_X, y: footerY + discLines.length * 11 + 8 },
-    thickness: 0.5,
-    color: RULE,
-  });
-  let dy = footerY + discLines.length * 11 - 8;
-  for (const line of discLines) {
-    page.drawText(line, { x: MARGIN_X, y: dy - 8, size: 8, font: fonts.helvOblique, color: MUTED });
-    dy -= 11;
+  // ---- header ----
+  page.drawRectangle({ x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: qualified ? GREEN : rgb(0.35, 0.34, 0.32) });
+  c.draw("XVcache", MARGIN_X, c.y - 16, 13, fonts.serifBold);
+  const rightTitle = verification ? L.header_verification : L.header;
+  const rw = fonts.sans.widthOfTextAtSize(rightTitle, 7.5);
+  c.draw(rightTitle, PAGE_W - MARGIN_X - rw, c.y - 14, 7.5, fonts.sans, MUTED);
+  c.y -= 26;
+  c.rule(accent, qualified ? 1.2 : 0.6);
+  c.gap(6);
+
+  // ---- verdict ----
+  const title = model.verdict === "V" ? L.title_intact : model.verdict === "X" ? L.title_modified : L.title_pending;
+  const subtitle = model.verdict === "V" ? L.subtitle_intact : model.verdict === "X" ? L.subtitle_modified : L.subtitle_pending;
+  const badgeY = c.y - 16;
+  drawBadge(c, MARGIN_X + 16, badgeY, 14, model.verdict);
+  const titleX = MARGIN_X + 42;
+  const titleSize = 18 * scale;
+  c.y = badgeY + 2 + titleSize;
+  c.text(title, { font: fonts.serifBold, size: 18, x: titleX, width: CONTENT_W - 42, lineGap: 2 });
+  c.gap(3);
+  c.text(subtitle, { font: fonts.sans, size: 8.2, color: MUTED, x: titleX, width: CONTENT_W - 42, lineGap: 2 });
+  c.y = Math.min(c.y, badgeY - 20) - 6;
+
+  // ---- NOT QUALIFIED banner ----
+  if (!qualified) {
+    const warn = model.pending_qualified || (model.verdict === "pending") ? L.warn_pending : isFreeTsa ? L.warn_freetsa : L.warn_other;
+    const head = L.banner_not_qualified;
+    const warnLines = wrapText(warn, fonts.sans, 8.4 * scale, CONTENT_W - 20);
+    const boxH = (warnLines.length + 1) * (8.4 * scale + 3) + 12;
+    const boxTop = c.y;
+    page.drawRectangle({ x: MARGIN_X, y: boxTop - boxH, width: CONTENT_W, height: boxH, color: WARN_BG });
+    c.y = boxTop - 6;
+    c.text(head, { font: fonts.sansBold, size: 8.4, color: WARN_INK, x: MARGIN_X + 10, width: CONTENT_W - 20, lineGap: 3 });
+    c.text(warn, { font: fonts.sans, size: 8.4, color: WARN_INK, x: MARGIN_X + 10, width: CONTENT_W - 20, lineGap: 3 });
+    c.y = boxTop - boxH - 10;
   }
 
-  doc.setTitle(`Certificat XVcache — ${fileName}`);
+  // ---- fields ----
+  c.field(L.field_document, model.label);
+  c.field(L.field_sha256, formatGroupedHex(model.sha256));
+  if (model.gen_time) {
+    const when = formatLocalDateTime(model.gen_time, lang, model.tz);
+    c.field(L.field_date, `${when.local} (${L.local_time}, ${when.tz})\n${when.utc} ${L.utc}`);
+  } else {
+    c.field(L.field_date, L.no_token);
+  }
+  if (model.tsa) {
+    const providerName = (model.tsa.label || "Certigna").replace(/\s*\([^)]*\)\s*$/, "").trim() || "Certigna";
+    const lines = qualified
+      ? `${providerName}\n${L.provider_qualified}\n${L.policy} : ${model.tsa.policy || "1.2.250.1.177.2.9.1"}`.replace(" : ", lang === "fr" ? " : " : ": ")
+      : isFreeTsa ? `${L.freetsa_line}\n${L.not_qualified_line}` : `${model.tsa.label || model.tsa.provider}\n${L.not_qualified_line}`;
+    c.field(L.field_provider, lines);
+    if (model.tsa.serial) c.field(L.field_serial, formatGroupedHex(model.tsa.serial));
+  } else {
+    c.field(L.field_provider, model.pending_qualified ? `Certigna — ${L.verdict_pending}` : L.no_provider);
+  }
+  c.field(L.field_qualified, qualified ? L.yes : L.no);
+  c.field(L.field_ots, model.ots_text ?? localizedOts(lang, model.ots_status, model.ots_detail));
+  if (model.proof_id) c.field(L.field_proof_id, model.proof_id);
+  c.rule();
+
+  // ---- how to verify again ----
+  c.text(L.reverify_title, { font: fonts.serifBold, size: 10.5, lineGap: 4 });
+  const since = model.gen_time ? formatLocalDateTime(model.gen_time, lang, model.tz).local : "…";
+  for (const [i, step] of [L.reverify_1, L.reverify_2, fill(L.reverify_3, { date: since })].entries()) {
+    c.text(`${i + 1}.  ${step}`, { font: fonts.serif, size: 9.2, lineGap: 2.4 });
+  }
+  c.gap(4);
+  c.rule();
+
+  // ---- attachments ----
+  c.text(L.attachments_title, { font: fonts.serifBold, size: 10.5, lineGap: 4 });
+  if (model.attachments.length === 0) c.text(L.attachments_none, { font: fonts.serif, size: 9.2, lineGap: 2.4 });
+  for (const a of model.attachments) c.text(`${a.name}  —  ${a.description}`, { font: fonts.serif, size: 9.2, lineGap: 2.4 });
+
+  const overflow = c.y < footerTop;
+
+  // ---- draw footer ----
+  page.drawLine({ start: { x: MARGIN_X, y: footerTop - 2 }, end: { x: PAGE_W - MARGIN_X, y: footerTop - 2 }, thickness: 0.5, color: RULE });
+  let fy = footerTop - 4;
+  for (const f of footerLines) {
+    c.draw(f.line, MARGIN_X, fy - legalSize, legalSize, f.font, f.color);
+    fy -= legalSize + legalGap;
+  }
+
+  doc.setTitle(`XVcache — ${model.label}`);
   doc.setAuthor("XVcache");
-  doc.setSubject(qualified ? "Certificat d'horodatage électronique qualifié eIDAS" : "Certificat d'horodatage (non qualifié)");
+  doc.setSubject(qualified ? "Qualified eIDAS electronic timestamp certificate" : "Timestamp certificate (not qualified)");
   doc.setCreator("XVcache");
   doc.setProducer("XVcache");
-  if (when) doc.setCreationDate(new Date(when.iso));
-  doc.setKeywords(["XVcache", "horodatage", qualified ? "eIDAS" : "test", fileName]);
+  doc.setLanguage(lang);
+  const created = model.fixed_date ?? model.gen_time;
+  if (created) { doc.setCreationDate(new Date(created)); doc.setModificationDate(new Date(created)); }
+  doc.setKeywords(["XVcache", lang, qualified ? "eIDAS" : "not-qualified", model.label]);
 
   const embedded: { name: string; bytes: Uint8Array; description: string }[] = [];
-  for (const a of opts.attachments) {
-    try {
-      embedded.push({ name: a.name, bytes: await fs.readFile(a.path), description: a.description });
-    } catch { /* skip missing */ }
+  for (const a of model.attachments) {
+    if (a.bytes) embedded.push({ name: a.name, bytes: a.bytes, description: a.description });
+    else if (a.path) {
+      try { embedded.push({ name: a.name, bytes: await fs.readFile(a.path), description: a.description }); } catch { /* skip missing */ }
+    }
   }
   attachFiles(doc, embedded);
 
-  return doc.save();
+  const missing: string[] = [];
+  for (const [key, cps] of c.used) {
+    const g = await glyphChecker(key);
+    for (const cp of cps) {
+      if (cp === 0x20 || cp === 0x0a) continue;
+      if (!g.hasGlyphForCodePoint(cp)) missing.push(`${FONT_FILES[key]}:U+${cp.toString(16).toUpperCase().padStart(4, "0")}`);
+    }
+  }
+
+  const bytes = await doc.save({ useObjectStreams: false });
+  return { bytes, pages: doc.getPageCount(), overflow, scale, lang, lines: c.lines, missing_glyphs: missing };
+}
+
+/** Render a one-page certificate. Shrinks the type slightly if a long language would overflow. */
+export async function renderCertificate(model: CertificateModel): Promise<RenderedCertificate> {
+  let last: RenderedCertificate | null = null;
+  for (const scale of [1, 0.94, 0.88, 0.82]) {
+    last = await renderOnce(model, scale);
+    if (!last.overflow) return last;
+  }
+  return last!;
+}
+
+/** Stable proof identifier for a local proof: `<batch_id>.<leaf_index>`. */
+export function localProofId(proof: Proof): string {
+  return `${proof.batch_id}.${proof.merkle.leaf_index}`;
+}
+
+export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string; otsText?: string | null; otsStatus?: string | null; otsDetail?: string | null; attachments: Attachment[] }): CertificateModel {
+  return {
+    lang: opts.lang,
+    tz: opts.tz,
+    kind: "timestamp",
+    verdict: "V",
+    label: proof.path,
+    sha256: proof.note_sha256,
+    gen_time: proof.tsa?.gen_time ?? null,
+    tsa: proof.tsa ? { provider: proof.tsa.provider, label: proof.tsa.label, qualified: proof.tsa.qualified, policy: proof.tsa.policy, serial: proof.tsa.serial } : null,
+    ots_status: opts.otsStatus ?? proof.ots?.status ?? null,
+    ots_detail: opts.otsDetail ?? proof.ots?.detail ?? null,
+    ots_text: opts.otsText ?? null,
+    proof_id: localProofId(proof),
+    attachments: opts.attachments,
+  };
+}
+
+/** Backward-compatible entry point (French by default, as before). */
+export async function buildCertificatePdf(opts: {
+  proof: Proof;
+  otsText?: string;
+  attachments: Attachment[];
+  lang?: string;
+  tz?: string;
+}): Promise<Uint8Array> {
+  const lang = opts.lang ?? "fr";
+  const r = await renderCertificate(modelFromProof(opts.proof, { lang, tz: opts.tz, otsText: lang === "fr" ? opts.otsText : null, attachments: opts.attachments }));
+  return r.bytes;
 }

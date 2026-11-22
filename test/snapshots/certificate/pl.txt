@@ -1,0 +1,47 @@
+XVcache
+CERTYFIKAT ZNACZNIKA CZASU
+V
+Dokument nienaruszony
+Wynik V — skrót nie zmienił się od oznaczenia czasem.
+DOKUMENT
+Contrat-de-cession-2026-11.pdf
+SKRÓT SHA-256
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+DATA I GODZINA
+22 listopada 2026 20:08:39 (czas lokalny, Europe/Brussels)
+22 listopada 2026 19:08:39 UTC
+DOSTAWCA
+Certigna
+Kwalifikowany elektroniczny znacznik czasu (eIDAS)
+Odniesienie do polityki: 1.2.250.1.177.2.9.1
+NUMER SERYJNY ZNACZNIKA
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+KWALIFIKOWANY EIDAS
+tak
+PUBLICZNE ZAKOTWICZENIE (OPENTIMESTAMPS)
+Oczekuje na potwierdzenie w sieci Bitcoin (może to potrwać kilka godzin).
+IDENTYFIKATOR DOWODU
+20261122T190839000Z-1a2b3c4d.0
+Jak zweryfikować ponownie
+1. Prześlij ponownie ten sam plik (verify_document) lub sprawdź załączony znacznik poleceniem openssl
+ts -verify.
+2. Jego skrót jest porównywany ze skrótem podanym na tym certyfikacie.
+3. Wynik to „Nienaruszony” albo „Zmieniony od 22 listopada 2026 20:08:39”.
+Pliki techniczne załączone do tego certyfikatu
+token.tst — RFC 3161
+merkle-path.json — Merkle
+INFORMACJE PRAWNE
+Rozporządzenie (UE) nr 910/2014 (eIDAS), art. 41: elektronicznemu znacznikowi czasu nie można odmówić skutku prawnego wyłącznie z tego powodu, że
+ma postać elektroniczną; kwalifikowany elektroniczny znacznik czasu korzysta z domniemania dokładności daty i czasu, które wskazuje, oraz
+integralności danych, z którymi te data i czas są powiązane, i jest uznawany we wszystkich państwach członkowskich. XVcache nie jest kwalifikowanym
+dostawcą usług zaufania. Kwalifikowany znacznik wydaje Certigna. Niniejszy certyfikat nie jest protokołem komornika, kwalifikowanym podpisem
+elektronicznym ani poradą prawną. Dowodzi, że skrót istniał w danym dniu; nie dowodzi ani autorstwa, ani treści. Treść dokumentu nigdy nie została
+przesłana, jedynie jego skrót. Jego konkretną moc dowodową ocenia sąd zgodnie z krajową procedurą.
+Tłumaczenie nie zostało jeszcze sprawdzone przez prawnika; rozstrzygająca jest wersja angielska. — Translation not yet reviewed by a
+legal professional; the English version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

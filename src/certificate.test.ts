@@ -19,21 +19,50 @@ import {
 import type { VerifyReport } from "./certify.js";
 import { inflateSync } from "node:zlib";
 
-/** Inflate FlateDecode streams so tests can assert on visible PDF strings. */
+/**
+ * Inflate FlateDecode streams so tests can assert on visible PDF strings.
+ * Embedded (Identity-H) fonts draw glyph ids: decode them through each ToUnicode CMap.
+ */
 function pdfText(buf: Buffer): string {
   const chunks = [buf.toString("latin1")];
   const raw = buf.toString("binary");
   const re = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
   let m: RegExpExecArray | null;
+  const inflated: string[] = [];
   while ((m = re.exec(raw))) {
-    try { chunks.push(inflateSync(Buffer.from(m[1], "binary")).toString("latin1")); }
+    try { inflated.push(inflateSync(Buffer.from(m[1], "binary")).toString("latin1")); }
     catch { /* not a flate stream */ }
   }
+  chunks.push(...inflated);
   const all = chunks.join("\n");
   const decoded: string[] = [all];
   for (const hex of all.matchAll(/<([0-9A-Fa-f\s]+)>/g)) {
     try { decoded.push(Buffer.from(hex[1].replace(/\s+/g, ""), "hex").toString("latin1")); }
     catch { /* ignore */ }
+  }
+  const cmaps: Map<number, string>[] = [];
+  for (const s of inflated) {
+    if (!s.includes("begincmap")) continue;
+    const map = new Map<number, string>();
+    const u16 = (h: string) => Buffer.from(h, "hex").swap16().toString("utf16le");
+    for (const b of s.matchAll(/beginbfchar([\s\S]*?)endbfchar/g)) {
+      for (const e of b[1].matchAll(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>/g)) map.set(parseInt(e[1], 16), u16(e[2]));
+    }
+    for (const b of s.matchAll(/beginbfrange([\s\S]*?)endbfrange/g)) {
+      for (const e of b[1].matchAll(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>/g)) {
+        const lo = parseInt(e[1], 16), hi = parseInt(e[2], 16), base = parseInt(e[3], 16);
+        for (let g = lo; g <= hi; g++) map.set(g, String.fromCodePoint(base + g - lo));
+      }
+    }
+    cmaps.push(map);
+  }
+  const hexes = [...all.matchAll(/<([0-9A-Fa-f]{4,})>\s*Tj/g)].map((h) => h[1]);
+  for (const map of cmaps) {
+    for (const h of hexes) {
+      let out = "";
+      for (let i = 0; i + 4 <= h.length; i += 4) out += map.get(parseInt(h.slice(i, i + 4), 16)) ?? "";
+      decoded.push(out);
+    }
   }
   return decoded.join("\n");
 }

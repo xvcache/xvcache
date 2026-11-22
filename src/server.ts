@@ -19,7 +19,9 @@ import {
 import { getOffer, loadPlansCatalog, recommendPlan, requestUpgrade } from "./plans.js";
 import { resolveTsaProvider } from "./tsa.js";
 import { Certifier, certifyConfigFromEnv } from "./certify.js";
-import { handleDocument } from "./certificate.js";
+import { handleDocument, reissueCertificate } from "./certificate.js";
+import { EU_LANGS } from "./i18n.js";
+import { readFileSync } from "node:fs";
 import { loadLocalEnv } from "./env.js";
 
 loadLocalEnv();
@@ -78,6 +80,19 @@ function fail(msg: string): ToolResult {
 
 function ok(text: string): ToolResult {
   return { content: [{ type: "text", text }] };
+}
+
+type PdfToolResult = { isError?: boolean; content: ({ type: "text"; text: string } | { type: "resource"; resource: { uri: string; mimeType: string; blob: string } })[] };
+
+/** Text result plus the PDF as an embedded MCP resource (clients without a disk still get the file). */
+function withPdf(text: string, pdfPath: string | null): PdfToolResult {
+  const content: PdfToolResult["content"] = [{ type: "text", text }];
+  if (pdfPath) {
+    try {
+      content.push({ type: "resource", resource: { uri: `file://${pdfPath}`, mimeType: "application/pdf", blob: readFileSync(pdfPath).toString("base64") } });
+    } catch { /* path is still in the text */ }
+  }
+  return { content };
 }
 
 function fold(s: string): string {
@@ -624,22 +639,27 @@ server.registerTool(
 server.registerTool(
   "certify_document",
   {
-    description: "Simple path for a human: certify a vault note if needed, then return a one-page French PDF certificate and a plain-language verdict. If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent) and the PDF path is returned, with verdict « Intact ». If the document changed since the timestamp, no new stamp is taken: the verdict is « Modifié depuis le <date> » and no V certificate is issued. stamp=false never stamps (export or re-check only). Technical files (.tst, .ots, Merkle path) are written next to the PDF and attached to it. FreeTSA certificates clearly say they are not a qualified eIDAS timestamp. Not a bailiff report, not a qualified signature, not legal advice. Not written into the journal.",
+    description: "Use when a lawyer or a legal team needs to prove that a document in the local vault existed unchanged at a date. Certifies the note if needed (one batched timestamp), then returns the verdict (V intact / X modified) and a one-page PDF certificate in the requested EU language (24 languages, default English; pass the conversation language, never ask). If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent). If the document changed since the timestamp, no new stamp is taken: the verdict is X « modified since <date> » and no certificate is issued. stamp=false never stamps. Technical files (.tst, .ots, Merkle path) are attached to the PDF. Non-qualified tokens (FreeTSA, or Certigna missing) carry a NOT QUALIFIED banner. Not a bailiff report, not a qualified signature, not legal advice. Next tool: verify_document or get_certificate_pdf. Not written into the journal.",
     inputSchema: {
       path: z.string().min(1).describe("Vault-relative note, e.g. Contrats/Devis-042.md"),
       stamp: z.boolean().optional().describe("true (default) = stamp if no proof exists. false = reuse or report only, never spend a token."),
       online: z.boolean().optional().describe("true = allow OpenTimestamps upgrade. Default false."),
+      lang: z.string().optional().describe(`PDF and verdict language, one of ${EU_LANGS.join(", ")}. Use the conversation language; unknown → en. Default en.`),
+      tz: z.string().optional().describe("IANA time zone printed next to UTC on the PDF. Default Europe/Brussels."),
     },
   },
-  async ({ path: rel, stamp, online }) => {
+  async ({ path: rel, stamp, online, lang, tz }) => {
     if (stamp !== false && tsaConfigError) return fail(JSON.stringify({ ok: false, error: tsaConfigError, witness: witnessSummary() }, null, 2));
-    const result = await handleDocument(certifier, { path: rel, stamp: stamp !== false, online: online === true });
+    const result = await handleDocument(certifier, { path: rel, stamp: stamp !== false, online: online === true, lang: lang ?? "en", tz });
     if (!result.ok) return fail(JSON.stringify({ ok: false, error: result.error, witness: witnessSummary() }, null, 2));
-    return ok(JSON.stringify({
+    return withPdf(JSON.stringify({
       ok: true,
       glyph: result.glyph,
       verdict: result.verdict?.kind,
+      verdict_localized: result.verdict_localized,
       message: result.verdict?.sentence,
+      lang: result.lang,
+      proof_id: result.proof_id,
       pdf: result.pdf,
       pack: result.pack,
       attachments: result.attachments,
@@ -652,7 +672,26 @@ server.registerTool(
       gen_time_paris: result.gen_time_paris,
       batch_id: result.batch_id,
       witness: witnessSummary(),
-    }, null, 2));
+    }, null, 2), result.pdf ?? null);
+  }
+);
+
+server.registerTool(
+  "get_certificate_pdf",
+  {
+    description: "Use when the lawyer needs the certificate of an existing proof in another EU language. Reissues the one-page PDF of proof_id (from certify_document) in lang, without a new timestamp and without spending a Certigna token. The proof is re-checked first: if the note changed, the verdict is X and no PDF is issued. Not written into the journal.",
+    inputSchema: {
+      proof_id: z.string().min(1).describe("proof_id returned by certify_document, e.g. 20261122T190839123Z-1a2b3c4d.0"),
+      lang: z.string().optional().describe(`One of ${EU_LANGS.join(", ")}; unknown → en. Default en.`),
+      tz: z.string().optional().describe("IANA time zone printed next to UTC. Default Europe/Brussels."),
+    },
+  },
+  async ({ proof_id, lang, tz }) => {
+    const r = await reissueCertificate(certifier, { proof_id, lang, tz });
+    if (!r.ok) {
+      return fail(JSON.stringify({ ok: false, code: "PROOF_NOT_FOUND", message_localized: r.error, retryable: false, next_action: "Use the proof_id returned by certify_document, or call certify_document again with stamp=false." }, null, 2));
+    }
+    return withPdf(JSON.stringify({ ok: true, glyph: r.glyph, verdict: r.verdict?.kind, verdict_localized: r.verdict_localized, lang: r.lang, proof_id: r.proof_id, pdf: r.pdf, attachments: r.attachments, qualified: r.qualified, gen_time: r.gen_time }, null, 2), r.pdf ?? null);
   }
 );
 

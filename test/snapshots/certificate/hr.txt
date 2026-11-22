@@ -1,0 +1,46 @@
+XVcache
+POTVRDA O VREMENSKOM ŽIGU
+V
+Dokument nepromijenjen
+Rezultat V — otisak se nije promijenio od vremenskog žiga.
+DOKUMENT
+Contrat-de-cession-2026-11.pdf
+OTISAK SHA-256
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+DATUM I VRIJEME
+22. studenoga 2026. u 20:08:39 (lokalno vrijeme, Europe/Brussels)
+22. studenoga 2026. u 19:08:39 UTC
+PRUŽATELJ
+Certigna
+Kvalificirani elektronički vremenski žig (eIDAS)
+Upućivanje na politiku: 1.2.250.1.177.2.9.1
+SERIJSKI BROJ ŽIGA
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+KVALIFICIRAN EIDAS
+da
+JAVNO SIDRENJE (OPENTIMESTAMPS)
+Čeka potvrdu u mreži Bitcoin (može potrajati nekoliko sati).
+IDENTIFIKATOR DOKAZA
+20261122T190839000Z-1a2b3c4d.0
+Kako ponovno provjeriti
+1. Ponovno podnesite istu datoteku (verify_document) ili provjerite priloženi žig naredbom openssl ts
+-verify.
+2. Njezin se otisak uspoređuje s otiskom navedenim na ovoj potvrdi.
+3. Rezultat je „Nepromijenjen” ili „Promijenjen od 22. studenoga 2026. u 20:08:39”.
+Tehničke datoteke priložene ovoj potvrdi
+token.tst — RFC 3161
+merkle-path.json — Merkle
+PRAVNA NAPOMENA
+Uredba (EU) br. 910/2014 (eIDAS), članak 41.: elektroničkom vremenskom žigu ne smije se uskratiti pravni učinak samo zato što je u elektroničkom
+obliku; za kvalificirani elektronički vremenski žig vrijedi pretpostavka točnosti datuma i vremena koje navodi te cjelovitosti podataka s kojima su datum i
+vrijeme povezani, i priznaje se u svim državama članicama. XVcache nije kvalificirani pružatelj usluga povjerenja. Kvalificirani žig izdaje Certigna. Ova
+potvrda nije zapisnik ovršitelja, kvalificirani elektronički potpis ni pravni savjet. Dokazuje da je otisak postojao na određeni datum; ne dokazuje ni autora
+ni sadržaj. Sadržaj dokumenta nikada nije prenesen, samo njegov otisak. Njegovu konkretnu dokaznu snagu ocjenjuje sud prema nacionalnom postupku.
+Prijevod još nije pregledao pravnik; mjerodavna je engleska verzija. — Translation not yet reviewed by a legal professional; the English
+version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

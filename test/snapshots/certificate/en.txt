@@ -1,0 +1,38 @@
+XVcache
+TIMESTAMP CERTIFICATE
+V
+Document intact
+Verdict V — the fingerprint has not changed since the timestamp.
+DOCUMENT
+Contrat-de-cession-2026-11.pdf
+SHA-256 FINGERPRINT
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+DATE AND TIME
+November 22, 2026 at 20:08:39 (local time, Europe/Brussels)
+November 22, 2026 at 19:08:39 UTC
+PROVIDER
+Certigna
+Qualified eIDAS electronic timestamp
+Policy reference: 1.2.250.1.177.2.9.1
+TOKEN SERIAL NUMBER
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+QUALIFIED EIDAS
+yes
+PUBLIC ANCHOR (OPENTIMESTAMPS)
+Waiting for confirmation on the Bitcoin network (this can take a few hours).
+PROOF IDENTIFIER
+20261122T190839000Z-1a2b3c4d.0
+How to verify again
+1. Submit the same file again (verify_document), or check the attached token with openssl ts -verify.
+2. Its fingerprint is compared with the one printed on this certificate.
+3. The result is “Intact” or “Modified since November 22, 2026 at 20:08:39”.
+Technical files attached to this certificate
+token.tst — RFC 3161
+merkle-path.json — Merkle
+LEGAL NOTICE
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.

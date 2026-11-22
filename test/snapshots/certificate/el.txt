@@ -1,0 +1,48 @@
+XVcache
+ΠΙΣΤΟΠΟΙΗΤΙΚΟ ΧΡΟΝΟΣΦΡΑΓΙΔΑΣ
+V
+Έγγραφο αναλλοίωτο
+Αποτέλεσμα V — το αποτύπωμα δεν έχει αλλάξει από τη χρονοσήμανση.
+ΈΓΓΡΑΦΟ
+Contrat-de-cession-2026-11.pdf
+ΑΠΟΤΎΠΩΜΑ SHA-256
+9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08
+ΗΜΕΡΟΜΗΝΊΑ ΚΑΙ ΏΡΑ
+22 Νοεμβρίου 2026 στις 20:08:39 (τοπική ώρα, Europe/Brussels)
+22 Νοεμβρίου 2026 στις 19:08:39 UTC
+ΠΆΡΟΧΟΣ
+Certigna
+Εγκεκριμένη ηλεκτρονική χρονοσφραγίδα (eIDAS)
+Αναφορά πολιτικής: 1.2.250.1.177.2.9.1
+ΣΕΙΡΙΑΚΌΣ ΑΡΙΘΜΌΣ ΧΡΟΝΟΣΦΡΑΓΊΔΑΣ
+2816 6173 0857 40a1 b113 a8ed cb46 5c87
+ΕΓΚΕΚΡΙΜΈΝΗ EIDAS
+ναι
+ΔΗΜΌΣΙΑ ΑΓΚΎΡΩΣΗ (OPENTIMESTAMPS)
+Αναμένεται επιβεβαίωση στο δίκτυο Bitcoin (μπορεί να διαρκέσει μερικές ώρες).
+ΑΝΑΓΝΩΡΙΣΤΙΚΌ ΑΠΟΔΕΙΚΤΙΚΟΎ
+20261122T190839000Z-1a2b3c4d.0
+Πώς να επαληθεύσετε ξανά
+1. Υποβάλετε ξανά το ίδιο αρχείο (verify_document) ή ελέγξτε τη συνημμένη χρονοσφραγίδα με openssl
+ts -verify.
+2. Το αποτύπωμά του συγκρίνεται με εκείνο που αναγράφεται σε αυτό το πιστοποιητικό.
+3. Το αποτέλεσμα είναι «Αναλλοίωτο» ή «Τροποποιημένο από 22 Νοεμβρίου 2026 στις 20:08:39».
+Τεχνικά αρχεία συνημμένα σε αυτό το πιστοποιητικό
+token.tst — RFC 3161
+merkle-path.json — Merkle
+ΝΟΜΙΚΉ ΣΗΜΕΊΩΣΗ
+Κανονισμός (ΕΕ) αριθ. 910/2014 (eIDAS), άρθρο 41: δεν μπορούν να αμφισβητηθούν τα έννομα αποτελέσματα μιας ηλεκτρονικής χρονοσφραγίδας μόνο
+επειδή έχει ηλεκτρονική μορφή· η εγκεκριμένη ηλεκτρονική χρονοσφραγίδα απολαύει του τεκμηρίου της ακρίβειας της ημερομηνίας και της ώρας που
+αναγράφει και της ακεραιότητας των δεδομένων με τα οποία συνδέονται η ημερομηνία και η ώρα, και αναγνωρίζεται σε όλα τα κράτη μέλη. Η XVcache
+δεν είναι εγκεκριμένος πάροχος υπηρεσιών εμπιστοσύνης. Η εγκεκριμένη χρονοσφραγίδα εκδίδεται από την Certigna. Το παρόν πιστοποιητικό δεν είναι
+έκθεση δικαστικού επιμελητή, ούτε εγκεκριμένη ηλεκτρονική υπογραφή, ούτε νομική συμβουλή. Αποδεικνύει ότι ένα αποτύπωμα υπήρχε σε μια
+ημερομηνία· δεν αποδεικνύει ούτε τον συντάκτη ούτε το περιεχόμενο. Το περιεχόμενο του εγγράφου δεν διαβιβάστηκε ποτέ, μόνο το αποτύπωμά του. Η
+συγκεκριμένη αποδεικτική του ισχύς εκτιμάται από το δικαστήριο σύμφωνα με την εθνική διαδικασία.
+Μετάφραση που δεν έχει ακόμη ελεγχθεί από νομικό· υπερισχύει η αγγλική έκδοση. — Translation not yet reviewed by a legal
+professional; the English version prevails.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
+recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
+by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the
+author nor the content. The content of the document was never transmitted, only its fingerprint. Its concrete evidential weight is assessed by the court
+under national procedure.
