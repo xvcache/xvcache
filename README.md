@@ -4,7 +4,9 @@
 
 XVcache is a local MCP server that journals every read and write in a Markdown vault as a sha256-chained JSONL log, so you can later prove a note is intact (**V**) or was changed outside XVcache (**X**), without putting the note's content into the journal. It talks MCP over STDIO. The intended first user is an AI agent, which can also look up plans, suggest a bundle, and ask its human to approve a paid upgrade when billing exists.
 
-Published source: [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache) (Apache-2.0). npm: [`xvcache-mcp`](https://www.npmjs.com/package/xvcache-mcp) (0.1.0 published; 0.2.0 with certified proofs in this repo). Official MCP Registry: `io.github.xvcache/xvcache`. Site: [xvcache.com](https://xvcache.com). Payment is not live.
+Version 0.2.0 adds certified proofs (`certify_note` / `verify_proof`): batched RFC 3161 + OpenTimestamps timestamps with a per-note **V/X** check, and a one-page **PDF certificate** (`certify_document`). Timestamps are **qualified eIDAS only when you configure your own Certigna account** (optional, paid by you to Certigna); the default FreeTSA provider is a test, not qualified. Paid XVcache plans are not on sale yet: no payment link is live.
+
+Published source: [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache) (Apache-2.0). npm: [`xvcache-mcp`](https://www.npmjs.com/package/xvcache-mcp) (0.2.0). Official MCP Registry: `io.github.xvcache/xvcache`. Site: [xvcache.com](https://xvcache.com). Payment is not live.
 
 ## Why XVcache (vs other Obsidian MCP servers)
 

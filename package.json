@@ -1,7 +1,7 @@
 {
   "name": "xvcache-mcp",
   "version": "0.2.0",
-  "description": "Local MCP server: sha256-chained Markdown vault journal. Verdicts V (intact) and X (modified outside XVcache). Batched RFC 3161 + OpenTimestamps proofs per note (certify_note / verify_proof).",
+  "description": "Local MCP server for Markdown vaults: sha256-chained journal with V (intact) / X (modified) verdicts, batched RFC 3161 + OpenTimestamps proofs, one-page PDF certificate. Timestamps are eIDAS-qualified only with your own Certigna account (optional); default FreeTSA is test-only. Paid plans not yet on sale.",
   "type": "module",
   "main": "dist/server.js",
   "bin": {

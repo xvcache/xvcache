@@ -39,7 +39,7 @@ async function openClient(logFile: string, name = "xvcache-test"): Promise<Clien
     command: "node", args: ["dist/server.js"],
     env: serverEnv(logFile),
   });
-  const c = new Client({ name, version: "0.1.0" });
+  const c = new Client({ name, version: "0.2.0" });
   await c.connect(transport);
   return c;
 }

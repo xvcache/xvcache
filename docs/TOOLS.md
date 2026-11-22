@@ -1,6 +1,6 @@
 # XVcache MCP tools (specification)
 
-Transport: MCP over **STDIO** only. Server name: `xvcache-mcp`. Version: `0.2.0` (local, not yet published).
+Transport: MCP over **STDIO** only. Server name: `xvcache-mcp`. Version: `0.2.0`.
 
 The journal tools and the certification tools (`certify_note`, `certify_batch`, `verify_proof`, `certify_document`) are implemented. The catalog is live; `request_upgrade` is a human-approval stub. **Payment is not live.** No tool charges a card, opens a checkout, or speaks x402 yet.
 
