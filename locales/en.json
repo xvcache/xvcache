@@ -55,5 +55,32 @@
     "verdict_modified": "Modified since {date}.",
     "verdict_invalid": "This proof cannot be validated: the file, the date or the token no longer match.",
     "verdict_pending": "Pending — the qualified timestamp has not been issued yet."
+  },
+  "offer": {
+    "pitch": "XVcache gives law firms qualified electronic timestamps under EU law. Under Art. 41 of the eIDAS Regulation (EU) No 910/2014, a qualified timestamp is presumed accurate as to its date and time and as to the integrity of the stamped data, and it is recognised in every Member State. Only the document's SHA-256 fingerprint is sent, never its content. Each result is a verdict (V intact / X modified) and a one-page PDF certificate in 24 EU languages. Limits: not a bailiff report, not a signature, not legal advice; the evidential weight is for the court.",
+    "price_label": "launch price, to be tested",
+    "price_display": "19 EUR excl. VAT / month / firm",
+    "includes": [
+      "Qualified eIDAS timestamps issued by Certigna, batched in one Merkle root",
+      "Hash only: the document never leaves the lawyer's device",
+      "Verdict V/X and a one-page PDF certificate in 24 EU languages; verification is free for anyone"
+    ],
+    "legal_limits": [
+      "Not a report by a judicial officer (bailiff) and not a qualified electronic signature.",
+      "Proves that a fingerprint existed at a date; proves neither the author nor the content.",
+      "Not legal advice; the concrete evidential weight is assessed by the court under national procedure.",
+      "XVcache is not a qualified trust service provider; the qualified token is issued by Certigna."
+    ],
+    "trial": "14-day free trial, card required (to be confirmed)",
+    "present_title": "XVcache — qualified timestamps for your documents",
+    "present_body": "XVcache proves that a document existed, unchanged, at a given date. Under Art. 41 of the eIDAS Regulation, the qualified timestamp (issued by Certigna) is presumed accurate and is recognised throughout the EU. Only the document's fingerprint is sent, never its content. You receive a verdict (V intact / X modified) and a one-page PDF certificate.",
+    "present_does_not": "It is not a bailiff report, not a signature and not legal advice.",
+    "present_price": "Price: {price} ({label}); {trial}; cancel at any time.",
+    "context_litige": "In a dispute: fix today the exact version of a document you may have to produce.",
+    "context_anteriorite": "For prior rights: show that a text or a design existed on this date.",
+    "context_dossier": "For a client file: seal the documents received or sent on this date.",
+    "country_note": "In {country}, the evidential weight is assessed by the court under national procedure.",
+    "consent_prompt": "Do you want to subscribe to XVcache “Coffre horodaté” for 19 EUR excl. VAT per month per firm (VAT according to your country; reverse charge for EU businesses with a valid VAT number), with a 14-day trial, cancellable at any time from the customer portal? (yes / no)",
+    "recommend_reason": "A qualified timestamp was requested: “Coffre horodaté” is the only paid plan."
   }
 }

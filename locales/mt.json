@@ -55,5 +55,32 @@
     "verdict_modified": "Modifikat mill-{date}.",
     "verdict_invalid": "Din il-prova ma tistax tiġi vvalidata: il-fajl, id-data jew it-timbru ma jaqblux aktar.",
     "verdict_pending": "Pendenti — it-timbru tal-ħin kwalifikat għadu ma nħariġx."
+  },
+  "offer": {
+    "pitch": "XVcache jagħti lid-ditti legali timbri tal-ħin elettroniċi kwalifikati skont il-liġi tal-UE. Skont l-Artikolu 41 tar-Regolament eIDAS (UE) Nru 910/2014, timbru tal-ħin kwalifikat igawdi l-preżunzjoni tal-eżattezza tad-data u l-ħin u tal-integrità tad-data ttimbrata, u huwa rikonoxxut fl-Istati Membri kollha. Tintbagħat biss il-marka diġitali SHA-256 tad-dokument, qatt il-kontenut. Kull riżultat huwa verdett (V intatt / X modifikat) u ċertifikat PDF ta' paġna waħda f'24 lingwa tal-UE. Limiti: mhuwiex rapport ta' marixxall, firma jew parir legali; il-valur probatorju jiddeċidih il-qorti.",
+    "price_label": "prezz tat-tnedija, għadu jiġi ttestjat",
+    "price_display": "19 EUR esklużi l-VAT / xahar / ditta",
+    "includes": [
+      "Timbri tal-ħin kwalifikati eIDAS minn Certigna, miġbura f'għerq Merkle wieħed",
+      "Il-marka diġitali biss: id-dokument qatt ma jħalli t-tagħmir tal-avukat",
+      "Verdett V/X u ċertifikat PDF ta' paġna waħda f'24 lingwa tal-UE; verifika b'xejn għal kulħadd"
+    ],
+    "legal_limits": [
+      "Mhuwiex rapport ta' uffiċjal ġudizzjarju (marixxall) u lanqas firma elettronika kwalifikata.",
+      "Juri li marka diġitali kienet teżisti f'data; ma jurix l-awtur u lanqas il-kontenut.",
+      "Mhuwiex parir legali; il-valur probatorju konkret jiġi evalwat mill-qorti skont il-proċedura nazzjonali.",
+      "XVcache mhuwiex fornitur kwalifikat ta' servizzi fiduċjarji; it-timbru kwalifikat jinħareġ minn Certigna."
+    ],
+    "trial": "prova b'xejn ta' 14-il jum, meħtieġa karta (għad trid tiġi kkonfermata)",
+    "present_title": "XVcache — timbri tal-ħin kwalifikati għad-dokumenti tiegħek",
+    "present_body": "XVcache juri li dokument kien jeżisti, mingħajr bidla, f'data partikolari. Skont l-Artikolu 41 tar-Regolament eIDAS, it-timbru tal-ħin kwalifikat (maħruġ minn Certigna) huwa preżunt eżatt u rikonoxxut madwar l-UE. Tintbagħat biss il-marka diġitali tad-dokument, qatt il-kontenut. Tirċievi verdett (V intatt / X modifikat) u ċertifikat PDF ta' paġna waħda.",
+    "present_does_not": "Mhuwiex rapport ta' marixxall, firma jew parir legali.",
+    "present_price": "Prezz: {price} ({label}); {trial}; tista' tħassar fi kwalunkwe ħin.",
+    "context_litige": "F'tilwima: iffissa llum il-verżjoni eżatta ta' dokument li jista' jkollok tippreżenta.",
+    "context_anteriorite": "Għal drittijiet preċedenti: uri li test jew disinn kien jeżisti f'din id-data.",
+    "context_dossier": "Għal fajl ta' klijent: issiġilla d-dokumenti riċevuti jew mibgħuta f'din id-data.",
+    "country_note": "F'{country}, il-valur probatorju jiġi evalwat mill-qorti skont il-proċedura nazzjonali.",
+    "consent_prompt": "Trid tabbona ma' XVcache «Coffre horodaté» għal 19 EUR esklużi l-VAT fix-xahar għal kull ditta (VAT skont il-pajjiż tiegħek; reverse charge għan-negozji tal-UE b'numru tal-VAT validu), bi prova ta' 14-il jum, li tista' tħassar fi kwalunkwe ħin mill-portal tal-klijent? (iva / le)",
+    "recommend_reason": "Intalab timbru tal-ħin kwalifikat: «Coffre horodaté» huwa l-uniku pjan bi ħlas."
   }
 }

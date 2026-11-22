@@ -55,5 +55,32 @@
     "verdict_modified": "Ændret siden {date}.",
     "verdict_invalid": "Dette bevis kan ikke valideres: filen, datoen eller tidsstemplet stemmer ikke længere.",
     "verdict_pending": "Afventer — det kvalificerede tidsstempel er endnu ikke udstedt."
+  },
+  "offer": {
+    "pitch": "XVcache giver advokatfirmaer kvalificerede elektroniske tidsstempler efter EU-retten. Efter art. 41 i eIDAS-forordningen (EU) nr. 910/2014 nyder et kvalificeret tidsstempel formodning for nøjagtig dato og tid og for integriteten af de stemplede data, og det anerkendes i alle medlemsstater. Kun dokumentets SHA-256-fingeraftryk sendes, aldrig indholdet. Hvert resultat er en afgørelse (V uændret / X ændret) og et PDF-certifikat på én side på 24 EU-sprog. Begrænsninger: ingen fogedrapport, ingen signatur, ingen juridisk rådgivning; bevisværdien afgøres af retten.",
+    "price_label": "introduktionspris, skal testes",
+    "price_display": "19 EUR ekskl. moms / måned / firma",
+    "includes": [
+      "Kvalificerede eIDAS-tidsstempler fra Certigna, samlet i én Merkle-rod",
+      "Kun fingeraftrykket: dokumentet forlader aldrig advokatens enhed",
+      "Afgørelse V/X og PDF-certifikat på én side på 24 EU-sprog; kontrol er gratis for alle"
+    ],
+    "legal_limits": [
+      "Ikke en fogedrapport og ikke en kvalificeret elektronisk signatur.",
+      "Beviser, at et fingeraftryk eksisterede på en dato; beviser hverken ophavsmand eller indhold.",
+      "Ikke juridisk rådgivning; den konkrete bevisværdi vurderes af retten efter national procesret.",
+      "XVcache er ikke en kvalificeret tillidstjenesteudbyder; det kvalificerede tidsstempel udstedes af Certigna."
+    ],
+    "trial": "14 dages gratis prøve, kort kræves (skal bekræftes)",
+    "present_title": "XVcache — kvalificerede tidsstempler til dine dokumenter",
+    "present_body": "XVcache beviser, at et dokument eksisterede uændret på en given dato. Efter art. 41 i eIDAS-forordningen formodes det kvalificerede tidsstempel (udstedt af Certigna) at være korrekt, og det anerkendes i hele EU. Kun dokumentets fingeraftryk sendes, aldrig indholdet. Du får en afgørelse (V uændret / X ændret) og et PDF-certifikat på én side.",
+    "present_does_not": "Det er ikke en fogedrapport, ikke en signatur og ikke juridisk rådgivning.",
+    "present_price": "Pris: {price} ({label}); {trial}; kan opsiges når som helst.",
+    "context_litige": "I en tvist: fastlås i dag den præcise version af et dokument, du kan blive nødt til at fremlægge.",
+    "context_anteriorite": "For tidligere rettigheder: vis at en tekst eller et design eksisterede på denne dato.",
+    "context_dossier": "For en klientsag: forsegl de dokumenter, der er modtaget eller sendt på denne dato.",
+    "country_note": "I {country} vurderes bevisværdien af retten efter national procesret.",
+    "consent_prompt": "Vil du abonnere på XVcache »Coffre horodaté« for 19 EUR ekskl. moms pr. måned pr. firma (moms efter dit land; omvendt betalingspligt for EU-virksomheder med gyldigt momsnummer), med 14 dages prøve og mulighed for opsigelse når som helst via kundeportalen? (ja / nej)",
+    "recommend_reason": "Der blev bedt om et kvalificeret tidsstempel: »Coffre horodaté« er den eneste betalte plan."
   }
 }

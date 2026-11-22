@@ -55,5 +55,32 @@
     "verdict_modified": "Spremenjen od {date}.",
     "verdict_invalid": "Tega dokaza ni mogoče potrditi: datoteka, datum ali žig se ne ujemajo več.",
     "verdict_pending": "V čakanju — kvalificirani časovni žig še ni bil izdan."
+  },
+  "offer": {
+    "pitch": "XVcache odvetniškim pisarnam zagotavlja kvalificirane elektronske časovne žige po pravu EU. Po členu 41 uredbe eIDAS (EU) št. 910/2014 za kvalificirani časovni žig velja domneva točnosti datuma in časa ter celovitosti žigosanih podatkov, priznava pa se v vseh državah članicah. Pošlje se le prstni odtis SHA-256 dokumenta, nikoli vsebina. Vsak rezultat je izid (V nespremenjen / X spremenjen) in enostransko potrdilo PDF v 24 jezikih EU. Omejitve: ni zapisnik izvršitelja, ni podpis in ni pravni nasvet; o dokazni vrednosti odloča sodišče.",
+    "price_label": "uvodna cena, v preizkusu",
+    "price_display": "19 EUR brez DDV / mesec / pisarna",
+    "includes": [
+      "Kvalificirani časovni žigi eIDAS družbe Certigna, združeni v en koren Merkle",
+      "Le prstni odtis: dokument nikoli ne zapusti naprave odvetnika",
+      "Izid V/X in enostransko potrdilo PDF v 24 jezikih EU; preverjanje je brezplačno za vse"
+    ],
+    "legal_limits": [
+      "Ni zapisnik izvršitelja niti kvalificirani elektronski podpis.",
+      "Dokazuje, da je prstni odtis obstajal na določen datum; ne dokazuje niti avtorja niti vsebine.",
+      "Ni pravni nasvet; konkretno dokazno vrednost presodi sodišče po nacionalnem postopku.",
+      "XVcache ni kvalificirani ponudnik storitev zaupanja; kvalificirani žig izda Certigna."
+    ],
+    "trial": "14-dnevni brezplačni preizkus, potrebna kartica (še ni potrjeno)",
+    "present_title": "XVcache — kvalificirani časovni žigi za vaše dokumente",
+    "present_body": "XVcache dokazuje, da je dokument na določen datum obstajal nespremenjen. Po členu 41 uredbe eIDAS se za kvalificirani časovni žig (izda ga Certigna) domneva, da je točen, in se priznava v vsej EU. Pošlje se le prstni odtis dokumenta, nikoli vsebina. Prejmete izid (V nespremenjen / X spremenjen) in enostransko potrdilo PDF.",
+    "present_does_not": "To ni zapisnik izvršitelja, ni podpis in ni pravni nasvet.",
+    "present_price": "Cena: {price} ({label}); {trial}; preklic kadar koli.",
+    "context_litige": "V sporu: že danes zamrznite natančno različico dokumenta, ki ga boste morda morali predložiti.",
+    "context_anteriorite": "Za prednost: pokažite, da je besedilo ali osnutek obstajal na ta datum.",
+    "context_dossier": "Za spis stranke: zapečatite dokumente, prejete ali poslane na ta datum.",
+    "country_note": "V državi {country} dokazno vrednost presodi sodišče po nacionalnem postopku.",
+    "consent_prompt": "Ali se želite naročiti na XVcache »Coffre horodaté« za 19 EUR brez DDV na mesec na pisarno (DDV glede na vašo državo; obrnjena davčna obveznost za podjetja iz EU z veljavno identifikacijsko številko za DDV), s 14-dnevnim preizkusom in možnostjo preklica kadar koli prek portala za stranke? (da / ne)",
+    "recommend_reason": "Zahtevan je bil kvalificirani časovni žig: »Coffre horodaté« je edini plačljivi paket."
   }
 }

@@ -455,7 +455,10 @@ try {
     name: "recommend_plan",
     arguments: { certifications_per_month: 30, reseller: true },
   });
-  const rUp = await client.callTool({ name: "request_upgrade", arguments: { plan_id: "bundle-starter" } });
+  const rUp = await client.callTool({ name: "request_upgrade", arguments: { human_confirmed: true, consent_quote: "Oui" } });
+  const rUpNoConsent = await client.callTool({ name: "request_upgrade", arguments: {} });
+  const rPresent = await client.callTool({ name: "present_to_client", arguments: { lang: "de", context: "litige" } });
+  const rOfferDe = await client.callTool({ name: "get_offer", arguments: { lang: "de" } });
   const rUpBad = await client.callTool({ name: "request_upgrade", arguments: { plan_id: "does-not-exist" } });
   const rCert = await client.callTool({ name: "certify_note", arguments: { path: "Bienvenue.md" } });
   const rVerif = await client.callTool({ name: "verify_proof", arguments: { path: "Bienvenue.md", online: false } });
@@ -467,7 +470,7 @@ try {
     return JSON.parse(toolText(result)) as Record<string, unknown>;
   }
 
-  if (rOffer.isError || rPlans.isError || rRecFree.isError || rRecBundle.isError || rRecReseller.isError || rUp.isError || rCert.isError) {
+  if (rOffer.isError || rPlans.isError || rRecFree.isError || rRecBundle.isError || rRecReseller.isError || rCert.isError || rPresent.isError || rOfferDe.isError) {
     console.error("FAIL 21: un outil commercial a échoué à tort", {
       offer: toolText(rOffer), plans: toolText(rPlans), rec: toolText(rRecFree), up: toolText(rUp), cert: toolText(rCert),
     });
@@ -479,9 +482,12 @@ try {
     const recBundle = asJson(rRecBundle);
     const recReseller = asJson(rRecReseller);
     const up = asJson(rUp);
+    const upNo = asJson(rUpNoConsent);
+    const present = asJson(rPresent);
+    const offerDe = asJson(rOfferDe);
     const cert = asJson(rCert);
-    if (offer.payment_live !== false || plans.payment_live !== false || plans.prices_status !== "TBD") {
-      console.error("FAIL 21: le catalogue doit déclarer payment_live=false et prices_status=TBD");
+    if (offer.payment_live !== false || plans.payment_live !== false || plans.prices_status !== "to_test") {
+      console.error("FAIL 21: le catalogue doit déclarer payment_live=false et prices_status=to_test");
       failed = true;
     }
     if (!Array.isArray(plans.plans) || (plans.plans as unknown[]).length < 3) {
@@ -500,13 +506,20 @@ try {
       console.error("FAIL 21: recommend_plan avec reseller=true doit inclure le champ reseller (termes TBD)");
       failed = true;
     }
-    if (up.payment_live !== false || up.status !== "needs_human_approval") {
-      console.error("FAIL 21: request_upgrade doit rester un stub d'approbation humaine, sans paiement :", up);
+    if (!rUp.isError || up.code !== "BILLING_UNAVAILABLE" || up.checkout_url != null || up.payment_live !== false) {
+      console.error("FAIL 21: sans compte Stripe, request_upgrade consenti doit renvoyer BILLING_UNAVAILABLE sans lien :", up);
       failed = true;
     }
-    const approval = up.approval as { checkout_url?: unknown } | undefined;
-    if (!approval || approval.checkout_url != null) {
-      console.error("FAIL 21: aucun lien de paiement ne doit être renvoyé", approval);
+    if (!rUpNoConsent.isError || upNo.code !== "CONSENT_REQUIRED" || typeof upNo.consent_prompt !== "string") {
+      console.error("FAIL 21: request_upgrade sans consentement doit renvoyer CONSENT_REQUIRED + consent_prompt :", upNo);
+      failed = true;
+    }
+    if (present.lang !== "de" || typeof present.consent_prompt !== "string" || !String(present.message_markdown).includes("19 EUR")) {
+      console.error("FAIL 21: present_to_client(de) doit renvoyer un message allemand avec le prix et la phrase de consentement :", present);
+      failed = true;
+    }
+    if (offerDe.lang !== "de" || !/Art\. 41/.test(String(offerDe.pitch)) || offerDe.next_tool !== "present_to_client") {
+      console.error("FAIL 21: get_offer(de) doit citer l'art. 41 eIDAS en allemand :", offerDe);
       failed = true;
     }
     if (!rUpBad.isError) {

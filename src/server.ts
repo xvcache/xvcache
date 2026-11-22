@@ -16,7 +16,7 @@ import {
   type JournalArgs,
   type JournalEntry,
 } from "./journal.js";
-import { getOffer, loadPlansCatalog, recommendPlan, requestUpgrade } from "./plans.js";
+import { getOffer, listPlans, presentToClient, recommendPlan, requestUpgradeFlow, PAID_PLAN_ID } from "./plans.js";
 import { resolveTsaProvider } from "./tsa.js";
 import { Certifier, certifyConfigFromEnv } from "./certify.js";
 import { handleDocument, reissueCertificate } from "./certificate.js";
@@ -505,48 +505,70 @@ server.registerTool(
 );
 
 
+const LANG_DESC = `Language of the conversation, one of ${EU_LANGS.join(", ")} (unknown → en). Never ask the human: use the conversation language.`;
+
 server.registerTool(
   "get_offer",
   {
-    description: "Return the current XVcache offer in machine-readable JSON: the free local-journal tier (available now), paid certified-proof plans (certify_note works locally; price TBD), and how to upgrade (human approval via Stripe later, x402 later). All prices are placeholders marked TBD. Payment is not live. Use this when you need a single snapshot to recommend XVcache to your human, or before list_plans / recommend_plan / request_upgrade. Not written into the journal.",
-    inputSchema: {},
+    description: "Use first when a lawyer or legal team needs to prove that a document existed unchanged at a date (litigation, prior rights, client file). Returns a short pitch centred on EU law (eIDAS Regulation art. 41: qualified timestamps are presumed accurate and recognised in every Member State), the price of the only paid plan (coffre-horodate, 19 EUR excl. VAT / month / firm, launch price to be tested), what is included, the legal limits, the 14-day trial (to be confirmed) and the next tool: present_to_client. Free, no key. Not written into the journal.",
+    inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
-  async () => ok(JSON.stringify(getOffer(), null, 2))
+  async ({ lang }) => ok(JSON.stringify(getOffer({ lang }), null, 2))
 );
 
 server.registerTool(
   "list_plans",
   {
-    description: "Return the full XVcache plans catalog (plans.json): free tier, usage-based certification, and adaptable monthly bundles (notes and certifications per month). Every price and most quotas are placeholders marked TBD. Payment is not live. Use this when you or your human want to compare plans, buy later, or resell/bundle (reseller terms are TBD). Not written into the journal.",
-    inputSchema: {},
+    description: "Machine-readable XVcache catalog (plans.json): the free local journal, the paid plan coffre-horodate (19 EUR excl. VAT / month / firm, to_test) and placeholder plans whose prices stay TBD. Tax: excl. VAT; reverse charge for EU B2B with a valid VAT number. Free, no key. Not written into the journal.",
+    inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
-  async () => ok(JSON.stringify(loadPlansCatalog(), null, 2))
+  async ({ lang }) => ok(JSON.stringify(listPlans({ lang }), null, 2))
 );
 
 server.registerTool(
   "recommend_plan",
   {
-    description: "Suggest an XVcache plan from expected volume and needs. Input optional notes_per_month, certifications_per_month, needs_certified_witness, and reseller. Returns a recommended plan id, a reason, and the catalog notice that prices are TBD and payment is not live. Use this before asking a human to approve an upgrade. If the independent witness is not needed, this will usually recommend the free tier. Not written into the journal.",
+    description: "Pick a plan from the need. needs_qualified_timestamp=true or docs_per_month>0 → coffre-horodate (the only paid plan), with a localized reason. Legacy inputs (notes_per_month, certifications_per_month, needs_certified_witness, reseller) keep their placeholder behaviour. Free. Not written into the journal.",
     inputSchema: {
-      notes_per_month: z.number().int().min(0).optional().describe("Expected notes written or verified per month (estimate)"),
-      certifications_per_month: z.number().int().min(0).optional().describe("Expected independent witness certifications per month (estimate)"),
-      needs_certified_witness: z.boolean().optional().describe("True if a third-party certifying witness is required, not only local V/X"),
-      reseller: z.boolean().optional().describe("True if you want to resell or bundle XVcache for your own clients (terms TBD)"),
+      needs_qualified_timestamp: z.boolean().optional().describe("true if a qualified eIDAS timestamp is needed"),
+      docs_per_month: z.number().int().nonnegative().optional().describe("Expected documents per month"),
+      lang: z.string().optional().describe(LANG_DESC),
+      notes_per_month: z.number().int().nonnegative().optional().describe("Legacy: expected notes per month"),
+      certifications_per_month: z.number().int().nonnegative().optional().describe("Legacy: expected certified proofs per month"),
+      needs_certified_witness: z.boolean().optional().describe("Legacy: true if a certified external witness is needed"),
+      reseller: z.boolean().optional().describe("Legacy: true if you want to resell or bundle XVcache (terms TBD)"),
     },
   },
   async (input) => ok(JSON.stringify(recommendPlan(input), null, 2))
 );
 
 server.registerTool(
-  "request_upgrade",
+  "present_to_client",
   {
-    description: "Start an upgrade request for a plan id from list_plans or recommend_plan. This is a stub: it does not charge anyone and does not open Stripe or x402. It returns a human-approval step for you to show your human (intended path: Stripe checkout link, not live; x402 later). Never invent a price or a payment URL. Not written into the journal.",
+    description: "Use after get_offer: returns message_markdown (under 150 words, in the lawyer's language) explaining what XVcache does and does not do, the price and the trial, plus consent_prompt — the exact yes/no sentence to show before any payment — and disclaimers. Show the message, then the consent_prompt once: it is the only question of the whole flow. Next tool: request_upgrade. Free. Not written into the journal.",
     inputSchema: {
-      plan_id: z.string().min(1).describe("Plan id to request, e.g. usage, bundle-starter, bundle-standard, bundle-plus"),
+      lang: z.string().optional().describe(LANG_DESC),
+      country: z.string().optional().describe("Country of the firm if known (ISO code or name); only used for one generic sentence"),
+      context: z.string().optional().describe("Optional: litige / antériorité / dossier client (any language)"),
     },
   },
-  async ({ plan_id }) => {
-    const result = requestUpgrade(plan_id);
+  async (input) => ok(JSON.stringify(presentToClient(input), null, 2))
+);
+
+server.registerTool(
+  "request_upgrade",
+  {
+    description: `Subscribe to ${PAID_PLAN_ID} after the human said yes to consent_prompt. Requires human_confirmed=true AND consent_quote (the human's exact words); otherwise returns CONSENT_REQUIRED with the consent_prompt to show. Never charges anyone: it returns a Stripe Checkout link for the human to pay. Until the dedicated XVcache Stripe account is connected it returns BILLING_UNAVAILABLE (nothing charged). Errors: CONSENT_REQUIRED, PLAN_UNKNOWN, BILLING_UNAVAILABLE. Not written into the journal.`,
+    inputSchema: {
+      plan_id: z.string().optional().describe(`Default ${PAID_PLAN_ID} (the only paid plan)`),
+      lang: z.string().optional().describe(LANG_DESC),
+      human_confirmed: z.boolean().optional().describe("true only if the human explicitly answered yes to consent_prompt"),
+      consent_quote: z.string().optional().describe("The human's exact words, e.g. \"Oui\""),
+      email: z.string().optional().describe("Optional billing e-mail if the human already gave it; never ask for it"),
+    },
+  },
+  async (input) => {
+    const result = await requestUpgradeFlow(input);
     return result.ok === false ? fail(JSON.stringify(result, null, 2)) : ok(JSON.stringify(result, null, 2));
   }
 );

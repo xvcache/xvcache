@@ -55,5 +55,32 @@
     "verdict_modified": "Modifié depuis le {date}.",
     "verdict_invalid": "Cette preuve ne peut pas être validée. Le fichier, la date ou le jeton ne correspondent plus.",
     "verdict_pending": "En attente — l'horodatage qualifié n'a pas encore été émis."
+  },
+  "offer": {
+    "pitch": "XVcache fournit aux cabinets d'avocats des horodatages électroniques qualifiés au sens du droit de l'Union. Selon l'art. 41 du règlement eIDAS (UE) n° 910/2014, un horodatage qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure et d'intégrité des données horodatées, et il est reconnu dans tous les États membres. Seule l'empreinte SHA-256 du document est envoyée, jamais son contenu. Chaque résultat est un verdict (V intact / X modifié) et un certificat PDF d'une page dans 24 langues de l'UE. Limites : ni constat d'huissier, ni signature, ni avis juridique ; la force probante relève du juge.",
+    "price_label": "prix de lancement, à tester",
+    "price_display": "19 EUR HT / mois / cabinet",
+    "includes": [
+      "Horodatages qualifiés eIDAS émis par Certigna, groupés dans une racine Merkle",
+      "Empreinte seule : le document ne quitte jamais le poste de l'avocat",
+      "Verdict V/X et certificat PDF d'une page en 24 langues de l'UE ; vérification gratuite pour tous"
+    ],
+    "legal_limits": [
+      "Ni constat de commissaire de justice (huissier), ni signature électronique qualifiée.",
+      "Prouve qu'une empreinte existait à une date ; ne prouve ni l'auteur ni le contenu.",
+      "Pas un avis juridique ; la force probante concrète est appréciée par le juge selon la procédure nationale.",
+      "XVcache n'est pas un prestataire de services de confiance qualifié ; le jeton qualifié est émis par Certigna."
+    ],
+    "trial": "essai gratuit de 14 jours, carte demandée (à confirmer)",
+    "present_title": "XVcache — horodatage qualifié de vos documents",
+    "present_body": "XVcache prouve qu'un document existait, inchangé, à une date donnée. Selon l'art. 41 du règlement eIDAS, l'horodatage qualifié (émis par Certigna) est présumé exact et reconnu dans toute l'UE. Seule l'empreinte du document est envoyée, jamais son contenu. Vous recevez un verdict (V intact / X modifié) et un certificat PDF d'une page.",
+    "present_does_not": "Ce n'est ni un constat d'huissier, ni une signature, ni un avis juridique.",
+    "present_price": "Prix : {price} ({label}) ; {trial} ; résiliable à tout moment.",
+    "context_litige": "En cas de litige : figez dès aujourd'hui la version exacte d'un document que vous devrez peut-être produire.",
+    "context_anteriorite": "Pour une antériorité : montrez qu'un texte ou un dessin existait à cette date.",
+    "context_dossier": "Pour un dossier client : scellez les pièces reçues ou envoyées à cette date.",
+    "country_note": "En {country}, la force probante est appréciée par le juge selon la procédure nationale.",
+    "consent_prompt": "Voulez-vous souscrire à XVcache « Coffre horodaté » pour 19 EUR HT par mois et par cabinet (TVA selon votre pays ; autoliquidation pour les entreprises de l'UE avec un numéro de TVA valide), avec un essai de 14 jours, résiliable à tout moment depuis le portail client ? (oui / non)",
+    "recommend_reason": "Un horodatage qualifié a été demandé : « Coffre horodaté » est le seul plan payant."
   }
 }

@@ -55,5 +55,32 @@
     "verdict_modified": "Modificat din {date}.",
     "verdict_invalid": "Această dovadă nu poate fi validată: fișierul, data sau marca nu mai corespund.",
     "verdict_pending": "În așteptare — marca temporală calificată nu a fost încă emisă."
+  },
+  "offer": {
+    "pitch": "XVcache oferă cabinetelor de avocatură mărci temporale electronice calificate conform dreptului UE. Potrivit art. 41 din Regulamentul eIDAS (UE) nr. 910/2014, o marcă temporală calificată beneficiază de prezumția de exactitate a datei și orei și de integritate a datelor marcate și este recunoscută în toate statele membre. Se trimite doar amprenta SHA-256 a documentului, niciodată conținutul. Fiecare rezultat este un verdict (V intact / X modificat) și un certificat PDF de o pagină în 24 de limbi ale UE. Limite: nu este proces-verbal de executor, semnătură sau consultanță juridică; forța probantă o apreciază instanța.",
+    "price_label": "preț de lansare, de testat",
+    "price_display": "19 EUR fără TVA / lună / cabinet",
+    "includes": [
+      "Mărci temporale calificate eIDAS emise de Certigna, grupate într-o rădăcină Merkle",
+      "Doar amprenta: documentul nu părăsește niciodată dispozitivul avocatului",
+      "Verdict V/X și certificat PDF de o pagină în 24 de limbi ale UE; verificare gratuită pentru oricine"
+    ],
+    "legal_limits": [
+      "Nu este un proces-verbal al unui executor judecătoresc și nici o semnătură electronică calificată.",
+      "Dovedește că o amprentă exista la o dată; nu dovedește nici autorul, nici conținutul.",
+      "Nu este consultanță juridică; forța probantă concretă este apreciată de instanță potrivit procedurii naționale.",
+      "XVcache nu este un prestator calificat de servicii de încredere; marca calificată este emisă de Certigna."
+    ],
+    "trial": "perioadă de probă gratuită de 14 zile, card necesar (de confirmat)",
+    "present_title": "XVcache — mărci temporale calificate pentru documentele dumneavoastră",
+    "present_body": "XVcache dovedește că un document exista, nemodificat, la o anumită dată. Potrivit art. 41 din Regulamentul eIDAS, marca temporală calificată (emisă de Certigna) este prezumată exactă și este recunoscută în întreaga UE. Se trimite doar amprenta documentului, niciodată conținutul. Primiți un verdict (V intact / X modificat) și un certificat PDF de o pagină.",
+    "present_does_not": "Nu este un proces-verbal de executor, o semnătură sau consultanță juridică.",
+    "present_price": "Preț: {price} ({label}); {trial}; se poate anula oricând.",
+    "context_litige": "Într-un litigiu: fixați de azi versiunea exactă a unui document pe care ar putea fi nevoie să-l prezentați.",
+    "context_anteriorite": "Pentru anterioritate: arătați că un text sau un desen exista la această dată.",
+    "context_dossier": "Pentru dosarul unui client: sigilați documentele primite sau trimise la această dată.",
+    "country_note": "În {country}, forța probantă este apreciată de instanță potrivit procedurii naționale.",
+    "consent_prompt": "Doriți să vă abonați la XVcache „Coffre horodaté” pentru 19 EUR fără TVA pe lună pe cabinet (TVA în funcție de țara dumneavoastră; taxare inversă pentru companiile din UE cu cod de TVA valabil), cu o perioadă de probă de 14 zile, anulabil oricând din portalul clientului? (da / nu)",
+    "recommend_reason": "S-a cerut o marcă temporală calificată: „Coffre horodaté” este singurul plan cu plată."
   }
 }

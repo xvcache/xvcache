@@ -55,5 +55,32 @@
     "verdict_modified": "Promijenjen od {date}.",
     "verdict_invalid": "Ovaj dokaz nije moguće potvrditi: datoteka, datum ili žig više se ne podudaraju.",
     "verdict_pending": "Na čekanju — kvalificirani vremenski žig još nije izdan."
+  },
+  "offer": {
+    "pitch": "XVcache odvjetničkim uredima pruža kvalificirane elektroničke vremenske žigove prema pravu EU-a. Prema članku 41. Uredbe eIDAS (EU) br. 910/2014 za kvalificirani vremenski žig vrijedi pretpostavka točnosti datuma i vremena te cjelovitosti označenih podataka, i priznaje se u svim državama članicama. Šalje se samo otisak SHA-256 dokumenta, nikada sadržaj. Svaki rezultat je ishod (V nepromijenjen / X promijenjen) i potvrda PDF od jedne stranice na 24 jezika EU-a. Ograničenja: nije zapisnik ovršitelja, potpis ni pravni savjet; o dokaznoj snazi odlučuje sud.",
+    "price_label": "uvodna cijena, u testiranju",
+    "price_display": "19 EUR bez PDV-a / mjesec / ured",
+    "includes": [
+      "Kvalificirani vremenski žigovi eIDAS društva Certigna, grupirani u jedan Merkleov korijen",
+      "Samo otisak: dokument nikada ne napušta uređaj odvjetnika",
+      "Ishod V/X i potvrda PDF od jedne stranice na 24 jezika EU-a; provjera besplatna za sve"
+    ],
+    "legal_limits": [
+      "Nije zapisnik ovršitelja ni kvalificirani elektronički potpis.",
+      "Dokazuje da je otisak postojao na određeni datum; ne dokazuje ni autora ni sadržaj.",
+      "Nije pravni savjet; konkretnu dokaznu snagu ocjenjuje sud prema nacionalnom postupku.",
+      "XVcache nije kvalificirani pružatelj usluga povjerenja; kvalificirani žig izdaje Certigna."
+    ],
+    "trial": "14 dana besplatnog probnog razdoblja, potrebna kartica (bit će potvrđeno)",
+    "present_title": "XVcache — kvalificirani vremenski žigovi za vaše dokumente",
+    "present_body": "XVcache dokazuje da je dokument postojao nepromijenjen na određeni datum. Prema članku 41. Uredbe eIDAS pretpostavlja se da je kvalificirani vremenski žig (izdaje ga Certigna) točan, i priznaje se u cijelom EU-u. Šalje se samo otisak dokumenta, nikada sadržaj. Dobivate ishod (V nepromijenjen / X promijenjen) i potvrdu PDF od jedne stranice.",
+    "present_does_not": "To nije zapisnik ovršitelja, potpis ni pravni savjet.",
+    "present_price": "Cijena: {price} ({label}); {trial}; otkaz u bilo kojem trenutku.",
+    "context_litige": "U sporu: već danas zabilježite točnu verziju dokumenta koji ćete možda morati podnijeti.",
+    "context_anteriorite": "Za prvenstvo: pokažite da je tekst ili nacrt postojao na taj datum.",
+    "context_dossier": "Za spis klijenta: zapečatite dokumente primljene ili poslane na taj datum.",
+    "country_note": "U zemlji {country} dokaznu snagu ocjenjuje sud prema nacionalnom postupku.",
+    "consent_prompt": "Želite li se pretplatiti na XVcache „Coffre horodaté” za 19 EUR bez PDV-a mjesečno po uredu (PDV prema vašoj zemlji; prijenos porezne obveze za poduzeća iz EU-a s valjanim PDV brojem), s probnim razdobljem od 14 dana i mogućnošću otkaza u bilo kojem trenutku putem korisničkog portala? (da / ne)",
+    "recommend_reason": "Zatražen je kvalificirani vremenski žig: „Coffre horodaté” jedini je plaćeni paket."
   }
 }

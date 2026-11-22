@@ -55,5 +55,32 @@
     "verdict_modified": "Modificado desde el {date}.",
     "verdict_invalid": "Esta prueba no puede validarse: el archivo, la fecha o el sello ya no coinciden.",
     "verdict_pending": "Pendiente — el sello de tiempo cualificado aún no se ha emitido."
+  },
+  "offer": {
+    "pitch": "XVcache ofrece a los despachos de abogados sellos de tiempo electrónicos cualificados conforme al Derecho de la UE. Según el art. 41 del Reglamento eIDAS (UE) n.º 910/2014, un sello de tiempo cualificado goza de presunción de exactitud de la fecha y la hora y de integridad de los datos sellados, y se reconoce en todos los Estados miembros. Solo se envía la huella SHA-256 del documento, nunca su contenido. Cada resultado es un veredicto (V intacto / X modificado) y un certificado PDF de una página en 24 lenguas de la UE. Límites: no es un acta notarial, ni una firma, ni asesoramiento jurídico; el valor probatorio corresponde al tribunal.",
+    "price_label": "precio de lanzamiento, por probar",
+    "price_display": "19 EUR sin IVA / mes / despacho",
+    "includes": [
+      "Sellos de tiempo cualificados eIDAS emitidos por Certigna, agrupados en una raíz Merkle",
+      "Solo la huella: el documento nunca sale del equipo del abogado",
+      "Veredicto V/X y certificado PDF de una página en 24 lenguas de la UE; verificación gratuita para todos"
+    ],
+    "legal_limits": [
+      "No es un acta de funcionario judicial ni una firma electrónica cualificada.",
+      "Prueba que una huella existía en una fecha; no prueba ni el autor ni el contenido.",
+      "No es asesoramiento jurídico; el valor probatorio concreto lo aprecia el tribunal según el procedimiento nacional.",
+      "XVcache no es un prestador cualificado de servicios de confianza; el sello cualificado lo emite Certigna."
+    ],
+    "trial": "prueba gratuita de 14 días, se pide tarjeta (por confirmar)",
+    "present_title": "XVcache — sellos de tiempo cualificados para sus documentos",
+    "present_body": "XVcache prueba que un documento existía, sin cambios, en una fecha dada. Según el art. 41 del Reglamento eIDAS, el sello de tiempo cualificado (emitido por Certigna) se presume exacto y se reconoce en toda la UE. Solo se envía la huella del documento, nunca su contenido. Recibe un veredicto (V intacto / X modificado) y un certificado PDF de una página.",
+    "present_does_not": "No es un acta notarial, ni una firma, ni asesoramiento jurídico.",
+    "present_price": "Precio: {price} ({label}); {trial}; cancelable en cualquier momento.",
+    "context_litige": "En un litigio: fije hoy la versión exacta de un documento que quizá deba aportar.",
+    "context_anteriorite": "Para la anterioridad: demuestre que un texto o un diseño existía en esta fecha.",
+    "context_dossier": "Para un expediente de cliente: selle los documentos recibidos o enviados en esta fecha.",
+    "country_note": "En {country}, el valor probatorio lo aprecia el tribunal según el procedimiento nacional.",
+    "consent_prompt": "¿Desea suscribirse a XVcache «Coffre horodaté» por 19 EUR sin IVA al mes por despacho (IVA según su país; inversión del sujeto pasivo para empresas de la UE con un NIF-IVA válido), con una prueba de 14 días y cancelable en cualquier momento desde el portal de cliente? (sí / no)",
+    "recommend_reason": "Se ha pedido un sello de tiempo cualificado: «Coffre horodaté» es el único plan de pago."
   }
 }

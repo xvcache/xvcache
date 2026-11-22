@@ -55,5 +55,32 @@
     "verdict_modified": "Pakeistas nuo {date}.",
     "verdict_invalid": "Šio įrodymo negalima patvirtinti: failas, data ar žyma nebeatitinka.",
     "verdict_pending": "Laukiama — kvalifikuota laiko žyma dar neišduota."
+  },
+  "offer": {
+    "pitch": "XVcache advokatų kontoroms teikia kvalifikuotas elektronines laiko žymas pagal ES teisę. Pagal eIDAS reglamento (ES) Nr. 910/2014 41 straipsnį kvalifikuotai laiko žymai taikoma datos ir laiko tikslumo bei pažymėtų duomenų vientisumo prezumpcija, ir ji pripažįstama visose valstybėse narėse. Siunčiama tik dokumento SHA-256 santrauka, niekada turinys. Kiekvienas rezultatas yra išvada (V nepakeistas / X pakeistas) ir vieno puslapio PDF pažyma 24 ES kalbomis. Ribos: tai ne antstolio protokolas, ne parašas ir ne teisinė konsultacija; įrodomąją galią vertina teismas.",
+    "price_label": "pradinė kaina, bandoma",
+    "price_display": "19 EUR be PVM / mėn. / kontora",
+    "includes": [
+      "Certigna išduotos kvalifikuotos eIDAS laiko žymos, sugrupuotos į vieną Merkle šaknį",
+      "Tik santrauka: dokumentas niekada nepalieka advokato įrenginio",
+      "Išvada V/X ir vieno puslapio PDF pažyma 24 ES kalbomis; patikra nemokama visiems"
+    ],
+    "legal_limits": [
+      "Tai nėra antstolio protokolas ar kvalifikuotas elektroninis parašas.",
+      "Įrodo, kad santrauka egzistavo tam tikrą dieną; neįrodo nei autoriaus, nei turinio.",
+      "Tai nėra teisinė konsultacija; konkrečią įrodomąją galią vertina teismas pagal nacionalinę procedūrą.",
+      "XVcache nėra kvalifikuotas patikimumo užtikrinimo paslaugų teikėjas; kvalifikuotą žymą išduoda Certigna."
+    ],
+    "trial": "14 dienų nemokamas bandomasis laikotarpis, reikia kortelės (bus patvirtinta)",
+    "present_title": "XVcache — kvalifikuotos laiko žymos jūsų dokumentams",
+    "present_body": "XVcache įrodo, kad dokumentas tam tikrą dieną egzistavo nepakeistas. Pagal eIDAS reglamento 41 straipsnį kvalifikuota laiko žyma (išduota Certigna) laikoma tikslia ir pripažįstama visoje ES. Siunčiama tik dokumento santrauka, niekada turinys. Gaunate išvadą (V nepakeistas / X pakeistas) ir vieno puslapio PDF pažymą.",
+    "present_does_not": "Tai nėra antstolio protokolas, parašas ar teisinė konsultacija.",
+    "present_price": "Kaina: {price} ({label}); {trial}; galima atsisakyti bet kada.",
+    "context_litige": "Ginče: jau šiandien užfiksuokite tikslią dokumento, kurį gali tekti pateikti, versiją.",
+    "context_anteriorite": "Ankstesnėms teisėms: parodykite, kad tekstas ar projektas egzistavo šią dieną.",
+    "context_dossier": "Kliento bylai: užantspauduokite šią dieną gautus ar išsiųstus dokumentus.",
+    "country_note": "Valstybėje {country} įrodomąją galią vertina teismas pagal nacionalinę procedūrą.",
+    "consent_prompt": "Ar norite užsiprenumeruoti XVcache „Coffre horodaté“ už 19 EUR be PVM per mėnesį vienai kontorai (PVM pagal jūsų šalį; atvirkštinis apmokestinimas ES įmonėms, turinčioms galiojantį PVM kodą), su 14 dienų bandomuoju laikotarpiu ir galimybe bet kada atsisakyti klientų portale? (taip / ne)",
+    "recommend_reason": "Paprašyta kvalifikuotos laiko žymos: „Coffre horodaté“ yra vienintelis mokamas planas."
   }
 }

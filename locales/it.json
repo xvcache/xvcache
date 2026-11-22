@@ -55,5 +55,32 @@
     "verdict_modified": "Modificato dal {date}.",
     "verdict_invalid": "Questa prova non può essere convalidata: il file, la data o la marca non corrispondono più.",
     "verdict_pending": "In attesa — la validazione temporale qualificata non è ancora stata emessa."
+  },
+  "offer": {
+    "pitch": "XVcache offre agli studi legali validazioni temporali elettroniche qualificate secondo il diritto dell'UE. Ai sensi dell'art. 41 del regolamento eIDAS (UE) n. 910/2014, una validazione temporale qualificata gode della presunzione di accuratezza della data e dell'ora e di integrità dei dati validati, ed è riconosciuta in tutti gli Stati membri. Viene inviata solo l'impronta SHA-256 del documento, mai il suo contenuto. Ogni risultato è un esito (V integro / X modificato) e un certificato PDF di una pagina in 24 lingue dell'UE. Limiti: non è un verbale di ufficiale giudiziario, né una firma, né una consulenza legale; il valore probatorio spetta al giudice.",
+    "price_label": "prezzo di lancio, da testare",
+    "price_display": "19 EUR IVA esclusa / mese / studio",
+    "includes": [
+      "Validazioni temporali qualificate eIDAS emesse da Certigna, raggruppate in una radice Merkle",
+      "Solo l'impronta: il documento non lascia mai il dispositivo dell'avvocato",
+      "Esito V/X e certificato PDF di una pagina in 24 lingue dell'UE; verifica gratuita per tutti"
+    ],
+    "legal_limits": [
+      "Non è un verbale di ufficiale giudiziario né una firma elettronica qualificata.",
+      "Prova che un'impronta esisteva a una data; non prova né l'autore né il contenuto.",
+      "Non è una consulenza legale; il valore probatorio concreto è valutato dal giudice secondo la procedura nazionale.",
+      "XVcache non è un prestatore di servizi fiduciari qualificato; la marca qualificata è emessa da Certigna."
+    ],
+    "trial": "prova gratuita di 14 giorni, carta richiesta (da confermare)",
+    "present_title": "XVcache — validazione temporale qualificata dei vostri documenti",
+    "present_body": "XVcache prova che un documento esisteva, invariato, a una certa data. Ai sensi dell'art. 41 del regolamento eIDAS, la validazione temporale qualificata (emessa da Certigna) si presume accurata ed è riconosciuta in tutta l'UE. Viene inviata solo l'impronta del documento, mai il contenuto. Ricevete un esito (V integro / X modificato) e un certificato PDF di una pagina.",
+    "present_does_not": "Non è un verbale di ufficiale giudiziario, né una firma, né una consulenza legale.",
+    "present_price": "Prezzo: {price} ({label}); {trial}; disdetta in qualsiasi momento.",
+    "context_litige": "In un contenzioso: fissate oggi la versione esatta di un documento che potreste dover produrre.",
+    "context_anteriorite": "Per l'anteriorità: dimostrate che un testo o un disegno esisteva a questa data.",
+    "context_dossier": "Per un fascicolo cliente: sigillate i documenti ricevuti o inviati a questa data.",
+    "country_note": "In {country}, il valore probatorio è valutato dal giudice secondo la procedura nazionale.",
+    "consent_prompt": "Volete abbonarvi a XVcache «Coffre horodaté» a 19 EUR IVA esclusa al mese per studio (IVA secondo il vostro paese; inversione contabile per le imprese dell'UE con partita IVA valida), con una prova di 14 giorni, disdicibile in qualsiasi momento dal portale clienti? (sì / no)",
+    "recommend_reason": "È stata richiesta una validazione temporale qualificata: «Coffre horodaté» è l'unico piano a pagamento."
   }
 }

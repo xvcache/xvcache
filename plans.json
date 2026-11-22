@@ -1,9 +1,9 @@
 {
-  "schema_version": "0.2.0",
-  "prices_status": "TBD",
+  "schema_version": "0.3.0",
+  "prices_status": "to_test",
   "payment_live": false,
-  "currency": null,
-  "notice": "Every amount, quota and fee in this catalog is a clearly marked placeholder (TBD). No payment is collected. Do not treat these figures as a real offer or invoice. Local V/X (verify_journal) is free. Certified proofs (certify_note / verify_proof) are the paid feature: they already run locally (FreeTSA test mode, or qualified eIDAS with the operator's own Certigna account), but XVcache's hosted certified witness and its price are TBD.",
+  "currency": "EUR",
+  "notice": "One paid plan has a launch price to be tested: coffre-horodate, 19 EUR excl. VAT per month per firm (price_status to_test, not final). Every other amount, quota and fee is a placeholder (TBD); none is invented. Billing is not live yet: no payment is collected until the dedicated XVcache Stripe account exists. Local V/X (verify_journal) is free. Certified proofs (qualified eIDAS timestamps via Certigna, plus OpenTimestamps) are the paid feature.",
   "updated": "2026-11-22",
   "current_tier_id": "free",
   "plans": [
@@ -40,6 +40,50 @@
         }
       },
       "certified_witness": false
+    },
+    {
+      "id": "coffre-horodate",
+      "name": "Coffre horodaté — qualified eIDAS timestamps for law firms",
+      "kind": "subscription",
+      "status": "launch_to_test",
+      "price": {
+        "amount": 19,
+        "currency": "EUR",
+        "unit": "per_month_per_firm",
+        "status": "to_test",
+        "tax_behavior": "exclusive",
+        "placeholder": false,
+        "display": "19 EUR excl. VAT / month / firm",
+        "label": "launch price, to be tested",
+        "note": "Launch price to be tested with the first firms. Final price is Julien's decision. VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number."
+      },
+      "trial": {
+        "days": 14,
+        "card_required": true,
+        "status": "to_test"
+      },
+      "includes": [
+        "Qualified eIDAS timestamps (Certigna, policy 1.2.250.1.177.2.9.1) over a shared Merkle root, plus an OpenTimestamps anchor",
+        "Hash only: the document content never leaves the lawyer's device",
+        "Verdict V intact / X modified and a one-page PDF certificate in the 24 official EU languages",
+        "verify_document stays free and keyless for anyone (including the opposing party)"
+      ],
+      "limits": {
+        "notes_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Not applicable in hash-only mode."
+        },
+        "certifications_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Monthly certification quota to be decided by Julien; the hosted service enforces the quota stored with each API key."
+        }
+      },
+      "certified_witness": true,
+      "certified_witness_status": "preview"
     },
     {
       "id": "usage",
@@ -183,7 +227,7 @@
       "method": "human_approval_via_stripe",
       "live": false,
       "checkout_url": null,
-      "note": "When billing is enabled, the agent must show the plan to its human and obtain explicit approval. The intended path is a Stripe checkout link. No link is live today."
+      "note": "request_upgrade needs human_confirmed=true and the human's exact words (consent_quote). It then returns a Stripe Checkout link once the dedicated XVcache Stripe account is connected; until then it returns BILLING_UNAVAILABLE. No link is live today."
     },
     "later": {
       "method": "x402",
@@ -205,7 +249,7 @@
       "verify_proof"
     ],
     "paid_feature": true,
-    "price": "TBD",
+    "price": "19 EUR excl. VAT / month / firm (coffre-horodate, to_test)",
     "payment_live": false,
     "model": "One timestamp covers a Merkle root of many notes (tampon groupé); each note gets its own proof (preuve vendue à l'unité).",
     "layers": {
@@ -213,5 +257,7 @@
       "B": "OpenTimestamps anchor of the same root (public, Bitcoin, pending for a few hours)."
     },
     "free_local_verdict": "verify_journal V/X stays free."
-  }
+  },
+  "tax": "excl. VAT; reverse charge for EU B2B with valid VAT number",
+  "default_paid_plan_id": "coffre-horodate"
 }

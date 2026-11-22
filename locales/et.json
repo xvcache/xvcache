@@ -55,5 +55,32 @@
     "verdict_modified": "Muudetud alates {date}.",
     "verdict_invalid": "Seda tõendit ei saa kinnitada: fail, kuupäev või ajatempel ei vasta enam.",
     "verdict_pending": "Ootel — kvalifitseeritud ajatemplit pole veel väljastatud."
+  },
+  "offer": {
+    "pitch": "XVcache pakub advokaadibüroodele ELi õiguse kohaseid kvalifitseeritud elektroonilisi ajatempleid. eIDAS-määruse (EL) nr 910/2014 artikli 41 kohaselt eeldatakse kvalifitseeritud ajatempli kuupäeva ja kellaaja õigsust ning tembeldatud andmete terviklust, ja seda tunnustatakse kõigis liikmesriikides. Saadetakse ainult dokumendi SHA-256 räsi, mitte kunagi sisu. Iga tulemus on otsus (V muutmata / X muudetud) ja üheleheküljeline PDF-tõend 24 ELi keeles. Piirangud: ei ole kohtutäituri protokoll, allkiri ega õigusnõuanne; tõendusväärtuse otsustab kohus.",
+    "price_label": "turuletoomise hind, testimisel",
+    "price_display": "19 EUR + km / kuu / büroo",
+    "includes": [
+      "Certigna väljastatud kvalifitseeritud eIDAS-ajatemplid ühes Merkle'i juures",
+      "Ainult räsi: dokument ei lahku kunagi advokaadi seadmest",
+      "Otsus V/X ja üheleheküljeline PDF-tõend 24 ELi keeles; kontroll on kõigile tasuta"
+    ],
+    "legal_limits": [
+      "Ei ole kohtutäituri protokoll ega kvalifitseeritud elektrooniline allkiri.",
+      "Tõendab, et räsi oli olemas teatud kuupäeval; ei tõenda autorit ega sisu.",
+      "Ei ole õigusnõuanne; tegeliku tõendusväärtuse hindab kohus riikliku menetluse kohaselt.",
+      "XVcache ei ole kvalifitseeritud usaldusteenuse osutaja; kvalifitseeritud ajatempli väljastab Certigna."
+    ],
+    "trial": "14-päevane tasuta prooviperiood, kaart nõutav (kinnitamisel)",
+    "present_title": "XVcache — kvalifitseeritud ajatemplid teie dokumentidele",
+    "present_body": "XVcache tõendab, et dokument oli teatud kuupäeval muutmata kujul olemas. eIDAS-määruse artikli 41 kohaselt eeldatakse kvalifitseeritud ajatempli (väljastaja Certigna) õigsust ja seda tunnustatakse kogu ELis. Saadetakse ainult dokumendi räsi, mitte kunagi sisu. Saate otsuse (V muutmata / X muudetud) ja üheleheküljelise PDF-tõendi.",
+    "present_does_not": "See ei ole kohtutäituri protokoll, allkiri ega õigusnõuanne.",
+    "present_price": "Hind: {price} ({label}); {trial}; saab igal ajal lõpetada.",
+    "context_litige": "Vaidluses: fikseerige juba täna dokumendi täpne versioon, mille peate võib-olla esitama.",
+    "context_anteriorite": "Varasemate õiguste jaoks: näidake, et tekst või kavand oli sel kuupäeval olemas.",
+    "context_dossier": "Kliendi toimiku jaoks: pitseerige sel kuupäeval saadud või saadetud dokumendid.",
+    "country_note": "Riigis {country} hindab tõendusväärtust kohus riikliku menetluse kohaselt.",
+    "consent_prompt": "Kas soovite tellida XVcache teenuse „Coffre horodaté” hinnaga 19 EUR + km kuus büroo kohta (käibemaks vastavalt teie riigile; pöördmaksustamine kehtiva KMKR-numbriga ELi ettevõtetele), 14-päevase prooviperioodiga ja igal ajal kliendiportaalis lõpetatavana? (jah / ei)",
+    "recommend_reason": "Taotleti kvalifitseeritud ajatemplit: „Coffre horodaté” on ainus tasuline pakett."
   }
 }

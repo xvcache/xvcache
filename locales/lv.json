@@ -55,5 +55,32 @@
     "verdict_modified": "Mainīts kopš {date}.",
     "verdict_invalid": "Šo pierādījumu nevar apstiprināt: fails, datums vai zīmogs vairs neatbilst.",
     "verdict_pending": "Gaida — kvalificētais laika zīmogs vēl nav izsniegts."
+  },
+  "offer": {
+    "pitch": "XVcache nodrošina advokātu birojiem kvalificētus elektroniskos laika zīmogus saskaņā ar ES tiesībām. Saskaņā ar eIDAS regulas (ES) Nr. 910/2014 41. pantu attiecībā uz kvalificētu laika zīmogu ir prezumpcija par datuma un laika precizitāti un apzīmogoto datu integritāti, un to atzīst visās dalībvalstīs. Tiek nosūtīts tikai dokumenta SHA-256 nospiedums, nekad tā saturs. Katrs rezultāts ir slēdziens (V nav mainīts / X mainīts) un vienas lapas PDF apliecinājums 24 ES valodās. Ierobežojumi: tas nav tiesu izpildītāja akts, paraksts vai juridiska konsultācija; pierādījuma spēku vērtē tiesa.",
+    "price_label": "ieviešanas cena, tiek testēta",
+    "price_display": "19 EUR bez PVN / mēnesī / birojs",
+    "includes": [
+      "Certigna izsniegti kvalificēti eIDAS laika zīmogi, apvienoti vienā Merkle saknē",
+      "Tikai nospiedums: dokuments nekad neatstāj advokāta ierīci",
+      "Slēdziens V/X un vienas lapas PDF apliecinājums 24 ES valodās; pārbaude bez maksas ikvienam"
+    ],
+    "legal_limits": [
+      "Tas nav tiesu izpildītāja akts un nav kvalificēts elektroniskais paraksts.",
+      "Pierāda, ka nospiedums pastāvēja noteiktā datumā; nepierāda ne autoru, ne saturu.",
+      "Tā nav juridiska konsultācija; konkrēto pierādījuma spēku izvērtē tiesa saskaņā ar valsts procesu.",
+      "XVcache nav kvalificēts uzticamības pakalpojumu sniedzējs; kvalificēto zīmogu izsniedz Certigna."
+    ],
+    "trial": "14 dienu bezmaksas izmēģinājums, nepieciešama karte (vēl jāapstiprina)",
+    "present_title": "XVcache — kvalificēti laika zīmogi jūsu dokumentiem",
+    "present_body": "XVcache pierāda, ka dokuments noteiktā datumā pastāvēja nemainīts. Saskaņā ar eIDAS regulas 41. pantu kvalificēto laika zīmogu (izsniedz Certigna) uzskata par precīzu, un to atzīst visā ES. Tiek nosūtīts tikai dokumenta nospiedums, nekad saturs. Jūs saņemat slēdzienu (V nav mainīts / X mainīts) un vienas lapas PDF apliecinājumu.",
+    "present_does_not": "Tas nav tiesu izpildītāja akts, paraksts vai juridiska konsultācija.",
+    "present_price": "Cena: {price} ({label}); {trial}; var atteikties jebkurā laikā.",
+    "context_litige": "Strīdā: jau šodien fiksējiet precīzu tā dokumenta versiju, kas jums, iespējams, būs jāiesniedz.",
+    "context_anteriorite": "Agrākām tiesībām: parādiet, ka teksts vai dizains pastāvēja šajā datumā.",
+    "context_dossier": "Klienta lietai: aizzīmogojiet šajā datumā saņemtos vai nosūtītos dokumentus.",
+    "country_note": "Valstī {country} pierādījuma spēku izvērtē tiesa saskaņā ar valsts procesu.",
+    "consent_prompt": "Vai vēlaties abonēt XVcache “Coffre horodaté” par 19 EUR bez PVN mēnesī par biroju (PVN atbilstoši jūsu valstij; apgrieztā maksāšana ES uzņēmumiem ar derīgu PVN numuru), ar 14 dienu izmēģinājumu un iespēju jebkurā laikā atteikties klientu portālā? (jā / nē)",
+    "recommend_reason": "Tika pieprasīts kvalificēts laika zīmogs: “Coffre horodaté” ir vienīgais maksas plāns."
   }
 }

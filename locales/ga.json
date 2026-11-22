@@ -55,5 +55,32 @@
     "verdict_modified": "Athraithe ó {date}.",
     "verdict_invalid": "Ní féidir an cruthúnas seo a bhailíochtú: ní réitíonn an comhad, an dáta ná an stampa a thuilleadh.",
     "verdict_pending": "Ar feitheamh — níor eisíodh an stampa ama cáilithe go fóill."
+  },
+  "offer": {
+    "pitch": "Tugann XVcache stampaí ama leictreonacha cáilithe faoi dhlí an AE do ghnólachtaí dlí. Faoi Airteagal 41 de Rialachán eIDAS (AE) Uimh. 910/2014, tá toimhde ann go bhfuil dáta agus am stampa ama cháilithe cruinn agus go bhfuil na sonraí stampáilte slán, agus aithnítear é i ngach Ballstát. Ní sheoltar ach méarlorg SHA-256 an doiciméid, riamh a ábhar. Is é gach toradh breith (V slán / X athraithe) agus deimhniú PDF aon leathanaigh i 24 theanga an AE. Teorainneacha: ní tuarascáil báille, ní síniú ná comhairle dhlíthiúil é; is faoin gcúirt atá an fiúntas fianaise.",
+    "price_label": "praghas seolta, le tástáil",
+    "price_display": "19 EUR gan CBL / mí / gnólacht",
+    "includes": [
+      "Stampaí ama cáilithe eIDAS ó Certigna, grúpáilte i bhfréamh Merkle amháin",
+      "Méarlorg amháin: ní fhágann an doiciméad gléas an dlíodóra riamh",
+      "Breith V/X agus deimhniú PDF aon leathanaigh i 24 theanga an AE; fíorú saor in aisce do chách"
+    ],
+    "legal_limits": [
+      "Ní tuarascáil ó oifigeach breithiúnach (báille) é ná síniú leictreonach cáilithe.",
+      "Cruthaíonn sé go raibh méarlorg ann ar dháta; ní chruthaíonn sé an t-údar ná an t-ábhar.",
+      "Ní comhairle dhlíthiúil é; measann an chúirt an fiúntas fianaise de réir an nós imeachta náisiúnta.",
+      "Ní soláthraí cáilithe seirbhísí iontaoibhe é XVcache; is é Certigna a eisíonn an stampa cáilithe."
+    ],
+    "trial": "triail saor in aisce 14 lá, cárta ag teastáil (le deimhniú)",
+    "present_title": "XVcache — stampaí ama cáilithe do do dhoiciméid",
+    "present_body": "Cruthaíonn XVcache go raibh doiciméad ann, gan athrú, ar dháta áirithe. Faoi Airteagal 41 de Rialachán eIDAS, glactar leis go bhfuil an stampa ama cáilithe (ó Certigna) cruinn agus aithnítear é ar fud an AE. Ní sheoltar ach méarlorg an doiciméid, riamh a ábhar. Faigheann tú breith (V slán / X athraithe) agus deimhniú PDF aon leathanaigh.",
+    "present_does_not": "Ní tuarascáil báille, ní síniú ná comhairle dhlíthiúil é.",
+    "present_price": "Praghas: {price} ({label}); {trial}; is féidir é a chealú am ar bith.",
+    "context_litige": "I gcás díospóide: socraigh inniu leagan cruinn doiciméid a d'fhéadfadh a bheith le tabhairt ar aird.",
+    "context_anteriorite": "Do chearta roimh ré: taispeáin go raibh téacs nó dearadh ann ar an dáta seo.",
+    "context_dossier": "Do chomhad cliaint: séalaigh na doiciméid a fuarthas nó a seoladh ar an dáta seo.",
+    "country_note": "In {country}, measann an chúirt an fiúntas fianaise de réir an nós imeachta náisiúnta.",
+    "consent_prompt": "Ar mhaith leat síntiús a ghlacadh le XVcache «Coffre horodaté» ar 19 EUR gan CBL in aghaidh na míosa in aghaidh an ghnólachta (CBL de réir do thíre; aisiompú muirir do ghnólachtaí an AE a bhfuil uimhir CBL bhailí acu), le triail 14 lá, agus é a chealú am ar bith ón tairseach custaiméara? (tá / níl)",
+    "recommend_reason": "Iarradh stampa ama cáilithe: is é «Coffre horodaté» an t-aon phlean íoctha."
   }
 }

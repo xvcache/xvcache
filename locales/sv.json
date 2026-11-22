@@ -55,5 +55,32 @@
     "verdict_modified": "Ändrat sedan {date}.",
     "verdict_invalid": "Detta bevis kan inte valideras: filen, datumet eller tidsstämpeln stämmer inte längre.",
     "verdict_pending": "Väntar — den kvalificerade tidsstämpeln har ännu inte utfärdats."
+  },
+  "offer": {
+    "pitch": "XVcache ger advokatbyråer kvalificerade elektroniska tidsstämplar enligt EU-rätten. Enligt art. 41 i eIDAS-förordningen (EU) nr 910/2014 presumeras en kvalificerad tidsstämpel ange korrekt datum och tid och att de stämplade uppgifterna är intakta, och den erkänns i alla medlemsstater. Endast dokumentets SHA-256-fingeravtryck skickas, aldrig innehållet. Varje resultat är ett utlåtande (V oförändrat / X ändrat) och ett PDF-certifikat på en sida på 24 EU-språk. Begränsningar: inget protokoll från kronofogde, ingen underskrift, ingen juridisk rådgivning; bevisvärdet avgörs av domstolen.",
+    "price_label": "introduktionspris, ska testas",
+    "price_display": "19 EUR exkl. moms / månad / byrå",
+    "includes": [
+      "Kvalificerade eIDAS-tidsstämplar från Certigna, samlade i en Merkle-rot",
+      "Endast fingeravtrycket: dokumentet lämnar aldrig advokatens enhet",
+      "Utlåtande V/X och PDF-certifikat på en sida på 24 EU-språk; kontroll gratis för alla"
+    ],
+    "legal_limits": [
+      "Inte ett protokoll från kronofogde eller stämningsman och inte en kvalificerad elektronisk underskrift.",
+      "Visar att ett fingeravtryck fanns vid ett datum; visar varken upphovsperson eller innehåll.",
+      "Inte juridisk rådgivning; det konkreta bevisvärdet bedöms av domstolen enligt nationell processrätt.",
+      "XVcache är inte en kvalificerad tillhandahållare av betrodda tjänster; den kvalificerade tidsstämpeln utfärdas av Certigna."
+    ],
+    "trial": "14 dagars gratis provperiod, kort krävs (ska bekräftas)",
+    "present_title": "XVcache — kvalificerade tidsstämplar för dina dokument",
+    "present_body": "XVcache visar att ett dokument fanns oförändrat vid ett visst datum. Enligt art. 41 i eIDAS-förordningen presumeras den kvalificerade tidsstämpeln (utfärdad av Certigna) vara korrekt och erkänns i hela EU. Endast dokumentets fingeravtryck skickas, aldrig innehållet. Du får ett utlåtande (V oförändrat / X ändrat) och ett PDF-certifikat på en sida.",
+    "present_does_not": "Det är inte ett protokoll från kronofogde, inte en underskrift och inte juridisk rådgivning.",
+    "present_price": "Pris: {price} ({label}); {trial}; kan sägas upp när som helst.",
+    "context_litige": "I en tvist: lås i dag den exakta versionen av ett dokument som du kan behöva lägga fram.",
+    "context_anteriorite": "För tidigare rättigheter: visa att en text eller en design fanns detta datum.",
+    "context_dossier": "För ett klientärende: försegla handlingar som tagits emot eller skickats detta datum.",
+    "country_note": "I {country} bedöms bevisvärdet av domstolen enligt nationell processrätt.",
+    "consent_prompt": "Vill du teckna XVcache ”Coffre horodaté” för 19 EUR exkl. moms per månad och byrå (moms enligt ditt land; omvänd betalningsskyldighet för EU-företag med giltigt momsnummer), med 14 dagars provperiod och uppsägning när som helst via kundportalen? (ja / nej)",
+    "recommend_reason": "En kvalificerad tidsstämpel efterfrågades: ”Coffre horodaté” är den enda betalda planen."
   }
 }

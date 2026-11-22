@@ -55,5 +55,32 @@
     "verdict_modified": "Zmieniony od {date}.",
     "verdict_invalid": "Tego dowodu nie można zweryfikować: plik, data lub znacznik już się nie zgadzają.",
     "verdict_pending": "W toku — kwalifikowany znacznik czasu nie został jeszcze wydany."
+  },
+  "offer": {
+    "pitch": "XVcache zapewnia kancelariom kwalifikowane elektroniczne znaczniki czasu zgodne z prawem UE. Zgodnie z art. 41 rozporządzenia eIDAS (UE) nr 910/2014 kwalifikowany znacznik czasu korzysta z domniemania dokładności daty i czasu oraz integralności oznaczonych danych i jest uznawany we wszystkich państwach członkowskich. Wysyłany jest tylko skrót SHA-256 dokumentu, nigdy jego treść. Każdy wynik to werdykt (V nienaruszony / X zmieniony) i jednostronicowy certyfikat PDF w 24 językach UE. Ograniczenia: to nie protokół komornika, nie podpis ani porada prawna; o mocy dowodowej decyduje sąd.",
+    "price_label": "cena startowa, do przetestowania",
+    "price_display": "19 EUR netto / miesiąc / kancelaria",
+    "includes": [
+      "Kwalifikowane znaczniki czasu eIDAS wydawane przez Certigna, zebrane w jednym korzeniu Merkle",
+      "Tylko skrót: dokument nigdy nie opuszcza urządzenia prawnika",
+      "Werdykt V/X i jednostronicowy certyfikat PDF w 24 językach UE; weryfikacja bezpłatna dla wszystkich"
+    ],
+    "legal_limits": [
+      "Nie jest protokołem komornika ani kwalifikowanym podpisem elektronicznym.",
+      "Dowodzi, że skrót istniał w danym dniu; nie dowodzi ani autorstwa, ani treści.",
+      "Nie jest poradą prawną; konkretną moc dowodową ocenia sąd zgodnie z krajową procedurą.",
+      "XVcache nie jest kwalifikowanym dostawcą usług zaufania; kwalifikowany znacznik wydaje Certigna."
+    ],
+    "trial": "14 dni bezpłatnego okresu próbnego, wymagana karta (do potwierdzenia)",
+    "present_title": "XVcache — kwalifikowane znaczniki czasu dla Państwa dokumentów",
+    "present_body": "XVcache dowodzi, że dokument istniał w niezmienionej postaci w danym dniu. Zgodnie z art. 41 rozporządzenia eIDAS kwalifikowany znacznik czasu (wydany przez Certigna) korzysta z domniemania dokładności i jest uznawany w całej UE. Wysyłany jest tylko skrót dokumentu, nigdy jego treść. Otrzymują Państwo werdykt (V nienaruszony / X zmieniony) i jednostronicowy certyfikat PDF.",
+    "present_does_not": "To nie jest protokół komornika, podpis ani porada prawna.",
+    "present_price": "Cena: {price} ({label}); {trial}; rezygnacja w dowolnym momencie.",
+    "context_litige": "W sporze: utrwalcie już dziś dokładną wersję dokumentu, który może trzeba będzie przedstawić.",
+    "context_anteriorite": "Dla pierwszeństwa: wykażcie, że tekst lub projekt istniał w tym dniu.",
+    "context_dossier": "Dla akt klienta: zabezpieczcie dokumenty otrzymane lub wysłane w tym dniu.",
+    "country_note": "W kraju {country} moc dowodową ocenia sąd zgodnie z krajową procedurą.",
+    "consent_prompt": "Czy chcą Państwo wykupić subskrypcję XVcache „Coffre horodaté” za 19 EUR netto miesięcznie za kancelarię (VAT według kraju; odwrotne obciążenie dla firm z UE z ważnym numerem VAT), z 14-dniowym okresem próbnym i możliwością rezygnacji w dowolnym momencie w portalu klienta? (tak / nie)",
+    "recommend_reason": "Poproszono o kwalifikowany znacznik czasu: „Coffre horodaté” to jedyny płatny plan."
   }
 }

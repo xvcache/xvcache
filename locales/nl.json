@@ -55,5 +55,32 @@
     "verdict_modified": "Gewijzigd sinds {date}.",
     "verdict_invalid": "Dit bewijs kan niet worden gevalideerd: het bestand, de datum of het tijdstempel komen niet meer overeen.",
     "verdict_pending": "In afwachting — het gekwalificeerde tijdstempel is nog niet uitgegeven."
+  },
+  "offer": {
+    "pitch": "XVcache biedt advocatenkantoren gekwalificeerde elektronische tijdstempels volgens het EU-recht. Volgens art. 41 van de eIDAS-verordening (EU) nr. 910/2014 geldt voor een gekwalificeerd tijdstempel het vermoeden van juistheid van datum en tijd en van integriteit van de gestempelde gegevens, en het wordt in alle lidstaten erkend. Alleen de SHA-256-vingerafdruk van het document wordt verzonden, nooit de inhoud. Elk resultaat is een uitslag (V ongewijzigd / X gewijzigd) en een PDF-certificaat van één pagina in 24 EU-talen. Grenzen: geen proces-verbaal van een gerechtsdeurwaarder, geen handtekening, geen juridisch advies; over de bewijskracht beslist de rechter.",
+    "price_label": "introductieprijs, nog te testen",
+    "price_display": "19 EUR excl. btw / maand / kantoor",
+    "includes": [
+      "Gekwalificeerde eIDAS-tijdstempels van Certigna, gebundeld in één Merkle-wortel",
+      "Alleen de vingerafdruk: het document verlaat nooit het apparaat van de advocaat",
+      "Uitslag V/X en PDF-certificaat van één pagina in 24 EU-talen; verificatie gratis voor iedereen"
+    ],
+    "legal_limits": [
+      "Geen proces-verbaal van een gerechtsdeurwaarder en geen gekwalificeerde elektronische handtekening.",
+      "Bewijst dat een vingerafdruk op een datum bestond; bewijst noch de auteur noch de inhoud.",
+      "Geen juridisch advies; de concrete bewijskracht wordt door de rechter beoordeeld volgens het nationale procesrecht.",
+      "XVcache is geen gekwalificeerde verlener van vertrouwensdiensten; het gekwalificeerde tijdstempel wordt uitgegeven door Certigna."
+    ],
+    "trial": "14 dagen gratis proberen, kaart vereist (nog te bevestigen)",
+    "present_title": "XVcache — gekwalificeerde tijdstempels voor uw documenten",
+    "present_body": "XVcache bewijst dat een document op een bepaalde datum ongewijzigd bestond. Volgens art. 41 van de eIDAS-verordening wordt het gekwalificeerde tijdstempel (uitgegeven door Certigna) vermoed juist te zijn en in de hele EU erkend. Alleen de vingerafdruk van het document wordt verzonden, nooit de inhoud. U ontvangt een uitslag (V ongewijzigd / X gewijzigd) en een PDF-certificaat van één pagina.",
+    "present_does_not": "Het is geen proces-verbaal van een deurwaarder, geen handtekening en geen juridisch advies.",
+    "present_price": "Prijs: {price} ({label}); {trial}; altijd opzegbaar.",
+    "context_litige": "Bij een geschil: leg vandaag de exacte versie vast van een document dat u mogelijk moet overleggen.",
+    "context_anteriorite": "Voor eerdere rechten: toon aan dat een tekst of ontwerp op deze datum bestond.",
+    "context_dossier": "Voor een cliëntdossier: verzegel de stukken die op deze datum zijn ontvangen of verzonden.",
+    "country_note": "In {country} beoordeelt de rechter de bewijskracht volgens het nationale procesrecht.",
+    "consent_prompt": "Wilt u zich abonneren op XVcache „Coffre horodaté” voor 19 EUR excl. btw per maand per kantoor (btw volgens uw land; verlegging voor EU-bedrijven met een geldig btw-nummer), met een proefperiode van 14 dagen en op elk moment opzegbaar via het klantenportaal? (ja / nee)",
+    "recommend_reason": "Er is om een gekwalificeerd tijdstempel gevraagd: „Coffre horodaté” is het enige betaalde abonnement."
   }
 }

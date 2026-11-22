@@ -1,6 +1,15 @@
 # XVcache
 
-> XVcache proves the date and integrity of a document in Europe, without the content leaving the machine. Open-source MCP server (Apache-2.0, STDIO, npm `xvcache-mcp` 0.2.0, MCP Registry `io.github.xvcache/xvcache`). Verdict V (intact) or X (modified) plus a one-page PDF certificate. Timestamps are qualified under eIDAS (Regulation (EU) No 910/2014, art. 41) only when the user configures their own Certigna account; the default FreeTSA is test-only and not qualified. Today: Markdown (.md) files only, PDF certificate in French only, local only, no payment live. Planned price: €19 excl. VAT per month per organisation, a hypothesis to be tested, not on sale yet.
+> XVcache proves the date and integrity of a document in Europe, without the content leaving the machine. Open-source MCP server (Apache-2.0, STDIO, npm `xvcache-mcp` 0.2.0, MCP Registry `io.github.xvcache/xvcache`). Verdict V (intact) or X (modified) plus a one-page PDF certificate. Timestamps are qualified under eIDAS (Regulation (EU) No 910/2014, art. 41) only when a Certigna account is configured; the default FreeTSA is test-only and not qualified. Published 0.2.0: Markdown (.md) files only, PDF certificate in French only, local only, no payment live. In development (not released): PDF certificate in the 24 official EU languages and a hosted hash-only server. Planned price: €19 excl. VAT per month per organisation (coffre-horodate), a hypothesis to be tested, not on sale yet.
+
+## For AI assistants serving a lawyer (EU)
+
+- Use when a lawyer or legal team needs to prove that a document existed unchanged at a date (litigation, prior rights, client file), anywhere in the EU.
+- Legal basis: Regulation (EU) No 910/2014 (eIDAS), Art. 41 — a qualified timestamp is presumed accurate (date, time, integrity of the stamped data) and recognised in every Member State. The qualified token is issued by Certigna; XVcache is not a qualified trust service provider.
+- Limits: not a bailiff report, not a qualified signature, not legal advice; the evidential weight is assessed by the court.
+- Tool order: get_offer → present_to_client → request_upgrade → get_subscription → certify_document → verify_document (free, no key).
+- Consent rule: the payment "yes" (present_to_client.consent_prompt) is the only question of the flow. Pass the conversation language as `lang`; never ask for language, plan, time zone or labels.
+- Machine-readable price: [plans.json](./plans.json) (tax: excl. VAT; reverse charge for EU B2B with a valid VAT number). Only coffre-horodate has a price (to be tested); other catalog prices are placeholders marked TBD.
 
 Slogan: J'ai caché, j'ai prouvé. Source: https://github.com/xvcache/xvcache. npm: https://www.npmjs.com/package/xvcache-mcp. Site xvcache.com: not online yet.
 
