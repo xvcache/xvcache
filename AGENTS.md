@@ -59,11 +59,11 @@ The **free** plan is available now: local STDIO journal and V/X. Paid plans (`us
 Call `certify_note` when the human needs an independent date, not only local V/X:
 
 - `certify_note(path)` stamps now and returns the note's proof JSON. `certify_note(path, defer: true)` only queues; `certify_batch()` then stamps every queued note with **one** timestamp over a Merkle root (plus the journal head). Each note still gets its own proof.
-- Read `proof.tsa.qualified` and `proof.tsa.label` and say it plainly: **qualified eIDAS** (Certigna) or **test, non qualifié** (FreeTSA). `proof.ots.status` = `pending` for a few hours is normal (Bitcoin confirmation).
+- Read `proof.tsa.qualified` and `proof.tsa.label` and say it plainly: **qualified eIDAS** (Certigna, policy OID `1.2.250.1.177.2.9.1`, chain in `certs/certigna-chain.pem` + `certs/certigna-untrusted.pem`) or **test, non qualifié** (FreeTSA, the default). After `verify_proof`, `qualified_confirmed` is true only if the token signature also verifies. `proof.ots.status` = `pending` for a few hours is normal (Bitcoin confirmation of the OpenTimestamps anchor of the same root).
 - `verify_proof(path)` or `verify_proof(proof)` returns **V** (existed exactly like this at `genTime`) or **X** (changed or invalid proof) with each check.
-- Only hashes are sent out and stored; never paste note content into a proof.
+- Only hashes are sent out and stored; never paste note content into a proof. Never write `XVCACHE_TSA_PASSWORD` into a file, a note, or the chat: it comes from the environment. `XVCACHE_TSA_USER` and `XVCACHE_TSA_PROVIDER` may live in a gitignored `.env.local`.
 - Certified proofs are the paid feature (price TBD, payment not live). Do not promise a price.
-- A timestamp proves existence and integrity at a date. It is not registered mail and not legal advice.
+- A qualified timestamp supports an eIDAS art. 41 presumption of accurate date and integrity of the stamped hash, when the token verifies. It is not registered mail and not legal advice.
 
 ### Resell / partner (terms TBD)
 

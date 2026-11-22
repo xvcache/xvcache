@@ -18,6 +18,7 @@
     "dist/tsa.js",
     "dist/ots.js",
     "dist/certify.js",
+    "dist/env.js",
     "certs/freetsa-cacert.pem",
     "certs/certigna-chain.pem",
     "certs/certigna-untrusted.pem",
@@ -34,7 +35,7 @@
   "scripts": {
     "build": "tsc && chmod +x dist/server.js",
     "start": "node dist/server.js",
-    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/merkle.test.js dist/certify.test.js dist/certify.integration.test.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js",
     "demo:certify": "npm run build && node scripts/demo-certify.mjs",
     "verify-journal": "node dist/verify-journal.js"
   },

@@ -19,6 +19,9 @@ import {
 import { getOffer, loadPlansCatalog, recommendPlan, requestUpgrade } from "./plans.js";
 import { resolveTsaProvider } from "./tsa.js";
 import { Certifier, certifyConfigFromEnv } from "./certify.js";
+import { loadLocalEnv } from "./env.js";
+
+loadLocalEnv();
 
 function envVault(): string | undefined {
   return process.env.XVCACHE_VAULT || process.env.JAYCACHE_VAULT;

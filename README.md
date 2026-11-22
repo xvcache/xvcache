@@ -205,27 +205,42 @@ Local V/X proves a note did not change **since XVcache last saw it**, but the da
 1. XVcache computes the note's sha256 locally. **The note content never leaves the machine**, and proofs contain hashes only.
 2. Pending notes (plus the current journal head) become the leaves of a **Merkle tree**. Only the **root** is stamped, so **one timestamp covers many notes** (10 or 10,000). Queue with `certify_note(path, defer: true)`, stamp with `certify_batch`; without `defer`, the batch is stamped immediately.
 3. The root is stamped twice:
-   - **Layer A — RFC 3161** token from a Time-Stamp Authority. Default: **FreeTSA = test, non qualifié** (no legal presumption). With a qualified provider (**Certigna**, eIDAS qualified trust service), the token carries the eIDAS presumption of accurate date and integrity (art. 41) across the EU. `qualified: true` only appears when Certigna is configured.
+   - **Layer A — RFC 3161** token from a Time-Stamp Authority (see [Qualified eIDAS timestamping](#qualified-eidas-timestamping-via-certigna)).
    - **Layer B — OpenTimestamps** anchor of the same root in Bitcoin: public, free, verifiable by anyone without trusting XVcache. It stays `pending` for a few hours until a block confirms it; that is normal.
 4. Each note gets its **own proof** JSON (note sha256, Merkle path, root, token base64, `genTime`, provider, `qualified`, OTS status) under `.xvcache/proofs/<note path>/<batch id>.json` (next to the journal by default, or `XVCACHE_DATA`).
 
-`verify_proof(path | proof)` returns **V** (the note existed exactly like this at `genTime`) or **X** (note changed, Merkle path broken, token not over this root, bad TSA signature, or bad OTS anchor), with each check detailed. TSA signatures are checked with `openssl ts -verify` against the provider's root certificate; a pending OTS anchor is upgraded from the calendars and checked against the Bitcoin block header when online (`online: false` skips the network).
+`verify_proof(path | proof)` returns **V** (the note existed exactly like this at `genTime`) or **X** (note changed, Merkle path broken, token not over this root, bad TSA signature, or bad OTS anchor), with each check detailed. TSA signatures are checked with `openssl ts -verify` against the provider's certificate chain; a pending OTS anchor is upgraded from the calendars and checked against the Bitcoin block header when online (`online: false` skips the network).
 
-Configuration (environment only, never hardcode secrets):
+### Qualified eIDAS timestamping via Certigna
+
+By default, Layer A uses **FreeTSA** (`https://freetsa.org/tsr`): a real RFC 3161 token, useful for tests, but **not a qualified eIDAS timestamp** (no legal presumption).
+
+To request a **qualified electronic timestamp**, set the provider to [Certigna](https://www.certigna.com/) (Dhimyotis), a qualified trust service provider listed by ANSSI:
+
+- Endpoint: `https://timestamp.dhimyotis.com/api/v1/`
+- Timestamp policy OID: `1.2.250.1.177.2.9.1`
+- The TSA certificate chain used by `openssl ts -verify` is bundled: `certs/certigna-chain.pem` (trust anchors) and `certs/certigna-untrusted.pem` (intermediates), taken from [Certigna's CA page](https://www.certigna.com/autorites-de-certification/). Override with `XVCACHE_TSA_CA_FILE` / `XVCACHE_TSA_UNTRUSTED_FILE` if needed.
+- `qualified: true` appears on the proof only when this provider is configured. After `verify_proof`, `qualified_confirmed` is true only if the token signature and chain also verify.
+
+Put `XVCACHE_TSA_PROVIDER=certigna` and `XVCACHE_TSA_USER` in a gitignored `.env.local` (see `.env.example`). Quote the user if it contains `#` or spaces; HTTP Basic Auth is sent as UTF-8. Set `XVCACHE_TSA_PASSWORD` in the **environment only** — never in a file, in git, or in a proof. The server and `npm run demo:certify` load that local file, then read the password from the process environment.
+
+A qualifying token supports the eIDAS article 41 presumption of an accurate date and of integrity of the **stamped hash**, provided the token and chain verify. That is existence and integrity of the Merkle root at `genTime`. It is not registered mail (it does not prove sending or receipt), not legal advice, and not recognised as a single global standard outside the EU. The OpenTimestamps layer remains a public, jurisdiction-neutral anchor of the same root.
+
+Configuration (environment and gitignored `.env.local`; never hardcode secrets):
 
 | Variable | Meaning |
 |---|---|
 | `XVCACHE_TSA_PROVIDER` | `freetsa` (default, test, non qualifié), `certigna` (qualified eIDAS), `custom`, or `off` |
 | `XVCACHE_TSA_URL` | RFC 3161 endpoint override (Certigna default: `https://timestamp.dhimyotis.com/api/v1/`) |
-| `XVCACHE_TSA_USER` / `XVCACHE_TSA_PASSWORD` | HTTP Basic credentials of the TSA user account (Certigna "compte utilisateur Horodatage") |
+| `XVCACHE_TSA_USER` / `XVCACHE_TSA_PASSWORD` | HTTP Basic credentials of the TSA user account (Certigna "compte utilisateur Horodatage"). Password: environment only |
 | `XVCACHE_TSA_CA_FILE` | PEM roots used to verify the TSA signature (FreeTSA and Certigna roots are bundled in `certs/`) |
 | `XVCACHE_TSA_UNTRUSTED_FILE` | Intermediate CA certs for chain building (Certigna intermediates are bundled in `certs/certigna-untrusted.pem`) |
 | `XVCACHE_OTS` | `on` (default) or `off` |
 | `XVCACHE_DATA` | Folder for the queue, batches and proofs |
 
-Certified proofs are the **paid feature** (price TBD, payment not live); local V/X with `verify_journal` stays free. A qualified timestamp proves **existence and integrity at a date**; it is not registered mail (it does not prove sending or receipt) and not legal advice. Outside the EU no single timestamp is recognised everywhere; the OpenTimestamps layer gives a public, jurisdiction-neutral anchor of the same root.
+Certified proofs are the **paid feature** (price TBD, payment not live); local V/X with `verify_journal` stays free.
 
-Demo: `npm run demo:certify` (temp vault, 3 notes, one timestamp, V, tamper one note, X).
+Demo: `npm run demo:certify` (3 notes, one timestamp, V, tamper one note, X). Add `-- --keep-dir=/path` to keep the vault, journal and proofs.
 
 ## License and trademark
 
