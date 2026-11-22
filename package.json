@@ -1,0 +1,63 @@
+{
+  "name": "xvcache-mcp",
+  "version": "0.1.0",
+  "description": "Local MCP server: sha256-chained Markdown vault journal. Verdicts V (intact) and X (modified outside XVcache).",
+  "type": "module",
+  "main": "dist/server.js",
+  "bin": {
+    "xvcache-mcp": "dist/server.js"
+  },
+  "mcpName": "io.github.xvcache/xvcache",
+  "files": [
+    "dist/server.js",
+    "dist/journal.js",
+    "dist/verify-journal.js",
+    "dist/plans.js",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "TRADEMARK.md",
+    "SECURITY.md",
+    "server.json",
+    "plans.json",
+    "AGENTS.md",
+    "llms.txt"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x dist/server.js",
+    "start": "node dist/server.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js",
+    "verify-journal": "node dist/verify-journal.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "stdio",
+    "journal",
+    "integrity",
+    "markdown",
+    "vault",
+    "xvcache"
+  ],
+  "author": "Julien Dietemann",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xvcache/xvcache.git"
+  },
+  "homepage": "https://github.com/xvcache/xvcache#readme",
+  "bugs": {
+    "url": "https://github.com/xvcache/xvcache/issues"
+  }
+}

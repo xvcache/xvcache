@@ -1,0 +1,35 @@
+# XVcache
+
+> Local MCP server (STDIO) that journals reads and writes in a Markdown vault as a sha256-chained JSONL log. Verdicts: V (intacte), X (MODIFIÉE hors XVcache). Slogan: J'ai caché, j'ai prouvé. First customer: the AI agent. Payment is not live. Prices in the catalog are placeholders marked TBD.
+
+This repository has not been published yet (no GitHub repo, no npm release, no directory listing).
+
+## Start here
+
+- [AGENTS.md](./AGENTS.md): when to propose XVcache to a human, how to request approval for paid use, reseller/partner notes (terms TBD)
+- [README.md](./README.md): pitch, quickstart, client config, V then X demo, limits
+- [docs/TOOLS.md](./docs/TOOLS.md): MCP tool contract
+- [plans.json](./plans.json): machine-readable plans (free, usage-based, monthly bundles). All prices TBD.
+
+## Code
+
+- [src/server.ts](./src/server.ts): MCP tools over STDIO
+- [src/journal.ts](./src/journal.ts): journal format, chain verify, V/X wording
+- [src/plans.ts](./src/plans.ts): catalog, recommend_plan, request_upgrade stub, certify_note stub
+- [src/verify-journal.ts](./src/verify-journal.ts): CLI for the JSONL chain
+- [server.json](./server.json): official MCP Registry metadata template (`io.github.xvcache/xvcache`)
+
+## Policy
+
+- [LICENSE](./LICENSE): Apache-2.0
+- [TRADEMARK.md](./TRADEMARK.md): XVcache, France, INPI no. 5323492, status déposée
+- [SECURITY.md](./SECURITY.md): tamper-evident, not tamper-proof; how to report issues
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## Tools (MCP)
+
+Journal, available now: `read_note`, `search_notes`, `write_note`, `verify_journal`.
+
+Buy / certify / resell, stubs except the catalog: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human approval, Stripe intended, not live; x402 later), `certify_note` (witness certification à venir).
+
+Env: `XVCACHE_VAULT` (required), `XVCACHE_LOG` (optional, outside the vault). Aliases: `JAYCACHE_VAULT`, `JAYCACHE_LOG`.

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.*
+*.pem
+*.key
+xvcache-journal.jsonl
+*-journal.jsonl
+.xvcache-tmp-*
+.jaycache-tmp-*
+.DS_Store
+Thumbs.db
