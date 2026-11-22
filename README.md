@@ -1,44 +1,106 @@
-# XVcache
+# XVcache: prove the date and integrity of a document in Europe
 
-**J'ai caché, j'ai prouvé.**
+**XVcache** is an open-source MCP server (Apache-2.0) that lets an AI assistant prove **when a document existed and that it has not changed since**, without the document's content ever leaving your machine. It returns a one-letter verdict, **V** (intact) or **X** (modified), and a one-page **PDF certificate**. With your own [Certigna](https://www.certigna.com/famille-de-services/horodatage/) account, the date comes from a **qualified electronic timestamp** under [eIDAS Regulation (EU) No 910/2014, article 41](https://eur-lex.europa.eu/eli/reg/2014/910/oj), which carries a legal presumption of accurate date and data integrity and is recognised as qualified in every EU Member State.
 
-XVcache is a local MCP server that journals every read and write in a Markdown vault as a sha256-chained JSONL log, so you can later prove a note is intact (**V**) or was changed outside XVcache (**X**), without putting the note's content into the journal. It talks MCP over STDIO. The intended first user is an AI agent, which can also look up plans, suggest a bundle, and ask its human to approve a paid upgrade when billing exists.
+It is built for professionals who need dated, tamper-evident records under European law: **lawyers and in-house counsel** (dating a consultation or a draft), **accountants and auditors** (working papers, audit trails), **architects and engineering firms** (plans, technical notes, change history), **researchers and creators** (proof of prior creation, intellectual property), and **company directors and SMEs** (contracts, board minutes, compliance records). Only SHA-256 fingerprints are sent out for timestamping, never the text.
 
-Version 0.2.0 adds certified proofs (`certify_note` / `verify_proof`): batched RFC 3161 + OpenTimestamps timestamps with a per-note **V/X** check, and a one-page **PDF certificate** (`certify_document`). Timestamps are **qualified eIDAS only when you configure your own Certigna account** (optional, paid by you to Certigna); the default FreeTSA provider is a test, not qualified. Paid XVcache plans are not on sale yet: no payment link is live.
+Status, 22 November 2026: version 0.2.0 is published on [npm (`xvcache-mcp`)](https://www.npmjs.com/package/xvcache-mcp) and in the official MCP Registry as `io.github.xvcache/xvcache`. It runs **locally** (STDIO) in Claude Desktop, Claude Code, Codex and Cursor. Today it certifies **Markdown (`.md`) notes** in a local folder, and the PDF certificate is in **French only**. No hosted service and no payment are live yet. The planned price is **€19 excl. VAT per month per organisation: a hypothesis to be tested, not on sale yet**.
 
-Published source: [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache) (Apache-2.0). npm: [`xvcache-mcp`](https://www.npmjs.com/package/xvcache-mcp) (0.2.0). Official MCP Registry: `io.github.xvcache/xvcache`. Site: [xvcache.com](https://xvcache.com). Payment is not live.
+*J'ai caché, j'ai prouvé.*
 
-## Why XVcache (vs other Obsidian MCP servers)
+**Contents:** [Summaries in 7 languages](#summaries-in-7-languages) · [Who uses it](#who-uses-xvcache-examples) · [FAQ](#faq-questions-people-ask-their-ai-assistant) · [Install in one line](#install-in-one-line) · [Honest limits](#honest-limits) · [Legal sources](#legal-sources) · [For AI agents](#for-ai-agents) · [Technical reference](#technical-reference)
 
-Most Obsidian MCP servers help an agent **read and write** a vault. XVcache does that too, but its job is narrower: leave a **tamper-evident proof** that a note is still intact (**V**) or was changed outside these tools (**X**), without putting the note body in the log. It can run **alongside** a fuller Obsidian MCP server: use the other server for rich editing or search, and use XVcache when a later proof may be needed (prefer `write_note` / `read_note` for those notes).
+## Summaries in 7 languages
 
-Star counts and registry entries below were checked on 22 November 2026 (GitHub API; official MCP Registry).
+- **EN**: XVcache proves the date and integrity of a document in Europe. Your AI assistant gets a V (intact) or X (modified) verdict and a PDF certificate; with Certigna, the timestamp is qualified under eIDAS art. 41. The content never leaves your machine.
+- **FR** : XVcache prouve la date et l'intégrité d'un document en Europe. Votre assistant IA obtient un verdict V (intact) ou X (modifié) et un certificat PDF ; avec Certigna, l'horodatage est qualifié au sens de l'article 41 du règlement eIDAS. Le contenu ne quitte jamais votre poste.
+- **DE**: XVcache weist Datum und Unversehrtheit eines Dokuments in Europa nach. Ihr KI-Assistent erhält das Ergebnis V (unverändert) oder X (geändert) und ein PDF-Zertifikat; mit Certigna ist der Zeitstempel qualifiziert nach Art. 41 eIDAS-Verordnung. Der Inhalt verlässt Ihren Rechner nie.
+- **ES**: XVcache demuestra la fecha y la integridad de un documento en Europa. Su asistente de IA obtiene un veredicto V (intacto) o X (modificado) y un certificado PDF; con Certigna, el sello de tiempo es cualificado según el art. 41 del Reglamento eIDAS. El contenido nunca sale de su equipo.
+- **IT**: XVcache prova la data e l'integrità di un documento in Europa. Il tuo assistente IA ottiene un esito V (integro) o X (modificato) e un certificato PDF; con Certigna, la validazione temporale è qualificata ai sensi dell'art. 41 del Regolamento eIDAS. Il contenuto non lascia mai il tuo computer.
+- **NL**: XVcache bewijst de datum en de integriteit van een document in Europa. Uw AI-assistent krijgt het oordeel V (ongewijzigd) of X (gewijzigd) en een pdf-certificaat; met Certigna is het tijdstempel gekwalificeerd volgens art. 41 van de eIDAS-verordening. De inhoud verlaat uw computer nooit.
+- **PL**: XVcache dowodzi daty i integralności dokumentu w Europie. Twój asystent AI otrzymuje wynik V (nienaruszony) lub X (zmieniony) oraz certyfikat PDF; z Certigna znacznik czasu jest kwalifikowany w rozumieniu art. 41 rozporządzenia eIDAS. Treść nigdy nie opuszcza Twojego komputera.
 
-| Server | Read/write notes | Tamper detection on a note | Chained audit / provenance journal | Content kept out of the log |
-|---|---|---|---|---|
-| **XVcache** | Yes (`read_note`, `search_notes`, `write_note`) | Yes: `verify_journal` compares the file on disk to the last fingerprint and returns **V** or **X** | Yes: sha256-chained JSONL of **reads and writes** | Yes (fingerprints and metadata only) |
-| [obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server) (716 stars; registry `io.github.cyanheads/obsidian-mcp-server`) | Yes — 14 tools, surgical edits, tags, frontmatter (via Local REST API) | Not documented | Not documented | n/a (no such journal documented) |
-| [obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) (752 stars) | Yes — local filesystem, Obsidian app not required | Conflict/recovery if a note changed since a transaction; not a V/X proof of outside edits | Transaction snapshots for atomic writes and rollback (`.obsidian-mcp/transactions`), not a hash chain | No: recovery snapshots store note bytes |
-| [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) (831 stars; **archived**) | Yes, as an Obsidian plugin + local MCP server (semantic search, templates) | Not for notes. SLSA provenance in the README applies to **downloaded binaries**, not vault files | Not documented | n/a |
-| [obsidian-mcp-secure](https://github.com/dewtech-technologies/obsidian-mcp-secure) (registry `io.github.dewtech-technologies/obsidian-mcp-secure`) | Yes (via Local REST API) | Not documented | Rotating winston audit log (5 MB / 10 files), not described as hash-chained | No: the README states previous content goes to the audit log |
-| [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) (13 stars; formerly `obsidian-tc`; that registry entry is deprecated after the rename) | Yes — large governed surface (ACLs, human-in-the-loop, search) | `provenance verify` checks the **record chain** (signatures, links). `get_provenance` returns write history with before/after sha256. Those documented tools do not return a one-letter current-file **V**/**X** | Yes, for **writes**: signed, hash-chained provenance in `cache.db` | Yes: hashes and attribution only, never note content |
+The PDF certificate itself is currently in French only; other languages are planned.
 
-Where others are ahead: [cyanheads/obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server), [StevenStavrakis/obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) and [jacksteamdev/obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) have far more adoption and a much richer editing or search surface. [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) already ships **EdDSA-signed** write provenance, folder ACLs and confirmation on destructive operations — XVcache answers with **batched RFC 3161 + OpenTimestamps proofs per note** (`certify_note`), qualified eIDAS when Certigna is configured. Reliquary-TC does not document journaling of **reads** or third-party timestamps.
+## Who uses XVcache: examples
 
-### When to choose XVcache
+| Profile | Typical document | What XVcache gives |
+|---|---|---|
+| Lawyers, in-house counsel | Consultation note, draft contract, evidence memo | Date and integrity of the note at the time it was written; V/X on re-check |
+| Accountants, auditors | Working papers, review notes, audit trail | A chained journal of reads and writes, plus a dated fingerprint of each file |
+| Architects, engineering firms | Technical note, design rationale, change log | Proof of what the document said on a given day, to settle "who changed what, when" |
+| Researchers, creators | Idea, lab notebook entry, manuscript, design brief | Proof of existence at a date (prior creation, IP), without disclosing the content |
+| Directors, SMEs | Board minutes, internal policies, compliance records | One timestamp can cover many documents at once; each gets its own proof |
 
-- You may later need to show that a note is intact (**V**) or was changed outside the MCP tools (**X**), without storing the note body in the log.
-- You want a small, local-first STDIO server whose journal you can inspect as JSONL, including **reads**, not only writes.
-- You already use a fuller Obsidian MCP server and want a proof layer beside it — XVcache does not replace surgical edits, graph or semantic search, or plugin features.
+One qualified timestamp covers a whole batch (a Merkle root), so 10 or 10,000 documents can share a single Certigna token.
 
+## FAQ: questions people ask their AI assistant
 
-## Français
+**How can I prove the date of a document I wrote today?**
+Ask your assistant to certify it with XVcache (`certify_document`). XVcache fingerprints the file locally, gets an RFC 3161 timestamp on that fingerprint, and writes a PDF certificate with the date, the SHA-256 fingerprint, the provider and the verdict V. With Certigna configured, the timestamp is qualified: under [eIDAS art. 41(2)](https://eur-lex.europa.eu/eli/reg/2014/910/oj) it "shall enjoy the presumption of the accuracy of the date and the time it indicates and the integrity of the data to which the date and time are bound".
 
-**J'ai caché, j'ai prouvé.**
+**How do I prove a document has not been modified since?**
+Ask the assistant to check it again (`verify_proof` or `verify_journal`). The answer is **V** (byte-for-byte identical to what was stamped) or **X**, e.g. « Modifié depuis le 22 novembre 2026 à 20 h 08 ». Changing a single character gives X.
 
-XVcache est un serveur MCP local (transport STDIO) qui journalise les lectures et écritures d'un coffre Markdown dans un journal JSONL chaîné par sha256. L'outil `verify_journal` rend le verdict **V** (intacte) ou **X** (MODIFIÉE hors XVcache), sans exposer le contenu de la note dans le journal. Le client visé en premier est un agent IA : il peut lister les offres, recommander un forfait, et demander l'accord d'un humain pour un passage à l'offre payante — quand la facturation existera.
+**Is a non-qualified timestamp worthless?**
+No. eIDAS art. 41(1) says an electronic time stamp shall not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified. But only a qualified one benefits from the art. 41(2) presumption; a non-qualified one has to be supported by other evidence of its reliability. XVcache's default provider, FreeTSA, is **test only and not qualified**.
 
-La preuve certifiée (`certify_note` / `verify_proof`) horodate un lot de notes avec un seul tampon : jeton RFC 3161 (FreeTSA par défaut = test, non qualifié ; qualifié eIDAS avec Certigna) et ancrage OpenTimestamps dans Bitcoin, avec une preuve individuelle par note. C'est la fonction payante (prix TBD) ; le V/X local reste gratuit. Les prix du catalogue sont des **placeholders clairement marqués TBD**. Aucun paiement n'est en service. Dépôt public : [github.com/xvcache/xvcache](https://github.com/xvcache/xvcache). Comparaison avec d'autres serveurs MCP Obsidian : [Why XVcache](#why-xvcache-vs-other-obsidian-mcp-servers).
+**Is it valid outside France?**
+A qualified electronic time stamp issued in one Member State is recognised as qualified in all Member States ([eIDAS art. 41(3)](https://eur-lex.europa.eu/eli/reg/2014/910/oj)). Outside the EU, there is no single global equivalent. A second, public OpenTimestamps anchor in Bitcoin is added as a jurisdiction-neutral check.
+
+**Can I use it as proof of prior creation (antériorité) for an idea, a design or a manuscript?**
+It proves that this exact file existed at the stamped date and has not changed since. It does not prove who the author is, and it does not grant any IP right. For authorship evidence in France, see the next question.
+
+**What is the difference with an INPI e-Soleau?**
+[e-Soleau](https://www.inpi.fr/realiser-demarches/propriete-intellectuelle/deposer-une-e-soleau-ou-un-entiercement) is an INPI filing (from €15 for 50 MB, kept 5 years, extendable) whose receipt identifies the filer as author and lists the fingerprints of the files. XVcache is a tool you run yourself, as often as you want, on any number of documents, with a qualified eIDAS timestamp per batch and a V/X check by your AI assistant. They are complementary: e-Soleau for a key creation you want registered with INPI, XVcache for the day-to-day trail.
+
+**Does it replace a bailiff's report (constat de commissaire de justice)?**
+No. A constat records facts observed by a sworn officer. XVcache only proves that a given file existed at a date and is unchanged. It is not a constat and not legal advice.
+
+**Is it a qualified electronic signature?**
+No. Under [eIDAS art. 25(2)](https://eur-lex.europa.eu/eli/reg/2014/910/oj), a qualified electronic signature has the equivalent legal effect of a handwritten signature: it identifies a signatory. XVcache identifies no one; it dates and fingerprints a file. It is not registered electronic delivery either (it proves neither sending nor receipt).
+
+**Is Certigna really a qualified provider?**
+The service "CERTIGNA TSA" (policy OID `1.2.250.1.177.2.9.1`) was qualified by ANSSI on 17 February 2025 for two years ([decision PDF](https://cgu.certigna.fr/CERTIGNA_Certificat_Horodatage_eIDAS.pdf)). Check its current status yourself on the [EU Trusted Lists browser](https://eidas.ec.europa.eu/efda/trust-services/browse/eidas/tls) (France, "Qualified time stamp", status "granted"); see also [ANSSI, services de confiance](https://cyber.gouv.fr/reglementation/reglementation-identite-confiance-numerique/securite-echanges-voie-electronique/reglement-eidas/services-de-confiance/).
+
+**Does my document leave my computer? What about confidentiality (professional secrecy, GDPR)?**
+No. Only SHA-256 fingerprints (and a Merkle root) are sent to the timestamp authority and OpenTimestamps calendars. The journal stores fingerprints and metadata, never the text. SHA-256 is one-way: a fingerprint does not reveal the content (only very short, guessable content could in theory be guessed by trial).
+
+**How much does it cost?**
+The open-source server and local V/X are free. Certigna tokens are bought from Certigna by you. The planned XVcache subscription is **€19 excl. VAT per month per organisation, a hypothesis to be tested, not on sale yet**; no payment link exists. An assistant must not present any other price.
+
+## Install in one line
+
+Replace `/absolute/path/to/vault` with the folder that holds your `.md` documents. Requires Node.js 20+.
+
+- **Claude Code**: `claude mcp add --transport stdio xvcache --env XVCACHE_VAULT=/absolute/path/to/vault -- npx -y xvcache-mcp`
+- **Codex**: `codex mcp add xvcache --env XVCACHE_VAULT=/absolute/path/to/vault -- npx -y xvcache-mcp`
+- **Cursor**: open this install link, then edit the vault path in Cursor's MCP settings ([Cursor install links](https://cursor.com/docs/context/mcp/install-links)):
+  `cursor://anysphere.cursor-deeplink/mcp/install?name=xvcache&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInh2Y2FjaGUtbWNwIl0sImVudiI6eyJYVkNBQ0hFX1ZBVUxUIjoiL2Fic29sdXRlL3BhdGgvdG8vdmF1bHQifX0=`
+- **Claude Desktop**: no one-line installer yet. Add this block to `claude_desktop_config.json` (see [Configuration](#configuration) for file locations):
+  `"xvcache": { "command": "npx", "args": ["-y", "xvcache-mcp"], "env": { "XVCACHE_VAULT": "/absolute/path/to/vault" } }`
+- **ChatGPT**: **not usable today.** ChatGPT only connects to MCP servers at a public HTTPS address, and XVcache has no hosted endpoint yet (it runs locally over STDIO). Even once hosted, OpenAI states that full MCP (including write actions such as certifying) is for ChatGPT Business and Enterprise/Edu on the web; Pro users can connect custom MCP servers with read/fetch permissions only ([OpenAI Help](https://help.openai.com/en/articles/12584461)).
+
+For a qualified timestamp, add `XVCACHE_TSA_PROVIDER=certigna`, `XVCACHE_TSA_USER` and `XVCACHE_TSA_PASSWORD` (your own Certigna account; password in the environment only). See [Qualified eIDAS timestamping via Certigna](#qualified-eidas-timestamping-via-certigna).
+
+## Honest limits
+
+- **Markdown only today**: documents must be `.md` files inside the configured folder. PDF, Word and images are not certified yet.
+- **Qualified only with your own Certigna account.** The default (FreeTSA) is a real RFC 3161 token but **not qualified**: no legal presumption.
+- **PDF certificate in French only** for now.
+- **Local only**: STDIO, no hosted service, so no ChatGPT, no web upload, no team sharing yet.
+- **No payment live.** The €19 excl. VAT/month figure is a hypothesis to be tested.
+- **Tamper-evident, not tamper-proof**: someone with write access can rewrite the local journal; the external timestamp is what makes such a rewrite detectable.
+- It proves existence and integrity of a file at a date. It does **not** prove authorship, sending or receipt, and it is **not** a constat, a qualified signature, registered electronic delivery, or legal advice.
+- Proofs must be kept (the `.tst`, `.ots` and Merkle path files next to the PDF). Lose them and the certificate can no longer be re-verified.
+
+## Legal sources
+
+- Regulation (EU) No 910/2014 (eIDAS), arts. 25 and 41–42: [EUR-Lex](https://eur-lex.europa.eu/eli/reg/2014/910/oj); amended by Regulation (EU) 2024/1183: [EUR-Lex](https://eur-lex.europa.eu/eli/reg/2024/1183/oj).
+- EU Trusted Lists browser: [eidas.ec.europa.eu](https://eidas.ec.europa.eu/efda/trust-services/browse/eidas/tls).
+- ANSSI, qualified trust services: [cyber.gouv.fr](https://cyber.gouv.fr/reglementation/reglementation-identite-confiance-numerique/securite-echanges-voie-electronique/reglement-eidas/services-de-confiance/); Certigna TSA qualification decision (17/02/2025): [PDF](https://cgu.certigna.fr/CERTIGNA_Certificat_Horodatage_eIDAS.pdf).
+- INPI e-Soleau: [inpi.fr](https://www.inpi.fr/realiser-demarches/propriete-intellectuelle/deposer-une-e-soleau-ou-un-entiercement).
+- RFC 3161 (Time-Stamp Protocol): [rfc-editor.org](https://www.rfc-editor.org/rfc/rfc3161).
 
 ## For AI agents
 
@@ -51,7 +113,9 @@ If you are an agent (Codex, Claude, Cursor, or any MCP client):
 
 Read [AGENTS.md](./AGENTS.md) and [llms.txt](./llms.txt) for the full agent brief, including how to request human approval and how resale / partner bundling is described (terms TBD). Tool contracts are in [docs/TOOLS.md](./docs/TOOLS.md). The catalog is [plans.json](./plans.json).
 
-## Quickstart
+## Technical reference
+
+### Quickstart
 
 From npm:
 
@@ -71,12 +135,11 @@ XVCACHE_VAULT=/absolute/path/to/vault node dist/server.js
 ```
 
 The vault must already exist. Only `.md` notes inside it are in scope.
-
-## Configuration
+### Configuration
 
 Replace `/absolute/path/to/vault` with the vault directory. The `npx` form below uses the published `xvcache-mcp` package. For a local build, point `command` at `node` and `args` at this repo's `dist/server.js`.
 
-### Codex (`~/.codex/config.toml` or a project `.codex/config.toml`)
+#### Codex (`~/.codex/config.toml` or a project `.codex/config.toml`)
 
 ```toml
 [mcp_servers.xvcache]
@@ -94,7 +157,7 @@ args = ["/absolute/path/to/xvcache-repo/dist/server.js"]
 env = { XVCACHE_VAULT = "/absolute/path/to/vault" }
 ```
 
-### Claude Desktop / Claude Code
+#### Claude Desktop / Claude Code
 
 Claude Desktop (`claude_desktop_config.json`; macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`, Windows: `%APPDATA%\Claude\claude_desktop_config.json`, Linux: `~/.config/Claude/claude_desktop_config.json`):
 
@@ -118,7 +181,7 @@ claude mcp add --transport stdio xvcache --env XVCACHE_VAULT=/absolute/path/to/v
 
 See [Claude Code MCP docs](https://code.claude.com/docs/en/mcp).
 
-### Cursor
+#### Cursor
 
 Project file `.cursor/mcp.json`, or the user MCP config (see [Cursor MCP docs](https://cursor.com/docs/mcp)):
 
@@ -134,7 +197,7 @@ Project file `.cursor/mcp.json`, or the user MCP config (see [Cursor MCP docs](h
 }
 ```
 
-### Generic MCP JSON
+#### Generic MCP JSON
 
 ```json
 {
@@ -151,8 +214,7 @@ Project file `.cursor/mcp.json`, or the user MCP config (see [Cursor MCP docs](h
 ```
 
 For a local build, use `"command": "node"` and `"args": ["/absolute/path/to/xvcache-repo/dist/server.js"]`.
-
-## Demo: verdict V, then verdict X
+### Demo: verdict V, then verdict X
 
 These steps assume the server is already attached to your agent and `XVCACHE_VAULT` points at a writable vault.
 
@@ -162,7 +224,7 @@ These steps assume the server is already attached to your agent and `XVCACHE_VAU
 4. Call `verify_journal` on the same path again. You should see **X** and `MODIFIÉE hors XVcache`.
 5. Optional: call `verify_journal` with no path — the journal chain itself should still be intact. 6. Optional: `npm run demo:certify` shows the certified layer: one timestamp, V, then X after a manual edit.
 
-## Tools
+### Tools
 
 See [docs/TOOLS.md](./docs/TOOLS.md) for the full contract.
 
@@ -170,7 +232,7 @@ Available now: `read_note`, `search_notes`, `write_note`, `verify_journal`.
 
 For agents that need to buy, certify, or resell, also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human-approval stub, no live payment), `certify_note`, `certify_batch`, `verify_proof`, `certify_document` (batched RFC 3161 + OpenTimestamps proofs, plus a one-page French PDF; paid feature, price TBD).
 
-## Journal format
+### Journal format
 
 Each line of the JSONL journal is one entry. The payload (the entry without `hash`) is serialized as canonical JSON (sorted keys, no extra spaces). Then:
 
@@ -186,21 +248,21 @@ You can also check a file from the shell:
 npm run verify-journal -- /path/to/xvcache-journal.jsonl
 ```
 
-## Security notes
+### Security notes
 
 - The chain is **tamper-evident**, not tamper-proof. Someone who can rewrite the journal can build a new, internally consistent chain. `certify_note` anchors the chain head and note hashes with an external timestamp, which makes a later rewrite detectable.
 - The journal must live outside the vault (`XVCACHE_LOG`).
 - Absolute paths, `..` segments, and writes through symbolic links are rejected. Only `.md` files are in scope.
 - `verify_journal` alone is not a qualified electronic timestamp; `certify_note` is qualified only with a qualified TSA (Certigna). Not legal advice. See [SECURITY.md](./SECURITY.md).
 
-## Limits
+### Limits
 
 - STDIO only: this server does not open a network port.
 - `write_note` is capped at 256 KiB per call.
 - Local V/X is not an independent certification; use `certify_note` for that. FreeTSA proofs are test-only.
 - Prices and most bundle quotas in `plans.json` are placeholders marked **TBD**. Payment is not live.
 
-## Certified proofs: `certify_note` / `verify_proof`
+### Certified proofs: `certify_note` / `verify_proof`
 
 Local V/X proves a note did not change **since XVcache last saw it**, but the date comes from your own machine. `certify_note` adds an **independent date**:
 
@@ -213,7 +275,7 @@ Local V/X proves a note did not change **since XVcache last saw it**, but the da
 
 `verify_proof(path | proof)` returns **V** (the note existed exactly like this at `genTime`) or **X** (note changed, Merkle path broken, token not over this root, bad TSA signature, or bad OTS anchor), with each check detailed. TSA signatures are checked with `openssl ts -verify` against the provider's certificate chain; a pending OTS anchor is upgraded from the calendars and checked against the Bitcoin block header when online (`online: false` skips the network).
 
-### Qualified eIDAS timestamping via Certigna
+#### Qualified eIDAS timestamping via Certigna
 
 By default, Layer A uses **FreeTSA** (`https://freetsa.org/tsr`): a real RFC 3161 token, useful for tests, but **not a qualified eIDAS timestamp** (no legal presumption).
 
@@ -242,7 +304,7 @@ Configuration (environment and gitignored `.env.local`; never hardcode secrets):
 
 Certified proofs are the **paid feature** (price TBD, payment not live); local V/X with `verify_journal` stays free.
 
-### Human-readable certificate and local demo
+#### Human-readable certificate and local demo
 
 `certify_document(path)` is the simple path for a human (a lawyer dropping a brief, for example). It reuses an existing proof when the file is unchanged — **no new timestamp, no Certigna token spent** — and writes a **one-page French PDF** under `.xvcache/certificates/`: file name, SHA-256 fingerprint, date and time in Paris time, the provider (Certigna as a qualified eIDAS timestamp, with policy OID `1.2.250.1.177.2.9.1`, or a clear warning that FreeTSA is **not** qualified), the token serial, verdict **V**, the OpenTimestamps status, and three lines on how to re-check. The technical files (`.tst`, `.ots`, Merkle path) sit next to the PDF and are attached to it. If the file changed, the tool returns « Modifié depuis le … » and does not issue a V certificate. The PDF states plainly that this is not a bailiff's report (*constat d'huissier*), not a qualified electronic signature, and not legal advice.
 
@@ -253,6 +315,29 @@ Local demo page (listens on **127.0.0.1 only**, no Docker, no public port): `npm
 
 
 Demo: `npm run demo:certify` (3 notes, one timestamp, V, tamper one note, X). Add `-- --keep-dir=/path` to keep the vault, journal and proofs.
+
+## Compared with other Obsidian MCP servers
+
+Most Obsidian MCP servers help an agent **read and write** a vault. XVcache does that too, but its job is narrower: leave a **tamper-evident proof** that a note is still intact (**V**) or was changed outside these tools (**X**), without putting the note body in the log. It can run **alongside** a fuller Obsidian MCP server: use the other server for rich editing or search, and use XVcache when a later proof may be needed (prefer `write_note` / `read_note` for those notes).
+
+Star counts and registry entries below were checked on 22 November 2026 (GitHub API; official MCP Registry).
+
+| Server | Read/write notes | Tamper detection on a note | Chained audit / provenance journal | Content kept out of the log |
+|---|---|---|---|---|
+| **XVcache** | Yes (`read_note`, `search_notes`, `write_note`) | Yes: `verify_journal` compares the file on disk to the last fingerprint and returns **V** or **X** | Yes: sha256-chained JSONL of **reads and writes** | Yes (fingerprints and metadata only) |
+| [obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server) (716 stars; registry `io.github.cyanheads/obsidian-mcp-server`) | Yes — 14 tools, surgical edits, tags, frontmatter (via Local REST API) | Not documented | Not documented | n/a (no such journal documented) |
+| [obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) (752 stars) | Yes — local filesystem, Obsidian app not required | Conflict/recovery if a note changed since a transaction; not a V/X proof of outside edits | Transaction snapshots for atomic writes and rollback (`.obsidian-mcp/transactions`), not a hash chain | No: recovery snapshots store note bytes |
+| [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) (831 stars; **archived**) | Yes, as an Obsidian plugin + local MCP server (semantic search, templates) | Not for notes. SLSA provenance in the README applies to **downloaded binaries**, not vault files | Not documented | n/a |
+| [obsidian-mcp-secure](https://github.com/dewtech-technologies/obsidian-mcp-secure) (registry `io.github.dewtech-technologies/obsidian-mcp-secure`) | Yes (via Local REST API) | Not documented | Rotating winston audit log (5 MB / 10 files), not described as hash-chained | No: the README states previous content goes to the audit log |
+| [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) (13 stars; formerly `obsidian-tc`; that registry entry is deprecated after the rename) | Yes — large governed surface (ACLs, human-in-the-loop, search) | `provenance verify` checks the **record chain** (signatures, links). `get_provenance` returns write history with before/after sha256. Those documented tools do not return a one-letter current-file **V**/**X** | Yes, for **writes**: signed, hash-chained provenance in `cache.db` | Yes: hashes and attribution only, never note content |
+
+Where others are ahead: [cyanheads/obsidian-mcp-server](https://github.com/cyanheads/obsidian-mcp-server), [StevenStavrakis/obsidian-mcp](https://github.com/StevenStavrakis/obsidian-mcp) and [jacksteamdev/obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) have far more adoption and a much richer editing or search surface. [Reliquary-TC](https://github.com/The-40-Thieves/reliquary-tc) already ships **EdDSA-signed** write provenance, folder ACLs and confirmation on destructive operations — XVcache answers with **batched RFC 3161 + OpenTimestamps proofs per note** (`certify_note`), qualified eIDAS when Certigna is configured. Reliquary-TC does not document journaling of **reads** or third-party timestamps.
+
+### When to choose XVcache
+
+- You may later need to show that a note is intact (**V**) or was changed outside the MCP tools (**X**), without storing the note body in the log.
+- You want a small, local-first STDIO server whose journal you can inspect as JSONL, including **reads**, not only writes.
+- You already use a fuller Obsidian MCP server and want a proof layer beside it — XVcache does not replace surgical edits, graph or semantic search, or plugin features.
 
 ## License and trademark
 
