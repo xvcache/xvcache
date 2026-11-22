@@ -218,7 +218,8 @@ Configuration (environment only, never hardcode secrets):
 | `XVCACHE_TSA_PROVIDER` | `freetsa` (default, test, non qualifié), `certigna` (qualified eIDAS), `custom`, or `off` |
 | `XVCACHE_TSA_URL` | RFC 3161 endpoint override (Certigna default: `https://timestamp.dhimyotis.com/api/v1/`) |
 | `XVCACHE_TSA_USER` / `XVCACHE_TSA_PASSWORD` | HTTP Basic credentials of the TSA user account (Certigna "compte utilisateur Horodatage") |
-| `XVCACHE_TSA_CA_FILE` | PEM root/chain used to verify the TSA signature (FreeTSA root is bundled in `certs/`) |
+| `XVCACHE_TSA_CA_FILE` | PEM roots used to verify the TSA signature (FreeTSA and Certigna roots are bundled in `certs/`) |
+| `XVCACHE_TSA_UNTRUSTED_FILE` | Intermediate CA certs for chain building (Certigna intermediates are bundled in `certs/certigna-untrusted.pem`) |
 | `XVCACHE_OTS` | `on` (default) or `off` |
 | `XVCACHE_DATA` | Folder for the queue, batches and proofs |
 

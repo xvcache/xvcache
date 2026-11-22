@@ -1,10 +1,10 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { promises as fs } from "node:fs";
+import { promises as fs, existsSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { Certifier, certifyConfigFromEnv, type Proof } from "./certify.js";
-import { resolveTsaProvider, type TsaProvider } from "./tsa.js";
+import { resolveTsaProvider, requestTimestamp, type TsaProvider } from "./tsa.js";
 import { JournalWriter, sha256Hex } from "./journal.js";
 import { startFakeTsa, type FakeTsa } from "./test-tsa.js";
 
@@ -43,6 +43,10 @@ test("provider selection: FreeTSA by default (not qualified), Certigna needs cre
   assert.equal(cg.id, "certigna");
   assert.equal(cg.qualified, true);
   assert.equal(cg.url, "https://timestamp.dhimyotis.com/api/v1/");
+  assert.match(cg.caFile ?? "", /certs\/certigna-chain\.pem$/);
+  assert.ok(existsSync(cg.caFile!));
+  assert.match(cg.untrustedFile ?? "", /certs\/certigna-untrusted\.pem$/);
+  assert.ok(existsSync(cg.untrustedFile!));
   assert.equal(resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "off" }), null);
   const custom = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "custom", XVCACHE_TSA_URL: "http://x" }) as TsaProvider;
   assert.equal(custom.qualified, false);
@@ -172,4 +176,13 @@ test("TSA down -> error and notes stay pending", async () => {
   const b = await c.runBatch();
   assert.ok("error" in b);
   assert.equal((await c.pending()).length, 1);
+});
+
+test("Certigna HTTP errors: 401 credentials, 402 exhausted tokens", async () => {
+  const provider = resolveTsaProvider({ XVCACHE_TSA_USER: "u", XVCACHE_TSA_PASSWORD: "p" }) as TsaProvider;
+  const digest = "0".repeat(64);
+  const fail = (status: number) => async () => ({ ok: false, status, arrayBuffer: async () => new ArrayBuffer(0) });
+  await assert.rejects(() => requestTimestamp(provider, digest, { fetchImpl: fail(401) }), /HTTP 401 \(identifiants refusés\)/);
+  await assert.rejects(() => requestTimestamp(provider, digest, { fetchImpl: fail(403) }), /HTTP 403 \(identifiants refusés\)/);
+  await assert.rejects(() => requestTimestamp(provider, digest, { fetchImpl: fail(402) }), /HTTP 402 \(pack de jetons épuisé\)/);
 });

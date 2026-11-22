@@ -19,6 +19,8 @@
     "dist/ots.js",
     "dist/certify.js",
     "certs/freetsa-cacert.pem",
+    "certs/certigna-chain.pem",
+    "certs/certigna-untrusted.pem",
     "LICENSE",
     "NOTICE",
     "README.md",

@@ -64,7 +64,6 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
     if (!env.XVCACHE_TSA_USER || !env.XVCACHE_TSA_PASSWORD) {
       return { error: "Certigna : XVCACHE_TSA_USER et XVCACHE_TSA_PASSWORD sont requis (compte utilisateur Horodatage)." };
     }
-    const bundled = path.join(certsDir(), "certigna-chain.pem");
     return {
       id: "certigna",
       label: "Certigna (horodatage qualifié eIDAS)",
@@ -73,10 +72,11 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
       qualifiedBasis: "Certigna est prestataire de services de confiance qualifié (ANSSI) pour l'horodatage électronique : présomption d'exactitude de la date et d'intégrité (eIDAS, art. 41).",
       user: env.XVCACHE_TSA_USER,
       password: env.XVCACHE_TSA_PASSWORD,
-      // TODO(certigna): ship certs/certigna-chain.pem (Certigna root + timestamping CA) once the
-      // account is open and the chain is checked against the published fingerprints.
-      caFile: caOverride ?? (existsSync(bundled) ? bundled : undefined),
-      untrustedFile: untrusted,
+      // Bundled public chain from https://www.certigna.com/autorites-de-certification/
+      // (fingerprints checked against that page). Override with XVCACHE_TSA_CA_FILE /
+      // XVCACHE_TSA_UNTRUSTED_FILE if needed.
+      caFile: caOverride ?? path.join(certsDir(), "certigna-chain.pem"),
+      untrustedFile: untrusted ?? path.join(certsDir(), "certigna-untrusted.pem"),
     };
   }
   if (wanted === "custom") {
@@ -198,7 +198,10 @@ export async function requestTimestamp(provider: TsaProvider, digestHex: string,
   const f: FetchLike = opts.fetchImpl ?? (fetch as unknown as FetchLike);
   const res = await f(provider.url, { method: "POST", headers, body, signal: AbortSignal.timeout(opts.timeoutMs ?? 20000) });
   if (!res.ok) {
-    const hint = res.status === 401 || res.status === 403 ? " (identifiants refusés ou pack de jetons épuisé)" : "";
+    // Certigna guide: 401/403 = bad credentials or forbidden; 402 = credits exhausted.
+    const hint = res.status === 401 || res.status === 403 ? " (identifiants refusés)"
+      : res.status === 402 ? " (pack de jetons épuisé)"
+      : "";
     throw new Error(`TSA ${provider.id} : HTTP ${res.status}${hint}.`);
   }
   return parseTimeStampResp(Buffer.from(await res.arrayBuffer()), digest, nonce);
