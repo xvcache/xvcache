@@ -10,7 +10,9 @@ import { canonicalJson } from "./journal.js";
 
 export type NoteLeaf = { k: "note"; p: string; h: string };
 export type JournalLeaf = { k: "journal"; seq: number; h: string };
-export type LeafData = NoteLeaf | JournalLeaf;
+/** Hosted witness (hash-only mode): the leaf binds the proof id and the document fingerprint, never a tenant or a label. */
+export type HashLeaf = { k: "hash"; id: string; h: string };
+export type LeafData = NoteLeaf | JournalLeaf | HashLeaf;
 
 export type MerkleStep = { position: "left" | "right"; hash: string };
 

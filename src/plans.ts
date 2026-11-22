@@ -206,7 +206,7 @@ export const DISABLED_BILLING: Billing = {
 export type UpgradeInput = { plan_id?: string; lang?: string; human_confirmed?: boolean; consent_quote?: string; email?: string };
 
 /** request_upgrade: refuses without explicit consent; never charges; returns a Checkout URL from the billing provider. */
-export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: Billing; pairingCode?: () => string } = {}): Promise<Record<string, unknown> & { ok: boolean; code?: string }> {
+export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: Billing; pairingCode?: () => string | Promise<string> } = {}): Promise<Record<string, unknown> & { ok: boolean; code?: string }> {
   const catalog = loadPlansCatalog();
   const planId = input.plan_id?.trim() || PAID_PLAN_ID;
   const pres = presentToClient({ lang: input.lang });
@@ -228,7 +228,7 @@ export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: 
       "Tell the human in one sentence that online subscription opens soon and that nothing was charged. Do not ask anything else. Free tools (verify_document, local journal) remain available.",
       { checkout_url: null, consent, payment_live: false });
   }
-  const pairing_code = deps.pairingCode?.();
+  const pairing_code = deps.pairingCode ? await deps.pairingCode() : undefined;
   try {
     const r = await billing.createCheckout({ plan_id: plan.id, lang: pres.lang, email: input.email, consent_quote: consent.quote, consent_at: consent.at, pairing_code });
     return {

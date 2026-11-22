@@ -6,7 +6,8 @@
   "main": "dist/server.js",
   "bin": {
     "xvcache-mcp": "dist/server.js",
-    "xvcache-certificate": "dist/export-certificate.js"
+    "xvcache-certificate": "dist/export-certificate.js",
+    "xvcache-remote": "dist/remote-server.js"
   },
   "mcpName": "io.github.xvcache/xvcache",
   "files": [
@@ -41,16 +42,21 @@
     "locales/*.json",
     "fonts/*.ttf",
     "fonts/LICENSE-DejaVu.txt",
-    "dist/errors.js"
+    "dist/errors.js",
+    "dist/subscriptions.js",
+    "dist/witness.js",
+    "dist/remote.js",
+    "dist/remote-server.js"
   ],
   "scripts": {
     "build": "tsc && chmod +x dist/server.js dist/export-certificate.js",
     "start": "node dist/server.js",
-    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/offer.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js dist/certificate-i18n.test.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/offer.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js dist/certificate-i18n.test.js dist/subscriptions.test.js dist/witness.test.js dist/remote.test.js",
     "demo:certify": "npm run build && node scripts/demo-certify.mjs",
     "demo:ui": "npm run build && node scripts/demo-ui.mjs",
     "certificate": "npm run build && node dist/export-certificate.js",
-    "verify-journal": "node dist/verify-journal.js"
+    "verify-journal": "node dist/verify-journal.js",
+    "start:remote": "node dist/remote-server.js"
   },
   "engines": {
     "node": ">=20"
