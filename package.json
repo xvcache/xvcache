@@ -56,7 +56,8 @@
     "demo:ui": "npm run build && node scripts/demo-ui.mjs",
     "certificate": "npm run build && node dist/export-certificate.js",
     "verify-journal": "node dist/verify-journal.js",
-    "start:remote": "node dist/remote-server.js"
+    "start:remote": "node dist/remote-server.js",
+    "lint:deploy": "bash -n deploy/hetzner-cx23-cloudflare/install-or-update.sh && bash -n deploy/hetzner-cx23-cloudflare/make-release-archive.sh && bash -n deploy/hetzner-cx23-cloudflare/check-health.sh && bash -n deploy/hetzner-cx23-cloudflare/backup.sh"
   },
   "engines": {
     "node": ">=20"

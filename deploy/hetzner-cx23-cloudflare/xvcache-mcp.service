@@ -1,0 +1,58 @@
+# /etc/systemd/system/xvcache-mcp.service
+# Serveur MCP distant XVcache (Streamable HTTP, empreinte seule), écoute 127.0.0.1 uniquement.
+# Modèle : install-or-update.sh remplace @NODE_BIN@ par le chemin absolu de node.
+[Unit]
+Description=XVcache MCP remote server (hash-only, Streamable HTTP on 127.0.0.1)
+Documentation=file:///opt/xvcache/current/deploy/hetzner-cx23-cloudflare/DEPLOIEMENT.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=xvcache
+Group=xvcache
+EnvironmentFile=/etc/xvcache/xvcache-mcp.env
+Environment=XVCACHE_REMOTE_DATA=/var/lib/xvcache
+Environment=HOME=/var/lib/xvcache
+WorkingDirectory=/var/lib/xvcache
+ExecStart=@NODE_BIN@ /opt/xvcache/current/dist/remote-server.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+# Données persistantes : /var/lib/xvcache (créé et possédé par systemd, mode 0700)
+StateDirectory=xvcache
+StateDirectoryMode=0700
+UMask=0077
+
+# --- Durcissement ---
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RemoveIPC=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+# Sortant nécessaire : TSA (FreeTSA/Certigna), calendriers OpenTimestamps. Pas de socket brute.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+# Pas de MemoryDenyWriteExecute : le JIT de V8 (Node) en a besoin.
+LimitNOFILE=4096
+MemoryMax=512M
+TasksMax=256
+
+[Install]
+WantedBy=multi-user.target

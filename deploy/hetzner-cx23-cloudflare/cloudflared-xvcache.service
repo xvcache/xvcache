@@ -1,0 +1,47 @@
+# /etc/systemd/system/cloudflared-xvcache.service
+# Connecteur du tunnel Cloudflare "xvcache-mcp" (géré à distance, par jeton).
+# Le jeton est lu par systemd dans /etc/cloudflared/xvcache-tunnel.env (root, 0600) et passé à
+# cloudflared par variable d'environnement (TUNNEL_TOKEN) : il n'apparaît ni dans la ligne de
+# commande (ps), ni dans ce fichier. Connexions SORTANTES uniquement : aucun port ouvert sur le VPS.
+[Unit]
+Description=Cloudflare Tunnel xvcache-mcp (remotely managed, token) for mcp.xvcache.com
+After=network-online.target xvcache-mcp.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+EnvironmentFile=/etc/cloudflared/xvcache-tunnel.env
+# $$ = '$' littéral pour le shell : systemd ne remplace pas la variable dans la ligne de commande.
+ExecStart=/bin/sh -c 'TUNNEL_TOKEN="$$CLOUDFLARE_TUNNEL_TOKEN" exec /usr/bin/cloudflared --no-autoupdate tunnel run'
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=0
+
+# --- Durcissement (cloudflared n'a besoin d'aucun fichier en mode jeton) ---
+DynamicUser=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

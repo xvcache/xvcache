@@ -39,6 +39,9 @@ Spec : `Horizon-2036/XVcache-Spec-MCP-Agentique.md`. Rien n'est poussé, publié
   - `requalifyPending()` relance périodiquement ;
   - le PDF « en attente » porte le bandeau NON QUALIFIÉ.
 
+### Déploiement préparé (non exécuté)
+- `deploy/hetzner-cx23-cloudflare/` : DEPLOIEMENT.md (VPS Hetzner CX23, Node 26 + systemd, sans Docker, tunnel cloudflared vers `mcp.xvcache.com`), `.env.example` sans secret, unité systemd durcie, connecteur du tunnel Cloudflare `xvcache-mcp` géré à distance (jeton dans `/etc/cloudflared/xvcache-tunnel.env` en 0600, unité `cloudflared-xvcache.service`, route `mcp.xvcache.com` → `127.0.0.1:8787` : `/mcp`, `/healthz`, `/pdf/*.pdf`), `install-or-update.sh` (`--check`, `--dry-run`, `--rollback`, `--tunnel` / `--with-tunnel`, idempotent, retour arrière automatique), `make-release-archive.sh`, `check-health.sh`, sauvegarde quotidienne.
+
 ## Choix
 - Travail dans un worktree séparé : le serveur de test ChatGPT d'Horizon tourne depuis `/workspace/xvcache-repo/dist`. `buildCertificatePdf` / `formatParisDateTime` restent compatibles pour son `live-server.ts`.
 - Langue par défaut : `en` pour les outils MCP (spec) ; `fr` pour la bibliothèque `handleDocument` (compatibilité).

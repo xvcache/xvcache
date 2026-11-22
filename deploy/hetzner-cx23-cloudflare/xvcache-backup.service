@@ -1,0 +1,13 @@
+# /etc/systemd/system/xvcache-backup.service — lancé par xvcache-backup.timer
+[Unit]
+Description=XVcache data backup and expired PDF purge
+
+[Service]
+Type=oneshot
+ExecStart=/opt/xvcache/current/deploy/hetzner-cx23-cloudflare/backup.sh /var/backups/xvcache 30
+Nice=10
+IOSchedulingClass=idle
+ProtectSystem=strict
+ReadWritePaths=/var/backups /var/lib/xvcache
+PrivateTmp=true
+NoNewPrivileges=true
