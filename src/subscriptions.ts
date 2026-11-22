@@ -24,6 +24,11 @@ export type SubscriptionRecord = {
   default_lang: string;
   created_at: string;
   total_certified: number;
+  /** L4: Stripe linkage (test or live ids). The organisation = the Stripe customer who paid via the pairing. */
+  stripe_customer?: string;
+  stripe_subscription?: string;
+  /** Set when a dispute (chargeback) is opened on one of this customer's charges; access is not cut automatically. */
+  disputed_at?: string;
 };
 
 type PairingRecord = {
@@ -39,7 +44,39 @@ type PairingRecord = {
   api_key_once?: string;
 };
 
-type StoreFile = { version: 1; subscriptions: SubscriptionRecord[]; pairings: PairingRecord[] };
+type StripeSubState = { status: SubscriptionStatus; at: number; customer?: string };
+
+type StoreFile = {
+  version: 1;
+  subscriptions: SubscriptionRecord[];
+  pairings: PairingRecord[];
+  /** L4 webhook: ids of Stripe events already applied (idempotence), most recent last. */
+  stripe_events?: string[];
+  /** L4 webhook: last known status per Stripe subscription (events can arrive out of order). */
+  stripe_subs?: Record<string, StripeSubState>;
+  /** L4 webhook: paid checkouts that carried no (or an unknown) client_reference_id — to be handled by the operator. */
+  unlinked_checkouts?: { event_id: string; session: string; customer?: string; subscription?: string; at: string }[];
+};
+
+/** Normalised billing event (built from a verified Stripe event by stripe-webhook.ts). */
+export type BillingEvent =
+  | { id: string; created: number; kind: "checkout_completed"; session: string; ref: string | null; customer?: string; subscription?: string; paid: boolean }
+  | { id: string; created: number; kind: "subscription_status"; subscription: string; customer?: string; status: SubscriptionStatus }
+  | { id: string; created: number; kind: "invoice_paid" | "invoice_failed"; subscription?: string; customer?: string }
+  | { id: string; created: number; kind: "dispute"; customer?: string; charge?: string }
+  | { id: string; created: number; kind: "ignored"; type: string };
+
+export type BillingResult = { duplicate: boolean; applied: string };
+
+export const MAX_STRIPE_EVENT_IDS = 5000;
+
+/** Public, non-secret reference of a pairing sent to Stripe as client_reference_id (derived from the hash). */
+export function checkoutRefFromCodeHash(code_hash: string): string {
+  return "xvr_" + code_hash.slice(0, 40);
+}
+export function checkoutRef(pairing_code: string): string {
+  return checkoutRefFromCodeHash(hashSecret(pairing_code.trim()));
+}
 
 export const PAIRING_TTL_MS = 24 * 3600 * 1000;
 
@@ -211,6 +248,86 @@ export class SubscriptionStore {
       p.key_hash = rec.key_hash;
       p.api_key_once = api_key;
       return { ok: true };
+    });
+  }
+
+  /**
+   * L4: apply one verified billing event, exactly once (event id), in one atomic write.
+   * - checkout_completed + known ref → mint the API key for that pairing (returned once by get_subscription),
+   *   linked to the Stripe customer / subscription.
+   * - subscription_status / invoice_* → update the status of the linked record; older events never override newer ones.
+   * - dispute → flag the record (no automatic cut-off; the operator decides).
+   */
+  applyBillingEvent(ev: BillingEvent): Promise<BillingResult> {
+    return this.tx((data) => {
+      data.stripe_events ??= [];
+      data.stripe_subs ??= {};
+      if (data.stripe_events.includes(ev.id)) return { duplicate: true, applied: "duplicate" };
+      data.stripe_events.push(ev.id);
+      if (data.stripe_events.length > MAX_STRIPE_EVENT_IDS) data.stripe_events.splice(0, data.stripe_events.length - MAX_STRIPE_EVENT_IDS);
+      const subs = data.stripe_subs;
+      const bySub = (id?: string) => (id ? data.subscriptions.find((r) => r.stripe_subscription === id) : undefined);
+      const byCustomer = (id?: string) => (id ? data.subscriptions.filter((r) => r.stripe_customer === id) : []);
+      const setSubStatus = (subId: string, status: SubscriptionStatus, at: number, customer?: string, force = false): boolean => {
+        const cur = subs[subId];
+        if (cur && !force && cur.at > at) return false; // stale event
+        if (cur && cur.status === "canceled" && status !== "canceled" && !force) return false; // canceled is final
+        subs[subId] = { status, at, customer: customer ?? cur?.customer };
+        const rec = bySub(subId);
+        if (rec) rec.status = status;
+        return true;
+      };
+      switch (ev.kind) {
+        case "checkout_completed": {
+          const p = ev.ref ? data.pairings.find((x) => checkoutRefFromCodeHash(x.code_hash) === ev.ref) : undefined;
+          if (!p || !ev.paid) {
+            data.unlinked_checkouts ??= [];
+            data.unlinked_checkouts.push({ event_id: ev.id, session: ev.session, customer: ev.customer, subscription: ev.subscription, at: this.now().toISOString() });
+            return { duplicate: false, applied: !ev.paid ? "checkout_unpaid" : "checkout_unlinked" };
+          }
+          const known = ev.subscription ? subs[ev.subscription] : undefined;
+          const status: SubscriptionStatus = known?.status ?? "active";
+          if (p.state === "active") {
+            const rec = data.subscriptions.find((r) => r.key_hash === p.key_hash);
+            if (rec) { rec.stripe_customer ??= ev.customer; rec.stripe_subscription ??= ev.subscription; }
+            return { duplicate: false, applied: "checkout_already_active" };
+          }
+          const api_key = newSecret("xvc_", 32);
+          const rec = this.newRecord(api_key, { plan_id: p.plan_id, quota: null, status, default_lang: p.lang });
+          rec.stripe_customer = ev.customer;
+          rec.stripe_subscription = ev.subscription;
+          data.subscriptions.push(rec);
+          p.state = "active";
+          p.key_hash = rec.key_hash;
+          p.api_key_once = api_key;
+          if (ev.subscription && !known) subs[ev.subscription] = { status, at: ev.created, customer: ev.customer };
+          return { duplicate: false, applied: `key_minted:${status}` };
+        }
+        case "subscription_status": {
+          const ok = setSubStatus(ev.subscription, ev.status, ev.created, ev.customer);
+          return { duplicate: false, applied: ok ? `status:${ev.status}${bySub(ev.subscription) ? "" : ":unlinked"}` : "stale_ignored" };
+        }
+        case "invoice_paid":
+        case "invoice_failed": {
+          const status: SubscriptionStatus = ev.kind === "invoice_paid" ? "active" : "past_due";
+          if (ev.subscription) {
+            const cur = subs[ev.subscription];
+            // A paid invoice never revives a trial into "active" before the subscription event says so,
+            // and never reopens a canceled subscription.
+            if (ev.kind === "invoice_paid" && cur?.status === "trialing") return { duplicate: false, applied: "trialing_kept" };
+            const ok = setSubStatus(ev.subscription, status, ev.created, ev.customer);
+            return { duplicate: false, applied: ok ? `status:${status}` : "stale_ignored" };
+          }
+          return { duplicate: false, applied: "invoice_without_subscription" };
+        }
+        case "dispute": {
+          const recs = byCustomer(ev.customer);
+          for (const r of recs) r.disputed_at = this.now().toISOString();
+          return { duplicate: false, applied: `dispute_flagged:${recs.length}` };
+        }
+        default:
+          return { duplicate: false, applied: "ignored" };
+      }
     });
   }
 

@@ -391,3 +391,12 @@ sudo rm -rf /opt/xvcache            # code seulement ; /var/lib/xvcache (donnée
 - L4 : Stripe et webhook vers l'activation des abonnements. Ensuite, plus besoin de `--create-key`.
 - L6 : stockage en base de données. Le fichier JSON actuel suppose une seule instance. Supervision (alertes Certigna envoyées par e-mail plutôt que dans le journal).
 - Limitation de débit dans l'application elle-même, et purge plus fine des PDF temporaires.
+
+## Stripe (lot L4) — webhook et lien de paiement
+
+- Route : `POST https://mcp.xvcache.com/stripe/webhook` (signature `Stripe-Signature` vérifiée avec `STRIPE_WEBHOOK_SECRET`, tolérance 5 min, chaque événement appliqué une seule fois).
+- Événements à cocher sur l'endpoint : `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`, `charge.dispute.created`.
+- Le serveur n'a besoin d'**aucune clé secrète Stripe** : `request_upgrade` renvoie le lien de paiement avec `client_reference_id` = référence publique de l'appairage (`xvr_…`, dérivée du haché du code ; le code d'appairage ne part jamais chez Stripe). Au `checkout.session.completed`, la clé API `xvc_…` est créée, liée au client et à l'abonnement Stripe, et remise une seule fois par `get_subscription(pairing_code)`.
+- Statuts : `active` / `trialing` → outils payants ouverts ; `past_due` (échec de paiement) ou `canceled` (résiliation) → `PAYMENT_REQUIRED`. Un litige (`charge.dispute.created`) est seulement signalé (`disputed_at`), sans coupure automatique.
+- Paiement sans référence (lien ouvert directement) : noté dans `unlinked_checkouts` de `/var/lib/xvcache/subscriptions.json`, aucune clé créée (l'opérateur crée la clé avec `xvcache-remote --create-key`).
+- Secrets : `/etc/xvcache/stripe.env` (root, 0600), modèle `stripe.env.example`. Journal : `journalctl -u xvcache-mcp | grep xvcache-billing` (identifiants et types d'événements seulement).

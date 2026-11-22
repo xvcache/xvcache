@@ -12,6 +12,8 @@ Type=simple
 User=xvcache
 Group=xvcache
 EnvironmentFile=/etc/xvcache/xvcache-mcp.env
+# L4 Stripe (facultatif, root 0600, lu par systemd seulement) : STRIPE_WEBHOOK_SECRET + XVCACHE_STRIPE_PAYMENT_LINK_URL
+EnvironmentFile=-/etc/xvcache/stripe.env
 Environment=XVCACHE_REMOTE_DATA=/var/lib/xvcache
 Environment=HOME=/var/lib/xvcache
 WorkingDirectory=/var/lib/xvcache

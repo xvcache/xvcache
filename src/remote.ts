@@ -11,6 +11,7 @@ import { SubscriptionStore, type SubscriptionRecord } from "./subscriptions.js";
 import { HostedWitness, type HostedProof, type HostedVerification } from "./witness.js";
 import { localizedVerdict } from "./certificate.js";
 import { EU_LANGS, resolveLang, DEFAULT_TZ } from "./i18n.js";
+import { STRIPE_WEBHOOK_PATH, handleStripeWebhook, type WebhookLog } from "./stripe-webhook.js";
 
 /**
  * Remote (hosted) XVcache MCP server — L3, écarts 6, 8, 9.
@@ -31,6 +32,11 @@ export type RemoteOptions = {
   publicBaseUrl?: string;
   pdfTtlMs?: number;
   maxItems?: number;
+  /** L4: Stripe webhook signing secret (whsec_…). Without it POST /stripe/webhook answers 503. */
+  stripeWebhookSecret?: string;
+  /** L4: true when the checkout is a Stripe TEST payment link (request_upgrade then says test_mode: true). */
+  billingTestMode?: boolean;
+  billingLog?: WebhookLog;
 };
 
 export const HASH_RE = /^[0-9a-fA-F]{64}$/;
@@ -213,7 +219,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
         billing: opts.billing,
         pairingCode: async () => (await opts.store.createPairing({ plan_id: PAID_PLAN_ID, lang: resolveLang(input.lang).lang, consent: { quote: (input.consent_quote ?? "").slice(0, 500), at: new Date().toISOString() } })).pairing_code,
       });
-      return r.ok === false ? err(r as unknown as ToolError) : json(r);
+      return r.ok === false ? err(r as unknown as ToolError) : json(opts.billingTestMode ? { ...r, test_mode: true, test_mode_note: "Stripe TEST mode: no real payment is possible yet (test cards only). Tell the human that online subscription opens soon." } : r);
     });
 
     s.registerTool("get_subscription", {
@@ -344,6 +350,10 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
         }
         if (req.method === "GET" && url.pathname.startsWith("/pdf/") && url.pathname.endsWith(".pdf")) {
           await servePdf(url.pathname.slice(5, -4), res);
+          return;
+        }
+        if (url.pathname === STRIPE_WEBHOOK_PATH) {
+          await handleStripeWebhook(req, res, { store: opts.store, secret: opts.stripeWebhookSecret, log: opts.billingLog });
           return;
         }
         if (url.pathname !== "/mcp") { res.writeHead(404).end(); return; }
