@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type http from "node:http";
-import { PAIRING_TTL_MS, checkoutRef, type BillingEvent, type BillingResult, type SubscriptionStatus, type SubscriptionStore } from "./subscriptions.js";
+import { PAIRING_TTL_MS, checkoutRef, type BillingEvent, type BillingResult, type PendingKeyDelivery, type SubscriptionStatus, type SubscriptionStore } from "./subscriptions.js";
 import type { Billing, CheckoutRequest, CheckoutResult } from "./plans.js";
 
 /**
@@ -82,6 +82,8 @@ export function normalizeStripeEvent(evt: Obj): BillingEvent {
         ref: typeof o.client_reference_id === "string" ? o.client_reference_id : null,
         customer: idOf(o.customer), subscription: idOf(o.subscription),
         paid: o.payment_status === "paid" || o.payment_status === "no_payment_required",
+        email: typeof o.customer_details?.email === "string" ? o.customer_details.email : typeof o.customer_email === "string" ? o.customer_email : undefined,
+        locale: typeof o.locale === "string" ? o.locale : undefined,
       };
     case "customer.subscription.created":
     case "customer.subscription.updated":
@@ -104,7 +106,7 @@ export function normalizeStripeEvent(evt: Obj): BillingEvent {
 export type WebhookLog = (line: Record<string, unknown>) => void;
 
 /** HTTP handler for POST /stripe/webhook. Never logs secrets nor personal data (ids and types only). */
-export async function handleStripeWebhook(req: http.IncomingMessage, res: http.ServerResponse, o: { store: SubscriptionStore; secret: string | undefined; log?: WebhookLog; now?: () => number }): Promise<void> {
+export async function handleStripeWebhook(req: http.IncomingMessage, res: http.ServerResponse, o: { store: SubscriptionStore; secret: string | undefined; log?: WebhookLog; now?: () => number; onKeyDelivery?: (d: PendingKeyDelivery) => void }): Promise<void> {
   const log = o.log ?? ((l) => process.stderr.write(`xvcache-billing ${JSON.stringify(l)}\n`));
   const reply = (code: number, body: Record<string, unknown>) => { res.writeHead(code, { "Content-Type": "application/json" }).end(JSON.stringify(body)); };
   if (req.method !== "POST") { res.writeHead(405, { Allow: "POST" }).end(); return; }
@@ -131,8 +133,10 @@ export async function handleStripeWebhook(req: http.IncomingMessage, res: http.S
     reply(500, { ok: false, error: "store error" }); // Stripe retries
     return;
   }
-  log({ ok: true, event: evt.id, type: evt.type, livemode: evt.livemode === true, applied: r.applied });
+  log({ ok: true, event: evt.id, type: evt.type, livemode: evt.livemode === true, applied: r.applied, ...(r.delivery ? { key_link_email: o.onKeyDelivery ? "queued" : "disabled" } : {}) });
   reply(200, { ok: true, received: evt.id, duplicate: r.duplicate });
+  // After answering Stripe: email the one-time link (never the key). Failures are logged, retried by the service.
+  if (r.delivery && o.onKeyDelivery) o.onKeyDelivery(r.delivery);
 }
 
 /** Billing through a Stripe Payment Link (no API key needed on the server). */

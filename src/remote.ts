@@ -12,6 +12,7 @@ import { HostedWitness, type HostedProof, type HostedVerification } from "./witn
 import { localizedVerdict } from "./certificate.js";
 import { EU_LANGS, resolveLang, DEFAULT_TZ } from "./i18n.js";
 import { STRIPE_WEBHOOK_PATH, handleStripeWebhook, type WebhookLog } from "./stripe-webhook.js";
+import { KEY_PAGE_PREFIX, handleKeyPage, type KeyDeliveryService } from "./key-delivery.js";
 
 /**
  * Remote (hosted) XVcache MCP server — L3, écarts 6, 8, 9.
@@ -37,6 +38,8 @@ export type RemoteOptions = {
   /** L4: true when the checkout is a Stripe TEST payment link (request_upgrade then says test_mode: true). */
   billingTestMode?: boolean;
   billingLog?: WebhookLog;
+  /** 0.3.0: email delivery of a one-time link to the key after payment (off unless given). */
+  keyDelivery?: KeyDeliveryService;
 };
 
 export const HASH_RE = /^[0-9a-fA-F]{64}$/;
@@ -81,6 +84,8 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
   const ttl = opts.pdfTtlMs ?? PDF_TTL_MS;
   const maxItems = opts.maxItems ?? 100;
   let baseUrl = opts.publicBaseUrl ?? "";
+  // Usage is counted when a proof obtains its token (never while pending).
+  opts.witness.useUsageCounter((owner, n) => opts.store.recordTimestamped(owner, n));
 
   async function publishPdf(bytes: Uint8Array, lang: string): Promise<{ pdf_url: string; pdf_expires_at: string }> {
     await fs.mkdir(pdfDir, { recursive: true });
@@ -117,7 +122,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     const a = await auth(apiKey);
     if ("code" in a) return err(a);
     const L = resolveLang(lang ?? a.default_lang);
-    const q = await opts.store.consume(a.key_hash, items.length);
+    const q = await opts.store.checkQuota(a.key_hash, items.length);
     if (!q.ok) {
       return err(toolError("QUOTA_EXCEEDED", `Monthly quota reached (${q.used}/${q.quota}).`, false,
         "Tell the human in one sentence that the monthly quota is reached and when it resets; do not ask anything.", { next_reset: q.next_reset, quota: q.quota, used: q.used }));
@@ -126,7 +131,6 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     try {
       proofs = await opts.witness.submit(items.map((it, i) => ({ sha256: it.sha256.trim().toLowerCase(), label: (it.label?.trim() || `Document ${i + 1}`).slice(0, MAX_LABEL), owner: a.key_hash })));
     } catch (e) {
-      await opts.store.refund(a.key_hash, items.length);
       return err(toolError("TSA_UNAVAILABLE", `Certification failed: ${e instanceof Error ? e.message : String(e)}`, true, "Retry in one minute. Nothing was counted."));
     }
     const out = [];
@@ -143,6 +147,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
         status: pdf ? pdf.proof.status : p.status,
         qualified: pdf ? pdf.qualified : false,
         gen_time: p.tsa?.gen_time ?? null,
+        ...(p.merkle ? {} : { anchor_due_at: p.anchor_due_at ?? null }),
         verdict_localized: verdictText(p.tsa ? "intact" : "pending", L.lang, p.tsa?.gen_time ?? null, tz),
         ...link,
       });
@@ -152,13 +157,15 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     const body = {
       ok: true,
       lang: L.lang,
-      batch_root: proofs[0]?.merkle.root,
-      fingerprints_in_shared_timestamp: proofs[0]?.merkle.leaf_count,
+      batch_root: proofs[0]?.merkle?.root ?? null,
+      fingerprints_in_shared_timestamp: proofs[0]?.merkle?.leaf_count ?? null,
       results: out,
       proofs: proofs.map(publicProof),
       usage: { used_this_period: usage.certifications_this_period, quota: usage.quota, next_reset: usage.next_reset },
-      next_action: pending
-        ? "The qualified timestamp is pending (provider unavailable). Give the PDF marked NOT QUALIFIED only as a receipt; XVcache retries automatically — call get_certificate_pdf later for the qualified version. Do not ask the human anything."
+      next_action: proofs.some((p) => !p.merkle)
+        ? `Queued for the daily shared timestamp (one Merkle root for all subscribers, stamped once a day; due ${proofs.find((p) => !p.merkle)?.anchor_due_at ?? "today"}). The PDF given now is only a receipt marked NOT QUALIFIED. After that time, call get_certificate_pdf(proof_id) for the report with the timestamp issued by Certigna. A pending proof is not counted. Do not ask the human anything.`
+        : pending
+        ? "The qualified timestamp is pending (provider unavailable). Give the PDF marked NOT QUALIFIED only as a receipt; XVcache retries automatically — call get_certificate_pdf later for the qualified version. A pending proof is not counted. Do not ask the human anything."
         : "Give the PDF to the lawyer (pdf_url valid 24 h, or the embedded file). Keep proof_id with the file: verify_document(sha256, proof_id) checks it for free at any time.",
     };
     return { content: [{ type: "text", text: JSON.stringify(body, null, 2) }, ...blobs] };
@@ -226,12 +233,15 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     });
 
     s.registerTool("get_subscription", {
-      description: "Status of the subscription. With pairing_code (from request_upgrade): NOT_PAID_YET while the human pays (retry, do not ask), then the api_key exactly once — store it for the lawyer's next calls (Authorization: Bearer). With the API key in the header: status, plan, quota. Free.",
+      description: "Status of the subscription. With pairing_code (from request_upgrade): NOT_PAID_YET while the human pays (retry about every 20 s, do not ask), then api_key EXACTLY ONCE. When api_key is returned: show it to the human immediately in your reply, once, and tell them to save it now in a password manager, because this tool never returns it again. Keep it for the next calls (Authorization: Bearer <key>). With the API key in the header: status, plan, usage. Free.",
       inputSchema: { pairing_code: z.string().optional() },
     }, async ({ pairing_code }) => {
       const r = await opts.store.getSubscription(pairing_code ? { pairing_code } : { api_key: apiKey ?? undefined });
       if (!r.ok) return err(apiKey || pairing_code ? r : paymentRequired());
-      return json({ ...r, next_action: r.api_key ? "Store api_key now (shown once) and send it as 'Authorization: Bearer <key>'. Then call certify_document." : "Call certify_document with the SHA-256 of the file." });
+      const once = "Show api_key to the human NOW, once, in your reply, and tell them to save it immediately (password manager): it will never be returned again by this tool."
+        + (opts.keyDelivery ? " A one-time link to view it once was also emailed to the payer (the key itself is never emailed; the link expires after 24 h)." : "")
+        + " Then send it as 'Authorization: Bearer <key>' and call certify_document.";
+      return json({ ...r, next_action: r.api_key ? once : "Call certify_document with the SHA-256 of the file." });
     });
 
     s.registerTool("get_usage", {
@@ -356,7 +366,11 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
           return;
         }
         if (url.pathname === STRIPE_WEBHOOK_PATH) {
-          await handleStripeWebhook(req, res, { store: opts.store, secret: opts.stripeWebhookSecret, log: opts.billingLog });
+          await handleStripeWebhook(req, res, { store: opts.store, secret: opts.stripeWebhookSecret, log: opts.billingLog, onKeyDelivery: opts.keyDelivery ? (d) => opts.keyDelivery!.deliver(d) : undefined });
+          return;
+        }
+        if (url.pathname.startsWith(KEY_PAGE_PREFIX)) {
+          await handleKeyPage(req, res, url.pathname.slice(KEY_PAGE_PREFIX.length), opts.store, `${baseUrl}/mcp`);
           return;
         }
         if (url.pathname !== "/mcp") { res.writeHead(404).end(); return; }

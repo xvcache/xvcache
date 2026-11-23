@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { toolError, type ToolError } from "./errors.js";
@@ -29,7 +29,57 @@ export type SubscriptionRecord = {
   stripe_subscription?: string;
   /** Set when a dispute (chargeback) is opened on one of this customer's charges; access is not cut automatically. */
   disputed_at?: string;
+  /** 0.3.0: email of the payer (Stripe checkout customer_details.email), used only for the key-delivery link. */
+  email?: string;
 };
+
+/**
+ * 0.3.0 — key delivery by email: a ONE-TIME link valid a short time (24 h by default).
+ * Only the SHA-256 of the link token is stored; the API key is stored encrypted with a key derived from the
+ * link token (AES-256-GCM), so neither the store file alone nor the email ever reveals the key.
+ * The ciphertext is erased as soon as the key is revealed, or when the link expires.
+ */
+export type KeyDeliveryRecord = {
+  token_hash: string;
+  key_hash: string;
+  email: string;
+  lang: string;
+  created_at: string;
+  expires_at: string;
+  sent_at?: string;
+  send_error?: string;
+  revealed_at?: string;
+  enc?: { iv: string; ct: string; tag: string };
+};
+
+/** Returned once by applyBillingEvent to the webhook, which emails the link. Never persisted in clear. */
+export type PendingKeyDelivery = { token: string; token_hash: string; email: string; lang: string; expires_at: string };
+
+export type DeliveryState = "valid" | "revealed" | "expired" | "unknown";
+
+export const KEY_DELIVERY_TTL_MS = 24 * 3600 * 1000;
+const DELIVERY_KEEP_MS = 30 * 24 * 3600 * 1000;
+const EMAIL_RE = /^[^\s@<>()",;]+@[^\s@<>()",;]+\.[^\s@<>()",;]+$/;
+
+function deliveryKey(token: string): Buffer {
+  return createHash("sha256").update("xvcache-key-delivery/1|" + token, "utf8").digest();
+}
+function sealKey(api_key: string, token: string, token_hash: string): { iv: string; ct: string; tag: string } {
+  const iv = randomBytes(12);
+  const c = createCipheriv("aes-256-gcm", deliveryKey(token), iv);
+  c.setAAD(Buffer.from(token_hash, "utf8"));
+  const ct = Buffer.concat([c.update(api_key, "utf8"), c.final()]);
+  return { iv: iv.toString("base64"), ct: ct.toString("base64"), tag: c.getAuthTag().toString("base64") };
+}
+function openKey(enc: { iv: string; ct: string; tag: string }, token: string, token_hash: string): string {
+  const d = createDecipheriv("aes-256-gcm", deliveryKey(token), Buffer.from(enc.iv, "base64"));
+  d.setAAD(Buffer.from(token_hash, "utf8"));
+  d.setAuthTag(Buffer.from(enc.tag, "base64"));
+  return Buffer.concat([d.update(Buffer.from(enc.ct, "base64")), d.final()]).toString("utf8");
+}
+export function isEmail(s: unknown): s is string {
+  return typeof s === "string" && s.length <= 254 && EMAIL_RE.test(s.trim());
+}
 
 type PairingRecord = {
   code_hash: string;
@@ -56,17 +106,19 @@ type StoreFile = {
   stripe_subs?: Record<string, StripeSubState>;
   /** L4 webhook: paid checkouts that carried no (or an unknown) client_reference_id — to be handled by the operator. */
   unlinked_checkouts?: { event_id: string; session: string; customer?: string; subscription?: string; at: string }[];
+  /** 0.3.0: one-time key-delivery links (hashed tokens, encrypted keys). */
+  key_deliveries?: KeyDeliveryRecord[];
 };
 
 /** Normalised billing event (built from a verified Stripe event by stripe-webhook.ts). */
 export type BillingEvent =
-  | { id: string; created: number; kind: "checkout_completed"; session: string; ref: string | null; customer?: string; subscription?: string; paid: boolean }
+  | { id: string; created: number; kind: "checkout_completed"; session: string; ref: string | null; customer?: string; subscription?: string; paid: boolean; email?: string; locale?: string }
   | { id: string; created: number; kind: "subscription_status"; subscription: string; customer?: string; status: SubscriptionStatus }
   | { id: string; created: number; kind: "invoice_paid" | "invoice_failed"; subscription?: string; customer?: string }
   | { id: string; created: number; kind: "dispute"; customer?: string; charge?: string }
   | { id: string; created: number; kind: "ignored"; type: string };
 
-export type BillingResult = { duplicate: boolean; applied: string };
+export type BillingResult = { duplicate: boolean; applied: string; delivery?: PendingKeyDelivery };
 
 export const MAX_STRIPE_EVENT_IDS = 5000;
 
@@ -113,7 +165,64 @@ export type SubscriptionView = {
 export class SubscriptionStore {
   private chain: Promise<unknown> = Promise.resolve();
 
-  constructor(private file: string, private now: () => Date = () => new Date()) {}
+  /**
+   * @param o.keyDeliveryTtlMs when set (key delivery by email enabled), every key minted from a paid checkout that
+   *   carries an email also gets a one-time link (see KeyDeliveryRecord). Unset = feature off (default).
+   */
+  constructor(private file: string, private now: () => Date = () => new Date(), private o: { keyDeliveryTtlMs?: number } = {}) {}
+
+  get keyDeliveryEnabled(): boolean {
+    return typeof this.o.keyDeliveryTtlMs === "number" && this.o.keyDeliveryTtlMs > 0;
+  }
+
+  /** Inside a transaction: create the one-time link for a freshly minted key. */
+  private newDelivery(data: StoreFile, api_key: string, key_hash: string, email: string, lang: string): PendingKeyDelivery {
+    const token = randomBytes(32).toString("base64url");
+    const token_hash = hashSecret(token);
+    const created = this.now();
+    const expires_at = new Date(created.getTime() + (this.o.keyDeliveryTtlMs ?? KEY_DELIVERY_TTL_MS)).toISOString();
+    data.key_deliveries ??= [];
+    data.key_deliveries = data.key_deliveries.filter((d) => Date.parse(d.expires_at) > created.getTime() - DELIVERY_KEEP_MS);
+    data.key_deliveries.push({ token_hash, key_hash, email, lang, created_at: created.toISOString(), expires_at, enc: sealKey(api_key, token, token_hash) });
+    return { token, token_hash, email, lang, expires_at };
+  }
+
+  /** State of a delivery link, without consuming it (GET page; mail scanners may open links). */
+  deliveryState(token: string): Promise<{ state: DeliveryState; lang: string; expires_at?: string }> {
+    return this.tx((data) => {
+      const d = (data.key_deliveries ?? []).find((x) => x.token_hash === hashSecret(token));
+      if (!d) return { state: "unknown" as const, lang: "en" };
+      if (d.revealed_at) return { state: "revealed" as const, lang: d.lang };
+      if (!d.enc || Date.parse(d.expires_at) <= this.now().getTime()) return { state: "expired" as const, lang: d.lang };
+      return { state: "valid" as const, lang: d.lang, expires_at: d.expires_at };
+    }, false);
+  }
+
+  /** Reveal the key ONCE (POST from the page): decrypts, then erases the ciphertext. */
+  revealDeliveredKey(token: string): Promise<{ ok: true; api_key: string; lang: string; key_hint: string } | { ok: false; state: Exclude<DeliveryState, "valid">; lang: string }> {
+    return this.tx((data) => {
+      const d = (data.key_deliveries ?? []).find((x) => x.token_hash === hashSecret(token));
+      if (!d) return { ok: false as const, state: "unknown" as const, lang: "en" };
+      if (d.revealed_at) return { ok: false as const, state: "revealed" as const, lang: d.lang };
+      if (!d.enc || Date.parse(d.expires_at) <= this.now().getTime()) {
+        delete d.enc;
+        return { ok: false as const, state: "expired" as const, lang: d.lang };
+      }
+      const api_key = openKey(d.enc, token, d.token_hash);
+      delete d.enc;
+      d.revealed_at = this.now().toISOString();
+      return { ok: true as const, api_key, lang: d.lang, key_hint: api_key.slice(-4) };
+    });
+  }
+
+  /** Record the outcome of the email send (no address, no token in the error text). */
+  markDeliverySent(token_hash: string, r: { ok: boolean; error?: string }): Promise<void> {
+    return this.tx((data) => {
+      const d = (data.key_deliveries ?? []).find((x) => x.token_hash === token_hash);
+      if (!d) return;
+      if (r.ok) { d.sent_at = this.now().toISOString(); delete d.send_error; } else d.send_error = (r.error ?? "send failed").slice(0, 200);
+    });
+  }
 
   private async load(): Promise<StoreFile> {
     try {
@@ -194,6 +303,34 @@ export class SubscriptionStore {
       rec.used += n;
       rec.total_certified += n;
       return { ok: true as const, used: rec.used, quota: rec.quota };
+    });
+  }
+
+  /**
+   * Hosted flow (0.3.0): check the monthly cap WITHOUT counting. Usage is counted by recordTimestamped() only when
+   * a proof actually obtains its timestamp token, so a pending proof (pending_qualified) is never counted.
+   * Paid subscriptions have quota null (unlimited); numeric quotas remain for operator/test keys.
+   */
+  checkQuota(key_hash: string, n: number): Promise<ConsumeResult> {
+    return this.tx((data) => {
+      const rec = data.subscriptions.find((s) => s.key_hash === key_hash);
+      if (!rec) throw new Error("unknown subscription");
+      this.rollPeriod(rec);
+      if (rec.quota !== null && rec.used + n > rec.quota) {
+        return { ok: false as const, used: rec.used, quota: rec.quota, next_reset: nextMonthStart(this.now()).toISOString() };
+      }
+      return { ok: true as const, used: rec.used, quota: rec.quota };
+    });
+  }
+
+  /** Count `n` proofs of this subscription that have just obtained their timestamp token. */
+  recordTimestamped(key_hash: string, n: number): Promise<void> {
+    return this.tx((data) => {
+      const rec = data.subscriptions.find((s) => s.key_hash === key_hash);
+      if (!rec) return;
+      this.rollPeriod(rec);
+      rec.used += n;
+      rec.total_certified += n;
     });
   }
 
@@ -280,6 +417,24 @@ export class SubscriptionStore {
       switch (ev.kind) {
         case "checkout_completed": {
           const p = ev.ref ? data.pairings.find((x) => checkoutRefFromCodeHash(x.code_hash) === ev.ref) : undefined;
+          const email = isEmail(ev.email) ? ev.email.trim() : undefined;
+          if (!p && ev.paid && email && this.keyDeliveryEnabled && ev.subscription) {
+            // Paid on the public payment link without an AI pairing (e.g. from the website): the key is minted
+            // and delivered ONLY through the one-time email link.
+            if (data.subscriptions.some((r) => r.stripe_subscription === ev.subscription)) return { duplicate: false, applied: "checkout_already_active" };
+            const known = subs[ev.subscription];
+            const status: SubscriptionStatus = known?.status ?? "active";
+            const lang = (ev.locale ?? "").toLowerCase().startsWith("fr") ? "fr" : "en";
+            const api_key = newSecret("xvc_", 32);
+            const rec = this.newRecord(api_key, { plan_id: "coffre-horodate", quota: null, status, default_lang: lang });
+            rec.stripe_customer = ev.customer;
+            rec.stripe_subscription = ev.subscription;
+            rec.email = email;
+            data.subscriptions.push(rec);
+            if (!known) subs[ev.subscription] = { status, at: ev.created, customer: ev.customer };
+            const delivery = this.newDelivery(data, api_key, rec.key_hash, email, lang);
+            return { duplicate: false, applied: `key_minted_email_only:${status}`, delivery };
+          }
           if (!p || !ev.paid) {
             data.unlinked_checkouts ??= [];
             data.unlinked_checkouts.push({ event_id: ev.id, session: ev.session, customer: ev.customer, subscription: ev.subscription, at: this.now().toISOString() });
@@ -296,12 +451,14 @@ export class SubscriptionStore {
           const rec = this.newRecord(api_key, { plan_id: p.plan_id, quota: null, status, default_lang: p.lang });
           rec.stripe_customer = ev.customer;
           rec.stripe_subscription = ev.subscription;
+          if (email) rec.email = email;
           data.subscriptions.push(rec);
           p.state = "active";
           p.key_hash = rec.key_hash;
           p.api_key_once = api_key;
           if (ev.subscription && !known) subs[ev.subscription] = { status, at: ev.created, customer: ev.customer };
-          return { duplicate: false, applied: `key_minted:${status}` };
+          const delivery = email && this.keyDeliveryEnabled ? this.newDelivery(data, api_key, rec.key_hash, email, p.lang) : undefined;
+          return { duplicate: false, applied: `key_minted:${status}`, ...(delivery ? { delivery } : {}) };
         }
         case "subscription_status": {
           const ok = setSubStatus(ev.subscription, ev.status, ev.created, ev.customer);

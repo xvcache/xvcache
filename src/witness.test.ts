@@ -31,7 +31,7 @@ test("two firms × 3 fingerprints in the same window → ONE token, 6 individual
   assert.equal(fake.requests - before, 1, "exactly one timestamp for both firms");
   const all = [...pa, ...pb];
   assert.equal(all.length, 6);
-  assert.equal(new Set(all.map((p) => p.merkle.root)).size, 1, "one shared root");
+  assert.equal(new Set(all.map((p) => p.merkle!.root)).size, 1, "one shared root");
   assert.equal(new Set(all.map((p) => p.proof_id)).size, 6);
   for (const p of all) {
     assert.equal(p.status, "qualified");
