@@ -3,7 +3,7 @@
   "prices_status": "announced",
   "payment_live": false,
   "currency": "EUR",
-  "notice": "One planned plan: XVcache Coffre horodaté (coffre-horodate), published by RENO'LINE SARL, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage: payment_live stays false until sales open. The planned subscription will use qualified eIDAS timestamps issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. The currently deployed hosted endpoint uses FreeTSA (not qualified). Local version: FreeTSA by default, not qualified.",
+  "notice": "One planned plan: XVcache Coffre horodaté (coffre-horodate), published by RENO'LINE SARL, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. No payment can be made at this stage: payment_live stays false until sales open. The planned subscription will use qualified eIDAS timestamps issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
   "updated": "2026-11-23",
   "current_tier_id": "free",
   "plans": [

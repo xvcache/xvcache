@@ -6,7 +6,7 @@ Document de préparation. **Rien n'a été publié** depuis ce fichier. Pas de `
 
 - Accord explicite de Julien.
 - Confirmer la version et le mode réellement déployés sur `https://mcp.xvcache.com/mcp` (0.2.0 ou 0.3.0, `daily` ou non). Tant que ce n'est pas confirmé, les textes publics parlent de la racine quotidienne au futur / « à partir de 0.3.0 ».
-- Le point d'accès hébergé actuellement déployé utilise FreeTSA (non qualifié). Ne pas publier que `mcp.xvcache.com` émet déjà des jetons Certigna tant qu'un jeton `.tst` émis par la production n'a pas été vérifié hors ligne (OID, émetteur) et n'a pas obtenu PASSED / Qualified timestamp dans l'outil de validation DSS de la Commission européenne (version de démonstration en ligne).
+- Le point d'accès hébergé, aujourd'hui en démonstration, demande ses jetons à Certigna, sans repli vers FreeTSA. L'abonnement Coffre horodaté n'est pas encore en vente. Version locale : FreeTSA par défaut, non qualifié. Ne pas publier que `mcp.xvcache.com` émet déjà des jetons Certigna tant qu'un jeton `.tst` émis par la production n'a pas été vérifié hors ligne (OID, émetteur) et n'a pas obtenu PASSED / Qualified timestamp dans l'outil de validation DSS de la Commission européenne (version de démonstration en ligne).
 - Les mentions DSS du site (`dss_howto`, `dss_howto_short`, `llms_q_dss`, complément de `step3_note`) restent exclues du build tant que `_dss_mention.publish` est `false` (même condition).
 
 ## Dépréciation de la 0.2.0 (préparée, non lancée)

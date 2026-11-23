@@ -65,7 +65,7 @@
     "price_label": "monthly subscription; professional price",
     "price_display": "19 EUR excl. VAT / month / organisation",
     "includes": [
-      "In the planned subscription, qualified eIDAS timestamps issued by Certigna: one Merkle root shared by all subscribers, stamped once a day; proofs are not capped (pending proofs are never counted). The currently deployed hosted endpoint uses FreeTSA (not qualified).",
+      "In the planned subscription, qualified eIDAS timestamps issued by Certigna: one Merkle root shared by all subscribers, stamped once a day; proofs are not capped (pending proofs are never counted). The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
       "Document content stays on your computer; the hosted server receives the fingerprint and an optional label, and processes the IP address",
       "V/X verdict and a one-page PDF report in 24 EU languages; verification is free for anyone"
     ],

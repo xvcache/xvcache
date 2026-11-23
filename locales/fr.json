@@ -65,7 +65,7 @@
     "price_label": "abonnement mensuel ; tarif professionnel",
     "price_display": "19 EUR HT / mois / organisation",
     "includes": [
-      "Dans l'abonnement prévu, horodatages qualifiés eIDAS émis par Certigna : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; les preuves ne sont pas plafonnées (une preuve en attente n'est jamais décomptée). Le point d'accès hébergé actuellement déployé utilise FreeTSA (non qualifié).",
+      "Dans l'abonnement prévu, horodatages qualifiés eIDAS émis par Certigna : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; les preuves ne sont pas plafonnées (une preuve en attente n'est jamais décomptée). Le point d'accès hébergé, aujourd'hui en démonstration, demande ses jetons à Certigna, sans repli vers FreeTSA. L'abonnement Coffre horodaté n'est pas encore en vente. Version locale : FreeTSA par défaut, non qualifié.",
       "Le contenu des documents reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte et un libellé facultatif, et traite l'adresse IP",
       "Verdict V/X et rapport PDF d'une page en 24 langues de l'UE ; vérification gratuite pour tous"
     ],

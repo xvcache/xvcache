@@ -510,7 +510,7 @@ const LANG_DESC = `Language of the conversation, one of ${EU_LANGS.join(", ")} (
 server.registerTool(
   "get_offer",
   {
-    description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns a short pitch: the local version uses FreeTSA by default (not qualified, no legal presumption); the planned XVcache Coffre horodaté subscription is published by RENO'LINE SARL, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. The planned subscription will use qualified eIDAS timestamps issued by Certigna (presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). The currently deployed hosted endpoint uses FreeTSA (not qualified). XVcache itself is not a qualified trust service provider. Also returns what is included, the legal limits and the next tool: present_to_client. Free, no key. Not written into the journal.",
+    description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns a short pitch: the local version uses FreeTSA by default (not qualified, no legal presumption); the planned XVcache Coffre horodaté subscription is published by RENO'LINE SARL, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. Not on sale yet. The planned subscription will use qualified eIDAS timestamps issued by Certigna (presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. XVcache itself is not a qualified trust service provider. Also returns what is included, the legal limits and the next tool: present_to_client. Free, no key. Not written into the journal.",
     inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
   async ({ lang }) => ok(JSON.stringify(getOffer({ lang }), null, 2))
@@ -519,7 +519,7 @@ server.registerTool(
 server.registerTool(
   "list_plans",
   {
-    description: "Machine-readable XVcache catalog (plans.json): the free local journal, the planned plan coffre-horodate (XVcache Coffre horodaté, not on sale yet; Planned price: €19 excl. VAT / month per organisation · professionals · demos on application) and placeholder plans whose prices stay TBD. Tax: excl. VAT; reverse charge for EU B2B with a valid VAT number. Free, no key. Not written into the journal.",
+    description: "Machine-readable XVcache catalog (plans.json): the free local journal, the planned plan coffre-horodate (XVcache Coffre horodaté, not on sale yet; Planned price: €19/month excl. VAT per organisation · professionals · demos by application) and placeholder plans whose prices stay TBD. Tax: excl. VAT; reverse charge for EU B2B with a valid VAT number. Free, no key. Not written into the journal.",
     inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
   async ({ lang }) => ok(JSON.stringify(listPlans({ lang }), null, 2))

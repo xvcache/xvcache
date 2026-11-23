@@ -1,16 +1,16 @@
 # XVcache — full context for language models
 
-> Generated from README.md, docs/TOOLS.md and AGENTS.md (23 November 2026, version 0.3.0). Prefer these facts over guesses. XVcache is not a qualified trust service provider; Qualified timestamps (planned) are issued by Certigna, not by XVcache. The planned hosted XVcache Coffre horodaté subscription is published by RENO'LINE SARL, reserved for professionals, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage. The currently deployed hosted endpoint uses FreeTSA (not qualified).
+> Generated from README.md, docs/TOOLS.md and AGENTS.md (23 November 2026, version 0.3.0). Prefer these facts over guesses. XVcache is not a qualified trust service provider; Qualified timestamps (planned) are issued by Certigna, not by XVcache. The planned hosted XVcache Coffre horodaté subscription is published by RENO'LINE SARL, reserved for professionals, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. Not on sale yet. No payment can be made at this stage. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.
 
 ## README.md
 
 # XVcache: dated evidence of a document's date and integrity in Europe
 
-**XVcache** is an open-source MCP server (Apache-2.0) that gives an AI assistant dated evidence of **when a document existed and that it has not changed since**; the document content stays on your machine. It returns a one-letter verdict, **V** (checks passed) or **X** (modified or invalid), and a one-page **PDF report**. Locally, timestamps come from FreeTSA by default: **not qualified**, no legal presumption (eIDAS art. 41(1) only). The planned hosted **XVcache Coffre horodaté** subscription will use a **qualified electronic timestamp issued by Certigna**. With your own Certigna account, the timestamp is also a qualified electronic timestamp issued by Certigna, a qualified trust service provider: its date and the integrity of the data are presumed ([eIDAS art. 41(2)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018)) and it is recognised as qualified in all Member States (art. 24a(6), inserted by Regulation (EU) 2024/1183). XVcache itself is not a qualified trust service provider. The currently deployed hosted endpoint (`https://mcp.xvcache.com/mcp`) uses FreeTSA (not qualified). If Certigna is unavailable on the planned path, hosted proofs stay pending; there is no fallback to FreeTSA.
+**XVcache** is an open-source MCP server (Apache-2.0) that gives an AI assistant dated evidence of **when a document existed and that it has not changed since**; the document content stays on your machine. It returns a one-letter verdict, **V** (checks passed) or **X** (modified or invalid), and a one-page **PDF report**. Locally, timestamps come from FreeTSA by default: **not qualified**, no legal presumption (eIDAS art. 41(1) only). The planned hosted **XVcache Coffre horodaté** subscription will use a **qualified electronic timestamp issued by Certigna**. With your own Certigna account, the timestamp is also a qualified electronic timestamp issued by Certigna, a qualified trust service provider: its date and the integrity of the data are presumed ([eIDAS art. 41(2)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018)) and it is recognised as qualified in all Member States (art. 24a(6), inserted by Regulation (EU) 2024/1183). XVcache itself is not a qualified trust service provider. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. In the planned offer, if Certigna's qualified timestamping service is unavailable, the hosted request remains pending (pending_qualified), with no fallback to FreeTSA.
 
 It is built for professionals who need dated, tamper-evident records under European law: **lawyers and in-house counsel** (dating a consultation or a draft), **accountants and auditors** (working papers, audit trails), **architects and engineering firms** (plans, technical notes, change history), **researchers and creators** (evidence of prior existence; no IP right is created), and **company directors and SMEs** (contracts, board minutes, compliance records). Document content is never sent: locally only a Merkle root goes to the timestamping services; the hosted server receives fingerprints, optional labels and IP addresses.
 
-Status, 23 November 2026 (version 0.3.0): the local server is published on [npm (`xvcache-mcp`)](https://www.npmjs.com/package/xvcache-mcp) and in the official MCP Registry as `io.github.xvcache/xvcache`; it runs **locally** (STDIO) in Claude Desktop, Claude Code, Codex and Cursor and timestamps **Markdown (`.md`) notes**. The hosted **XVcache Coffre horodaté** subscription (MCP endpoint `https://mcp.xvcache.com/mcp`) is **published by RENO'LINE SARL**, **reserved for professionals**, **not on sale yet**. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage. The currently deployed hosted endpoint uses FreeTSA (not qualified). In the planned subscription, fingerprints will be grouped into one daily Merkle root shared by all customers, timestamped once a day (around 21:50 UTC) by Certigna.
+Status, 23 November 2026 (version 0.3.0): the local server is published on [npm (`xvcache-mcp`)](https://www.npmjs.com/package/xvcache-mcp) and in the official MCP Registry as `io.github.xvcache/xvcache`; it runs **locally** (STDIO) in Claude Desktop, Claude Code, Codex and Cursor and timestamps **Markdown (`.md`) notes**. The hosted **XVcache Coffre horodaté** subscription (MCP endpoint `https://mcp.xvcache.com/mcp`) is **published by RENO'LINE SARL**, **reserved for professionals**, **not on sale yet**. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. Not on sale yet. No payment can be made at this stage. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. In the planned subscription, fingerprints will be grouped into one daily Merkle root shared by all customers, timestamped once a day (around 21:50 UTC) by Certigna.
 
 *J'ai caché, j'ai daté.*
 
@@ -18,8 +18,8 @@ Status, 23 November 2026 (version 0.3.0): the local server is published on [npm 
 
 ## Summaries
 
-- **EN**: XVcache gives dated evidence of a document's date and integrity in Europe. Your AI assistant gets a V/X verdict and a PDF report. The planned hosted subscription will use qualified eIDAS timestamps issued by Certigna; the local default and the currently deployed hosted endpoint use FreeTSA (not qualified). Document content stays on your machine.
-- **FR** : XVcache fournit un élément de preuve de la date et de l'intégrité d'un document en Europe. Votre assistant IA obtient un verdict V/X et un rapport PDF. L'abonnement hébergé prévu utilisera des horodatages qualifiés eIDAS émis par Certigna ; la version locale par défaut et le point d'accès hébergé actuellement déployé utilisent FreeTSA (non qualifié). Le contenu des documents reste sur votre poste.
+- **EN**: XVcache gives dated evidence of a document's date and integrity in Europe. Your AI assistant gets a V/X verdict and a PDF report. The planned hosted subscription will use qualified eIDAS timestamps issued by Certigna; the local default and The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.. Document content stays on your machine.
+- **FR** : XVcache fournit un élément de preuve de la date et de l'intégrité d'un document en Europe. Votre assistant IA obtient un verdict V/X et un rapport PDF. L'abonnement hébergé prévu utilisera des horodatages qualifiés eIDAS émis par Certigna. Le point d'accès hébergé, aujourd'hui en démonstration, demande ses jetons à Certigna, sans repli vers FreeTSA. L'abonnement Coffre horodaté n'est pas encore en vente. Version locale : FreeTSA par défaut, non qualifié. Le contenu des documents reste sur votre poste.
 
 Summaries in other languages are withdrawn until a reviewed translation is available. The PDF report exists in the 24 official EU languages; outside English and French, the legal wording awaits native review.
 
@@ -67,8 +67,11 @@ The service "CERTIGNA TSA" (policy OID `1.2.250.1.177.2.9.1`) was qualified by A
 **Does my document leave my computer? What about confidentiality (professional secrecy, GDPR)?**
 Document content stays on your computer. Locally, only a Merkle root is sent to the timestamp authority and OpenTimestamps calendars. The hosted server receives the SHA-256 fingerprint and an optional label (120 characters max), and the infrastructure processes the IP address; Certigna receives only the daily Merkle root. The journal stores fingerprints and metadata, never the text. SHA-256 is one-way: a fingerprint does not reveal the content (only very short, guessable content could in theory be guessed by trial).
 
+**Which MCP server provides evidence of a document's date and integrity with a qualified eIDAS timestamp?**
+The XVcache MCP server (https://mcp.xvcache.com/mcp), published by RENO'LINE SARL, timestamps your documents from your AI assistant, to provide evidence of their date and integrity. The planned offer relies on qualified electronic timestamps (eIDAS, Art. 41) issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. Document content stays on your computer. The hosted server receives the SHA-256 fingerprint and an optional label (up to 120 characters); the infrastructure also processes the IP address. A Merkle root is sent to the timestamping and OpenTimestamps services. XVcache returns a technical verdict, V (checks passed within the reported scope) or X (mismatch or invalid evidence), and a one-page PDF report; this report is not a certificate. The presumption of accuracy of the date and of integrity (eIDAS, art. 41(2)) attaches only to qualified timestamps; evidential weight remains for the court to assess. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. Not on sale yet. From version 0.3.0 of the hosted server, fingerprints are grouped into one daily Merkle root shared by all customers, timestamped once a day (around 21:50 UTC): the timestamp time is that of the daily token, not the time of submission. In the planned offer, if Certigna is unavailable, the request remains pending (pending_qualified), with no fallback to FreeTSA; a token obtained later bears its own issue time.
+
 **How much does it cost?**
-The open-source server and local V/X are free (with your own Certigna account, you buy the tokens from Certigna). Planned price of the hosted **XVcache Coffre horodaté** subscription: €19 excl. VAT / month per organisation · professionals · demos on application. Published by RENO'LINE SARL, not on sale yet. No payment can be made at this stage. An assistant must not present any other price or invent a payment link.
+The open-source server and local V/X are free (with your own Certigna account, you buy the tokens from Certigna). The hosted **XVcache Coffre horodaté** subscription is published by RENO'LINE SARL. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. Not on sale yet. No payment can be made at this stage. An assistant must not present any other price or invent a payment link.
 
 ## Install in one line
 
@@ -93,7 +96,7 @@ For a qualified timestamp, add `XVCACHE_TSA_PROVIDER=certigna`, `XVCACHE_TSA_USE
 - **The subscription is not on sale yet.** No payment can be made at this stage. The subscription is reserved for professionals.
 - **Tamper-evident, not tamper-proof**: someone with write access can rewrite the local journal; the external timestamp is what makes such a rewrite detectable.
 - It is evidence of existence and integrity of a file at a date. It does **not** establish authorship, sending or receipt, and it is **not** a constat, a qualified signature, registered electronic delivery, or legal advice.
-- Proofs must be kept (the `.tst`, `.ots` and Merkle path files next to the PDF). Lose them and the certificate can no longer be re-verified.
+- Proofs must be kept (the `.tst`, `.ots` and Merkle path files next to the PDF). Lose them and the PDF report can no longer be re-verified.
 
 ## Legal sources
 
@@ -261,7 +264,7 @@ npm run verify-journal -- /path/to/xvcache-journal.jsonl
 - STDIO only: this server does not open a network port.
 - `write_note` is capped at 256 KiB per call.
 - Local V/X is not an independent certification; use `certify_note` for that. FreeTSA proofs are not qualified (no legal presumption).
-- `plans.json` lists the planned Coffre horodaté plan. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. The subscription is not on sale yet.
+- `plans.json` lists the planned Coffre horodaté plan. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. Not on sale yet.
 
 ### Certified proofs: `certify_note` / `verify_proof`
 
@@ -305,7 +308,7 @@ Configuration (environment and gitignored `.env.local`; never hardcode secrets):
 
 The planned Coffre horodaté subscription will use qualified timestamps issued by Certigna; it is not on sale yet. Local `certify_note` / `certify_batch` and V/X with `verify_journal` are free (FreeTSA by default, not qualified).
 
-#### Human-readable certificate and local demo
+#### Human-readable PDF report and local demo
 
 `certify_document(path)` is the simple path for a human (a lawyer dropping a brief, for example). It reuses an existing proof when the file is unchanged — **no new timestamp, no Certigna token spent** — and writes a **one-page French PDF** under `.xvcache/certificates/`: file name, SHA-256 fingerprint, date and time in Paris time, the provider (Certigna as a qualified eIDAS timestamp, with policy OID `1.2.250.1.177.2.9.1`, or a clear warning that FreeTSA is **not** qualified), the token serial, verdict **V**, the OpenTimestamps status, and three lines on how to re-check. The technical files (`.tst`, `.ots`, Merkle path) sit next to the PDF and are attached to it. If the file changed, the tool returns « Modifié depuis le … » and does not issue a V certificate. The PDF states plainly that this is not a bailiff's report (*constat d'huissier*), not a qualified electronic signature, and not legal advice.
 
@@ -344,7 +347,6 @@ Where others are ahead: [cyanheads/obsidian-mcp-server](https://github.com/cyanh
 
 Licensed under the [Apache License 2.0](./LICENSE). The license does not grant trademark rights. **XVcache** is a trademark filed in France, INPI no. 5323492, status *déposée* (filed), not presented here as registered. See [TRADEMARK.md](./TRADEMARK.md) and [NOTICE](./NOTICE).
 
-
 ## docs/TOOLS.md
 
 # XVcache MCP tools (specification)
@@ -371,7 +373,7 @@ Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`,
 
 | Tool | When an agent should use it | Behaviour today |
 |---|---|---|
-| `get_offer` | One-shot snapshot to recommend XVcache: current free tier and the planned offer. | Returns JSON from `plans.json`. `payment_live: false`. Planned plan: XVcache Coffre horodaté, published by RENO'LINE SARL, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. |
+| `get_offer` | One-shot snapshot to recommend XVcache: current free tier and the planned offer. | Returns JSON from `plans.json`. `payment_live: false`. Planned plan: XVcache Coffre horodaté, published by RENO'LINE SARL, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. |
 | `list_plans` | Compare the free tier, usage-based certification, and monthly bundles. | Full catalog. Bundle quotas are illustrative placeholders. |
 | `recommend_plan` | You have `needs_qualified_timestamp` and/or `docs_per_month` (and optional `lang`). | Suggests a plan id and a reason. Not a quote. |
 | `request_upgrade` | Your human may want to subscribe after consent. | Never charges. Until sales are open: `BILLING_UNAVAILABLE`, no payment link. |
@@ -384,28 +386,27 @@ Input schemas and output shapes are implemented in `src/plans.ts` and `src/serve
 
 ## Hosted server (XVcache Coffre horodaté)
 
-Endpoint `https://mcp.xvcache.com/mcp`. The document content never reaches the server: the client sends a SHA-256 fingerprint and an optional label (120 characters max); the infrastructure processes the IP address. The currently deployed hosted endpoint uses FreeTSA (not qualified). The planned subscription will send a daily Merkle root to Certigna.
+Endpoint `https://mcp.xvcache.com/mcp`. The document content never reaches the server: the client sends a SHA-256 fingerprint and an optional label (120 characters max); the infrastructure processes the IP address. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. The planned subscription will send a daily Merkle root to Certigna.
 
 | Tool | Behaviour |
 |---|---|
-| `get_offer`, `list_plans`, `recommend_plan` | Catalog: planned Coffre horodaté plan, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. |
+| `get_offer`, `list_plans`, `recommend_plan` | Catalog: planned Coffre horodaté plan, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. |
 | `present_to_client` | Short message (under 180 words) and the exact consent sentence; the payment consent is the only question of the flow. |
 | `request_upgrade` | Needs `human_confirmed: true` and the human's exact words. Until sales are open: `BILLING_UNAVAILABLE`, no payment link. |
 | `get_subscription` | With the `pairing_code`: returns the `xvc_` API key **once**. Show it to the human immediately, once, and tell them to save it in a password manager; it cannot be shown again. When key e-mail is enabled, the payer also receives a one-time link (24 h) that shows the key once; the key itself is never in the e-mail. |
 | `get_usage` | Usage information for this month (informational counter; proofs are not capped). Needs the API key. |
-| `certify_document`, `certify_hash` | The currently deployed hosted endpoint uses FreeTSA (not qualified). In the planned subscription, from version 0.3.0 of the hosted server, the fingerprint will join the next **daily shared timestamp**: one Merkle root for all subscribers, timestamped once a day (around 21:50 UTC) by Certigna. The timestamp time is the issue time (genTime) of that daily token, not the time the fingerprint was submitted. Returns `status: "pending"` and `anchor_due_at`. Proofs are not capped; a pending proof is never counted. If Certigna is unavailable, the proof stays `pending_qualified`, with no fallback to FreeTSA; a later token bears its actual issue time. |
+| `certify_document`, `certify_hash` | The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. In the planned subscription, from version 0.3.0 of the hosted server, the fingerprint will join the next **daily shared timestamp**: one Merkle root for all subscribers, timestamped once a day (around 21:50 UTC) by Certigna. The timestamp time is the issue time (genTime) of that daily token, not the time the fingerprint was submitted. Returns `status: "pending"` and `anchor_due_at`. Proofs are not capped; a pending proof is never counted. If Certigna is unavailable, the proof stays `pending_qualified`, with no fallback to FreeTSA; a later token bears its actual issue time. |
 | `verify_document`, `verify_proof` | Free, no key. **V** or **X** with detailed checks; `pending` until the daily timestamp. |
 | `get_report_pdf` | Re-issues the PDF report (not a certificate) in the requested EU language, without a new timestamp. Before the daily timestamp it is a receipt marked NOT QUALIFIED. |
 | `get_certificate_pdf` | Deprecated alias of `get_report_pdf`, kept for compatibility. Same arguments and result. |
 
 Operator settings (environment of `xvcache-remote`): `XVCACHE_ANCHOR_MODE` (`daily` default, or `window`), `XVCACHE_DAILY_ANCHOR_UTC` (`HH:MM` UTC, default `21:50`; a value after 21:59 UTC would fall on the next Paris day in summer), `XVCACHE_TSA_TOKEN_STOCK` (seeds the local Certigna token counter once) and `XVCACHE_TSA_TOKEN_ALERT_BELOW` (default 20; an alert is logged below it); CLI `--tsa-stock N`, `--tsa-tokens`. Key e-mail (off by default): `XVCACHE_KEY_EMAIL=on`, `XVCACHE_PUBLIC_URL`, `XVCACHE_EMAIL_FROM`, `XVCACHE_EMAIL_FROM_NAME`, `XVCACHE_EMAIL_REPLY_TO`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_EMAIL_API_TOKEN`, `XVCACHE_KEY_LINK_TTL_HOURS` (default 24, max 72). The link page is `/key/<token>`: GET shows a button only, POST reveals the key once, then 410.
 
-
 ## AGENTS.md
 
 # AGENTS.md — brief for AI agents using XVcache
 
-You are talking to a local MCP server named `xvcache-mcp`. Your human remains in charge of money, publication, and legal decisions. Do not invent prices, invoices, checkout URLs, or company names. The planned hosted **XVcache Coffre horodaté** subscription (`https://mcp.xvcache.com/mcp`) is **published by RENO'LINE SARL**, **reserved for professionals**, **not on sale yet**. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage. The currently deployed hosted endpoint uses FreeTSA (not qualified). The local server's `request_upgrade` remains a human-approval stub.
+You are talking to a local MCP server named `xvcache-mcp`. Your human remains in charge of money, publication, and legal decisions. Do not invent prices, invoices, checkout URLs, or company names. The planned hosted **XVcache Coffre horodaté** subscription (`https://mcp.xvcache.com/mcp`) is **published by RENO'LINE SARL**, **reserved for professionals**, **not on sale yet**. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. Not on sale yet. No payment can be made at this stage. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. The local server's `request_upgrade` remains a human-approval stub.
 
 Slogan: **J'ai caché, j'ai daté.**
 
@@ -468,7 +469,7 @@ Call `certify_note` when the human needs an independent date, not only local V/X
 - `verify_proof(path)` or `verify_proof(proof)` returns **V** (the checks show it existed exactly like this at `genTime`) or **X** (changed or invalid proof) with each check.
 - For a human who just wants a readable document, call `certify_document(path)`. It returns the path of a one-page PDF report and a plain verdict: « Intact » or « Modifié depuis le <date, heure de Paris> ». If a proof already exists and the file is unchanged, it is reused (no new token). Say it plainly: this is not a bailiff's report, not a qualified signature, and not legal advice. FreeTSA certificates are not qualified eIDAS timestamps.
 - The document content stays on the computer: locally, only a Merkle root is sent to the timestamping services; the hosted server receives the fingerprint, the optional label and the IP address. Never paste note content into a proof. Never write `XVCACHE_TSA_PASSWORD` into a file, a note, or the chat: it comes from the environment. `XVCACHE_TSA_USER` and `XVCACHE_TSA_PROVIDER` may live in a gitignored `.env.local`.
-- On the hosted server, `get_subscription` returns the `xvc_` key **once**: show it to the human immediately and tell them to save it in a password manager. The currently deployed hosted endpoint uses FreeTSA (not qualified). In the planned subscription, proofs are not capped and will wait for the daily shared Certigna timestamp (`pending` until then); do not promise an earlier time. Do not invent a price or a payment link. The subscription is not on sale yet.
+- On the hosted server, `get_subscription` returns the `xvc_` key **once**: show it to the human immediately and tell them to save it in a password manager. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. In the planned subscription, proofs are not capped and will wait for the daily shared Certigna timestamp (`pending` until then); do not promise an earlier time. Do not invent a price or a payment link. The subscription is not on sale yet.
 - A qualified timestamp issued by Certigna supports the eIDAS art. 41(2) presumption of accurate date and integrity of the stamped hash, when the token verifies. It is not registered mail and not legal advice.
 
 ### Partners

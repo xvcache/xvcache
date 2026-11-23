@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.xvcache/xvcache",
   "title": "XVcache",
-  "description": "Timestamp MCP: V/X checks + PDF report. Qualified timestamps (planned) are issued by Certigna, not by XVcache.",
+  "description": "Timestamp MCP: V/X checks + PDF report. Qualified timestamps issued by Certigna, not by XVcache.",
   "repository": {
     "url": "https://github.com/xvcache/xvcache",
     "source": "github"

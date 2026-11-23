@@ -22,7 +22,7 @@ Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`,
 
 | Tool | When an agent should use it | Behaviour today |
 |---|---|---|
-| `get_offer` | One-shot snapshot to recommend XVcache: current free tier and the planned offer. | Returns JSON from `plans.json`. `payment_live: false`. Planned plan: XVcache Coffre horodaté, published by RENO'LINE SARL, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. |
+| `get_offer` | One-shot snapshot to recommend XVcache: current free tier and the planned offer. | Returns JSON from `plans.json`. `payment_live: false`. Planned plan: XVcache Coffre horodaté, published by RENO'LINE SARL, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. |
 | `list_plans` | Compare the free tier, usage-based certification, and monthly bundles. | Full catalog. Bundle quotas are illustrative placeholders. |
 | `recommend_plan` | You have `needs_qualified_timestamp` and/or `docs_per_month` (and optional `lang`). | Suggests a plan id and a reason. Not a quote. |
 | `request_upgrade` | Your human may want to subscribe after consent. | Never charges. Until sales are open: `BILLING_UNAVAILABLE`, no payment link. |
@@ -35,16 +35,16 @@ Input schemas and output shapes are implemented in `src/plans.ts` and `src/serve
 
 ## Hosted server (XVcache Coffre horodaté)
 
-Endpoint `https://mcp.xvcache.com/mcp`. The document content never reaches the server: the client sends a SHA-256 fingerprint and an optional label (120 characters max); the infrastructure processes the IP address. The currently deployed hosted endpoint uses FreeTSA (not qualified). The planned subscription will send a daily Merkle root to Certigna.
+Endpoint `https://mcp.xvcache.com/mcp`. The document content never reaches the server: the client sends a SHA-256 fingerprint and an optional label (120 characters max); the infrastructure processes the IP address. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. The planned subscription will send a daily Merkle root to Certigna.
 
 | Tool | Behaviour |
 |---|---|
-| `get_offer`, `list_plans`, `recommend_plan` | Catalog: planned Coffre horodaté plan, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. |
+| `get_offer`, `list_plans`, `recommend_plan` | Catalog: planned Coffre horodaté plan, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. |
 | `present_to_client` | Short message (under 180 words) and the exact consent sentence; the payment consent is the only question of the flow. |
 | `request_upgrade` | Needs `human_confirmed: true` and the human's exact words. Until sales are open: `BILLING_UNAVAILABLE`, no payment link. |
 | `get_subscription` | With the `pairing_code`: returns the `xvc_` API key **once**. Show it to the human immediately, once, and tell them to save it in a password manager; it cannot be shown again. When key e-mail is enabled, the payer also receives a one-time link (24 h) that shows the key once; the key itself is never in the e-mail. |
 | `get_usage` | Usage information for this month (informational counter; proofs are not capped). Needs the API key. |
-| `certify_document`, `certify_hash` | The currently deployed hosted endpoint uses FreeTSA (not qualified). In the planned subscription, from version 0.3.0 of the hosted server, the fingerprint will join the next **daily shared timestamp**: one Merkle root for all subscribers, timestamped once a day (around 21:50 UTC) by Certigna. The timestamp time is the issue time (genTime) of that daily token, not the time the fingerprint was submitted. Returns `status: "pending"` and `anchor_due_at`. Proofs are not capped; a pending proof is never counted. If Certigna is unavailable, the proof stays `pending_qualified`, with no fallback to FreeTSA; a later token bears its actual issue time. |
+| `certify_document`, `certify_hash` | The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. In the planned subscription, from version 0.3.0 of the hosted server, the fingerprint will join the next **daily shared timestamp**: one Merkle root for all subscribers, timestamped once a day (around 21:50 UTC) by Certigna. The timestamp time is the issue time (genTime) of that daily token, not the time the fingerprint was submitted. Returns `status: "pending"` and `anchor_due_at`. Proofs are not capped; a pending proof is never counted. If Certigna is unavailable, the proof stays `pending_qualified`, with no fallback to FreeTSA; a later token bears its actual issue time. |
 | `verify_document`, `verify_proof` | Free, no key. **V** or **X** with detailed checks; `pending` until the daily timestamp. |
 | `get_report_pdf` | Re-issues the PDF report (not a certificate) in the requested EU language, without a new timestamp. Before the daily timestamp it is a receipt marked NOT QUALIFIED. |
 | `get_certificate_pdf` | Deprecated alias of `get_report_pdf`, kept for compatibility. Same arguments and result. |
