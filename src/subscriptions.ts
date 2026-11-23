@@ -8,7 +8,9 @@ import { toolError, type ToolError } from "./errors.js";
  * - API keys and pairing codes are stored as SHA-256 hashes only; the plain API key is shown once.
  * - Quotas are counted per calendar month (UTC). `quota: null` = no cap (quotas are still TBD).
  * - Activation is done by billing (L4, Stripe webhook) or by the operator (createApiKey). Nothing here charges.
- * Storage: one JSON file, written atomically. Good enough for a single-instance server; a real DB is L6.
+ * Storage: one JSON file, written atomically (tmp + fsync + rename). Good enough for a single-instance server; a real DB is L6.
+ * Pending email-link tokens are stored wrapped with delivery-wrap.key so a crash after the Stripe 200
+ * can still resume delivery; the wrap key lives beside this file and is not in the JSON.
  */
 
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled";
@@ -52,6 +54,10 @@ export type KeyDeliveryRecord = {
   send_error?: string;
   revealed_at?: string;
   enc?: { iv: string; ct: string; tag: string };
+  /** Stripe event that minted this delivery; used to re-queue the email on a retry. */
+  event_id?: string;
+  /** Link token wrapped with the server-side delivery-wrap.key (not the raw token). */
+  token_wrap?: { iv: string; ct: string; tag: string };
 };
 
 /** Returned once by applyBillingEvent to the webhook, which emails the link. Never persisted in clear. */
@@ -78,6 +84,35 @@ function openKey(enc: { iv: string; ct: string; tag: string }, token: string, to
   d.setAAD(Buffer.from(token_hash, "utf8"));
   d.setAuthTag(Buffer.from(enc.tag, "base64"));
   return Buffer.concat([d.update(Buffer.from(enc.ct, "base64")), d.final()]).toString("utf8");
+}
+
+/** Filename next to subscriptions.json. Created once, mode 0600; must be backed up with the data dir. */
+export const DELIVERY_WRAP_FILE = "delivery-wrap.key";
+
+function sealWith(key: Buffer, plaintext: string, aad: string): { iv: string; ct: string; tag: string } {
+  const iv = randomBytes(12);
+  const c = createCipheriv("aes-256-gcm", key, iv);
+  c.setAAD(Buffer.from(aad, "utf8"));
+  const ct = Buffer.concat([c.update(plaintext, "utf8"), c.final()]);
+  return { iv: iv.toString("base64"), ct: ct.toString("base64"), tag: c.getAuthTag().toString("base64") };
+}
+function openWith(key: Buffer, enc: { iv: string; ct: string; tag: string }, aad: string): string {
+  const d = createDecipheriv("aes-256-gcm", key, Buffer.from(enc.iv, "base64"));
+  d.setAAD(Buffer.from(aad, "utf8"));
+  d.setAuthTag(Buffer.from(enc.tag, "base64"));
+  return Buffer.concat([d.update(Buffer.from(enc.ct, "base64")), d.final()]).toString("utf8");
+}
+
+async function fsyncRename(tmp: string, dest: string): Promise<void> {
+  const fh = await fs.open(tmp, "r+");
+  try { await fh.sync(); } finally { await fh.close(); }
+  await fs.rename(tmp, dest);
+  try {
+    const dh = await fs.open(path.dirname(dest), "r");
+    try { await dh.sync(); } finally { await dh.close(); }
+  } catch {
+    // Directory fsync is best-effort (not supported on every filesystem).
+  }
 }
 export function isEmail(s: unknown): s is string {
   return typeof s === "string" && s.length <= 254 && EMAIL_RE.test(s.trim());
@@ -195,6 +230,8 @@ export class SubscriptionStore {
    */
   constructor(private file: string, private now: () => Date = () => new Date(), private o: { keyDeliveryTtlMs?: number } = {}) {}
 
+  private wrapKey: Buffer | null = null;
+
   currentTime(): Date {
     return this.now();
   }
@@ -203,16 +240,122 @@ export class SubscriptionStore {
     return typeof this.o.keyDeliveryTtlMs === "number" && this.o.keyDeliveryTtlMs > 0;
   }
 
+  wrapKeyPath(): string {
+    return path.join(path.dirname(this.file), DELIVERY_WRAP_FILE);
+  }
+
+  /**
+   * Server-side wrapping key for pending delivery tokens. Created once (32 random bytes, mode 0600).
+   * The store file alone still does not reveal the API key or the link token.
+   */
+  async getWrapKey(): Promise<Buffer> {
+    if (this.wrapKey) return this.wrapKey;
+    const dest = this.wrapKeyPath();
+    try {
+      const buf = await fs.readFile(dest);
+      if (buf.length !== 32) throw new Error("delivery wrap key has an unexpected length");
+      this.wrapKey = buf;
+      return buf;
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+    }
+    await fs.mkdir(path.dirname(dest), { recursive: true });
+    const key = randomBytes(32);
+    const tmp = `${dest}.${process.pid}.${Date.now()}.tmp`;
+    const fh = await fs.open(tmp, "w", 0o600);
+    try {
+      await fh.write(key);
+      await fh.sync();
+    } finally {
+      await fh.close();
+    }
+    await fsyncRename(tmp, dest);
+    this.wrapKey = key;
+    return key;
+  }
+
   /** Inside a transaction: create the one-time link for a freshly minted key. */
-  private newDelivery(data: StoreFile, api_key: string, key_hash: string, email: string, lang: string): PendingKeyDelivery {
+  private newDelivery(data: StoreFile, api_key: string, key_hash: string, email: string, lang: string, wrap: Buffer, event_id?: string): PendingKeyDelivery {
     const token = randomBytes(32).toString("base64url");
     const token_hash = hashSecret(token);
     const created = this.now();
     const expires_at = new Date(created.getTime() + (this.o.keyDeliveryTtlMs ?? KEY_DELIVERY_TTL_MS)).toISOString();
     data.key_deliveries ??= [];
     data.key_deliveries = data.key_deliveries.filter((d) => Date.parse(d.expires_at) > created.getTime() - DELIVERY_KEEP_MS);
-    data.key_deliveries.push({ token_hash, key_hash, email, lang, created_at: created.toISOString(), expires_at, enc: sealKey(api_key, token, token_hash) });
+    data.key_deliveries.push({
+      token_hash, key_hash, email, lang,
+      created_at: created.toISOString(), expires_at,
+      enc: sealKey(api_key, token, token_hash),
+      token_wrap: sealWith(wrap, token, token_hash),
+      ...(event_id ? { event_id } : {}),
+    });
     return { token, token_hash, email, lang, expires_at };
+  }
+
+  private unwrapDelivery(d: KeyDeliveryRecord, wrap: Buffer | null): PendingKeyDelivery | undefined {
+    if (!d.token_wrap || !wrap || d.revealed_at || !d.enc) return undefined;
+    if (Date.parse(d.expires_at) <= this.now().getTime()) return undefined;
+    try {
+      const token = openWith(wrap, d.token_wrap, d.token_hash);
+      if (hashSecret(token) !== d.token_hash) return undefined;
+      return { token, token_hash: d.token_hash, email: d.email, lang: d.lang, expires_at: d.expires_at };
+    } catch {
+      return undefined;
+    }
+  }
+
+  private clearDeliverySecrets(d: KeyDeliveryRecord): void {
+    delete d.enc;
+    delete d.token_wrap;
+  }
+
+  /** Unsent, unrevealed, unexpired deliveries whose link token can be recovered after a restart. */
+  listRecoverableDeliveries(): Promise<PendingKeyDelivery[]> {
+    return this.tx(async (data) => {
+      const wrap = this.wrapKey ?? await this.getWrapKey().catch(() => null);
+      const out: PendingKeyDelivery[] = [];
+      for (const d of data.key_deliveries ?? []) {
+        if (d.sent_at || d.revealed_at) continue;
+        const rec = this.unwrapDelivery(d, wrap);
+        if (rec) out.push(rec);
+      }
+      return out;
+    }, false);
+  }
+
+  /**
+   * Fallback when a pending delivery cannot be unwrapped (legacy record, wrap key lost).
+   * If the pairing still holds api_key_once, a new link is sealed for the same key.
+   * Otherwise a new key is minted, the unrevealed previous key is revoked, and pairing
+   * / delivery are updated (rotation of an undelivered key only).
+   */
+  recoverOrRotateDelivery(token_hash: string): Promise<PendingKeyDelivery | undefined> {
+    return this.tx(async (data) => {
+      const d = (data.key_deliveries ?? []).find((x) => x.token_hash === token_hash);
+      if (!d || d.revealed_at) return undefined;
+      const wrap = await this.getWrapKey();
+      const existing = this.unwrapDelivery(d, wrap);
+      if (existing) return existing;
+      const pairing = data.pairings.find((p) => p.key_hash === d.key_hash);
+      let api_key = pairing?.api_key_once;
+      if (!api_key) {
+        const rec = data.subscriptions.find((s) => s.key_hash === d.key_hash);
+        if (!rec) return undefined;
+        api_key = newSecret("xvc_", 32);
+        rec.key_hash = hashSecret(api_key);
+        rec.key_hint = api_key.slice(-4);
+        if (pairing) {
+          pairing.key_hash = rec.key_hash;
+          pairing.api_key_once = api_key;
+        }
+        d.key_hash = rec.key_hash;
+      }
+      this.clearDeliverySecrets(d);
+      const fresh = this.newDelivery(data, api_key, d.key_hash, d.email, d.lang, wrap, d.event_id);
+      const added = data.key_deliveries!.pop();
+      if (added) Object.assign(d, added, { sent_at: undefined, send_error: undefined, revealed_at: undefined });
+      return fresh;
+    });
   }
 
   /** State of a delivery link, without consuming it (GET page; mail scanners may open links). */
@@ -233,14 +376,22 @@ export class SubscriptionStore {
       if (!d) return { ok: false as const, state: "unknown" as const, lang: "en" };
       if (d.revealed_at) return { ok: false as const, state: "revealed" as const, lang: d.lang };
       if (!d.enc || Date.parse(d.expires_at) <= this.now().getTime()) {
-        delete d.enc;
+        this.clearDeliverySecrets(d);
         return { ok: false as const, state: "expired" as const, lang: d.lang };
       }
       const api_key = openKey(d.enc, token, d.token_hash);
-      delete d.enc;
+      this.clearDeliverySecrets(d);
       d.revealed_at = this.now().toISOString();
       return { ok: true as const, api_key, lang: d.lang, key_hint: api_key.slice(-4) };
     });
+  }
+
+  /** True once the link email was accepted by the mailer (or the key was already revealed). */
+  deliveryAlreadySent(token_hash: string): Promise<boolean> {
+    return this.tx((data) => {
+      const d = (data.key_deliveries ?? []).find((x) => x.token_hash === token_hash);
+      return !!d && !!(d.sent_at || d.revealed_at);
+    }, false);
   }
 
   /** Record the outcome of the email send (no address, no token in the error text). */
@@ -264,8 +415,14 @@ export class SubscriptionStore {
   private async save(data: StoreFile): Promise<void> {
     await fs.mkdir(path.dirname(this.file), { recursive: true });
     const tmp = `${this.file}.${process.pid}.${Date.now()}.tmp`;
-    await fs.writeFile(tmp, JSON.stringify(data, null, 2), { mode: 0o600 });
-    await fs.rename(tmp, this.file);
+    const fh = await fs.open(tmp, "w", 0o600);
+    try {
+      await fh.writeFile(JSON.stringify(data, null, 2), "utf8");
+      await fh.sync();
+    } finally {
+      await fh.close();
+    }
+    await fsyncRename(tmp, this.file);
   }
 
   /** Serialise read-modify-write cycles. */
@@ -453,10 +610,15 @@ export class SubscriptionStore {
    * - dispute → flag the record (no automatic cut-off; the operator decides).
    */
   applyBillingEvent(ev: BillingEvent): Promise<BillingResult> {
-    return this.tx((data) => {
+    return this.tx(async (data) => {
       data.stripe_events ??= [];
       data.stripe_subs ??= {};
-      if (data.stripe_events.includes(ev.id)) return { duplicate: true, applied: "duplicate" };
+      const wrap = this.keyDeliveryEnabled ? await this.getWrapKey() : null;
+      if (data.stripe_events.includes(ev.id)) {
+        const d = (data.key_deliveries ?? []).find((x) => x.event_id === ev.id && !x.sent_at && !x.revealed_at);
+        const delivery = d && wrap ? this.unwrapDelivery(d, wrap) : undefined;
+        return { duplicate: true, applied: "duplicate", ...(delivery ? { delivery } : {}) };
+      }
       data.stripe_events.push(ev.id);
       if (data.stripe_events.length > MAX_STRIPE_EVENT_IDS) data.stripe_events.splice(0, data.stripe_events.length - MAX_STRIPE_EVENT_IDS);
       const subs = data.stripe_subs;
@@ -497,8 +659,8 @@ export class SubscriptionStore {
             rec.email = email;
             data.subscriptions.push(rec);
             if (!known) subs[ev.subscription] = { status, at: ev.created, customer: ev.customer };
-            const delivery = this.newDelivery(data, api_key, rec.key_hash, email, lang);
-            return { duplicate: false, applied: `key_minted_email_only:${status}`, delivery };
+            const delivery = wrap ? this.newDelivery(data, api_key, rec.key_hash, email, lang, wrap, ev.id) : undefined;
+            return { duplicate: false, applied: `key_minted_email_only:${status}`, ...(delivery ? { delivery } : {}) };
           }
           if (!p || !ev.paid) {
             data.unlinked_checkouts ??= [];
@@ -522,7 +684,7 @@ export class SubscriptionStore {
           p.key_hash = rec.key_hash;
           p.api_key_once = api_key;
           if (ev.subscription && !known) subs[ev.subscription] = { status, at: ev.created, customer: ev.customer };
-          const delivery = email && this.keyDeliveryEnabled ? this.newDelivery(data, api_key, rec.key_hash, email, p.lang) : undefined;
+          const delivery = email && wrap ? this.newDelivery(data, api_key, rec.key_hash, email, p.lang, wrap, ev.id) : undefined;
           return { duplicate: false, applied: `key_minted:${status}`, ...(delivery ? { delivery } : {}) };
         }
         case "subscription_status": {

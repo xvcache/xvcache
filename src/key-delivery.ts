@@ -103,19 +103,34 @@ export type DeliveryLog = (line: Record<string, unknown>) => void;
 /** Sends the link email after the webhook has answered Stripe; retries a few times, never logs the address nor the token. */
 export class KeyDeliveryService {
   private inflight = new Set<Promise<void>>();
+  private baseOverride: string | undefined;
   constructor(private o: { store: SubscriptionStore; mailer: Mailer; publicBaseUrl: () => string; log?: DeliveryLog; retryDelaysMs?: number[] }) {}
+
+  /** Bound once the listen port is known, so resume-on-start uses a real URL. */
+  setPublicBaseUrl(url: string): void {
+    this.baseOverride = url.replace(/\/$/, "");
+  }
 
   private log(l: Record<string, unknown>): void {
     (this.o.log ?? ((x) => process.stderr.write(`xvcache-key-delivery ${JSON.stringify(x)}\n`)))(l);
   }
 
   linkFor(token: string): string {
-    return `${this.o.publicBaseUrl().replace(/\/$/, "")}${KEY_PAGE_PREFIX}${token}`;
+    const base = (this.baseOverride || this.o.publicBaseUrl()).replace(/\/$/, "");
+    return `${base}${KEY_PAGE_PREFIX}${token}`;
   }
 
   deliver(d: PendingKeyDelivery): void {
     const p = this.run(d).finally(() => this.inflight.delete(p));
     this.inflight.add(p);
+  }
+
+  /** After a restart: re-queue unsent deliveries whose token was persisted (wrapped) before the Stripe 200. */
+  async resume(): Promise<number> {
+    const pending = await this.o.store.listRecoverableDeliveries();
+    for (const d of pending) this.deliver(d);
+    if (pending.length) this.log({ ok: true, resumed: pending.length });
+    return pending.length;
   }
 
   /** Tests / shutdown: wait for every pending send. */
@@ -124,6 +139,7 @@ export class KeyDeliveryService {
   }
 
   private async run(d: PendingKeyDelivery): Promise<void> {
+    if (await this.o.store.deliveryAlreadySent(d.token_hash)) return;
     const mail = keyLinkEmail({ link: this.linkFor(d.token), expires_at: d.expires_at, lang: d.lang });
     const delays = this.o.retryDelaysMs ?? [0, 60_000, 600_000];
     const id = d.token_hash.slice(0, 12);

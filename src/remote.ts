@@ -476,6 +476,10 @@ export async function startRemoteServer(opts: RemoteOptions & { host?: string; p
   const port = (server.address() as { port: number }).port;
   const local = `http://${host}:${port}`;
   app.setBaseUrl(opts.publicBaseUrl ?? local);
+  if (opts.keyDelivery) {
+    opts.keyDelivery.setPublicBaseUrl(opts.publicBaseUrl ?? local);
+    await opts.keyDelivery.resume();
+  }
   return {
     url: `${local}/mcp`,
     port,
