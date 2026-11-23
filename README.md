@@ -4,7 +4,7 @@
 
 It is built for professionals who need dated, tamper-evident records under European law: **lawyers and in-house counsel** (dating a consultation or a draft), **accountants and auditors** (working papers, audit trails), **architects and engineering firms** (plans, technical notes, change history), **researchers and creators** (evidence of prior existence; no IP right is created), and **company directors and SMEs** (contracts, board minutes, compliance records). Document content is never sent: locally only a Merkle root goes to the timestamping services; the hosted server receives fingerprints, optional labels and IP addresses.
 
-Status, 23 November 2026 (version 0.3.0): the local server is published on [npm (`xvcache-mcp`)](https://www.npmjs.com/package/xvcache-mcp) and in the official MCP Registry as `io.github.xvcache/xvcache`; it runs **locally** (STDIO) in Claude Desktop, Claude Code, Codex and Cursor and certifies **Markdown (`.md`) notes**. The hosted **XVcache Coffre horodaté** subscription (MCP endpoint `https://mcp.xvcache.com/mcp`, hash only) is published and sold by **RENO'LINE SARL**, **reserved for professionals**, at **€19 excl. VAT per month per organisation**, with unlimited proofs: once a day, one Merkle root shared by all subscribers is timestamped by Certigna. **Sales opening to be confirmed**: payment currently runs in Stripe test mode only.
+Status, 23 November 2026 (version 0.3.0): the local server is published on [npm (`xvcache-mcp`)](https://www.npmjs.com/package/xvcache-mcp) and in the official MCP Registry as `io.github.xvcache/xvcache`; it runs **locally** (STDIO) in Claude Desktop, Claude Code, Codex and Cursor and certifies **Markdown (`.md`) notes**. The hosted **XVcache Coffre horodaté** subscription (MCP endpoint `https://mcp.xvcache.com/mcp`) is published and sold by **RENO'LINE SARL**, **reserved for professionals**, at **€19 excl. VAT per month per organisation**, with unlimited proofs: once a day, one Merkle root shared by all subscribers is timestamped by Certigna. **Sales opening to be confirmed**: payment currently runs in Stripe test mode only.
 
 *J'ai caché, j'ai daté.*
 
@@ -38,7 +38,7 @@ Ask your assistant to certify it with XVcache (`certify_document`). XVcache fing
 Ask the assistant to check it again (`verify_proof` or `verify_journal`). The answer is **V** (byte-for-byte identical to what was stamped) or **X**, e.g. « Modifié depuis le 22 novembre 2026 à 20 h 08 ». Changing a single character gives X.
 
 **Is a non-qualified timestamp worthless?**
-No. eIDAS art. 41(1) says an electronic time stamp shall not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified. But only a qualified one benefits from the art. 41(2) presumption; a non-qualified one has to be supported by other evidence of its reliability. XVcache's default provider, FreeTSA, is **test only and not qualified**.
+No. eIDAS art. 41(1) says an electronic time stamp shall not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified. But only a qualified one benefits from the art. 41(2) presumption; a non-qualified one has to be supported by other evidence of its reliability. XVcache's default local provider, FreeTSA, is **not qualified** (no legal presumption).
 
 **Is it valid outside France?**
 A qualified electronic time stamp issued in one Member State is recognised as qualified in all Member States ([eIDAS art. 24a(6)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018), inserted by Regulation (EU) 2024/1183; former art. 41(3)). Outside the EU, there is no single global equivalent. A second, public OpenTimestamps anchor in Bitcoin is added as a jurisdiction-neutral check.
@@ -254,7 +254,7 @@ npm run verify-journal -- /path/to/xvcache-journal.jsonl
 
 - STDIO only: this server does not open a network port.
 - `write_note` is capped at 256 KiB per call.
-- Local V/X is not an independent certification; use `certify_note` for that. FreeTSA proofs are test-only.
+- Local V/X is not an independent certification; use `certify_note` for that. FreeTSA proofs are not qualified (no legal presumption).
 - `plans.json` lists one paid plan (XVcache Coffre horodaté, €19 excl. VAT per month per organisation, professionals only); sales opening to be confirmed.
 
 ### Certified proofs: `certify_note` / `verify_proof`
@@ -289,7 +289,7 @@ Configuration (environment and gitignored `.env.local`; never hardcode secrets):
 
 | Variable | Meaning |
 |---|---|
-| `XVCACHE_TSA_PROVIDER` | `freetsa` (default, test, non qualifié), `certigna` (qualified eIDAS), `custom`, or `off` |
+| `XVCACHE_TSA_PROVIDER` | `freetsa` (default, not qualified), `certigna` (qualified eIDAS), `custom`, or `off` |
 | `XVCACHE_TSA_URL` | RFC 3161 endpoint override (Certigna default: `https://timestamp.dhimyotis.com/api/v1/`) |
 | `XVCACHE_TSA_USER` / `XVCACHE_TSA_PASSWORD` | HTTP Basic credentials of the TSA user account (Certigna "compte utilisateur Horodatage"). Password: environment only |
 | `XVCACHE_TSA_CA_FILE` | PEM roots used to verify the TSA signature (FreeTSA and Certigna roots are bundled in `certs/`) |

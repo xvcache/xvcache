@@ -19,7 +19,8 @@ import { paymentLinkBilling, isTestPaymentLink } from "./stripe-webhook.js";
  * XVCACHE_OTS (on/off), TSA settings as for the local server (XVCACHE_TSA_*; FreeTSA = test by default).
  * L4 billing: XVCACHE_STRIPE_PAYMENT_LINK_URL + STRIPE_WEBHOOK_SECRET (both needed; webhook on POST /stripe/webhook).
  * 0.3.0 anchoring: XVCACHE_ANCHOR_MODE (daily | window; default daily = ONE shared Merkle root stamped per day),
- *   XVCACHE_DAILY_ANCHOR_UTC (HH:MM UTC, default 22:50).
+ *   XVCACHE_DAILY_ANCHOR_UTC (HH:MM UTC, default 21:50 = 22:50 Paris in winter / 23:50 in summer, always the same Paris day;
+ *   avoid values after 21:59 UTC, which cross midnight in Paris in summer).
  * 0.3.0 token stock: XVCACHE_TSA_TOKEN_STOCK (tokens left on the provider account, seeds the local ledger once),
  *   XVCACHE_TSA_TOKEN_ALERT_BELOW (default 20). `xvcache-remote --tsa-stock <n>` resets the stock; `--tsa-tokens` shows it.
  * 0.3.0 key email (OFF by default): XVCACHE_KEY_EMAIL=on, XVCACHE_PUBLIC_URL (https), XVCACHE_EMAIL_FROM (address on a

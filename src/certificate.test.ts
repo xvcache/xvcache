@@ -147,7 +147,7 @@ test("handleDocument writes a one-page PDF on V, no secret, FreeTSA-style warnin
   assert.match(raw, /XVcache/);
   assert.match(raw, /Devis\.md/);
   assert.match(raw, /PAS un horodatage qualifi/);
-  assert.match(raw, /commissaire de justice/);
+  assert.match(raw, /commissaire\s+de\s+justice/);
   assert.match(raw, /SHA-256/);
   assert.ok(first.attachments && first.attachments.some((a) => a.name === "jeton.tst"));
   assert.ok(first.attachments!.some((a) => a.name === "chemin-de-preuve.json"));
@@ -214,7 +214,7 @@ test("Certigna-style certificate: qualified only from the token (Certigna OID + 
     assert.doesNotMatch(raw, /FreeTSA/);
     assert.doesNotMatch(raw, /PAS un horodatage qualifi/);
     assert.doesNotMatch(raw, /NON QUALIFI/);
-    assert.match(raw, /commissaire de justice/);
+    assert.match(raw, /commissaire\s+de\s+justice/);
     assert.match(raw, /OpenTimestamps/i);
     // Same proof, no qualification passed: recomputed against the REAL bundled Certigna chain → not qualified.
     const pack2 = await writeCertificatePack({ proof, dataDir: path.join(c.cfg.dataDir, "again"), batchesDir: c.batchesDir() });

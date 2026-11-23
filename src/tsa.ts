@@ -71,7 +71,7 @@ export const CERTIGNA_URL = "https://timestamp.dhimyotis.com/api/v1/";
 /**
  * Provider selection (env):
  * - XVCACHE_TSA_PROVIDER = freetsa | certigna | custom | off
- *   default: certigna when XVCACHE_TSA_USER is set, otherwise freetsa (test, non qualifié).
+ *   default: certigna when XVCACHE_TSA_USER is set, otherwise freetsa (non qualifié, sans présomption légale).
  * - XVCACHE_TSA_URL, XVCACHE_TSA_USER, XVCACHE_TSA_PASSWORD (HTTP Basic), XVCACHE_TSA_CA_FILE,
  *   XVCACHE_TSA_UNTRUSTED_FILE (intermediate certs, optional), XVCACHE_TSA_QUALIFIED (custom only).
  * Secrets are read from the environment only and are never written to proofs or logs.
@@ -84,7 +84,7 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
   if (wanted === "freetsa") {
     return {
       id: "freetsa",
-      label: "FreeTSA (test, non qualifié)",
+      label: "FreeTSA (non qualifié, sans présomption légale)",
       url: env.XVCACHE_TSA_URL || FREETSA_URL,
       qualified: false,
       qualifiedBasis: "FreeTSA n'est pas un prestataire qualifié eIDAS : jeton de test, sans présomption légale.",

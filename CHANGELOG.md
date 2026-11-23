@@ -3,14 +3,14 @@
 ## 0.3.0 — 2026-11-23 (prepared, not published)
 
 ### Hosted XVcache Coffre horodaté
-- **Daily shared anchor**: one Merkle root for all subscribers, timestamped by Certigna once a day (default 22:50 UTC; `XVCACHE_ANCHOR_MODE`, `XVCACHE_DAILY_ANCHOR_UTC`). About one Certigna token per day. `certify_document` / `certify_hash` return `pending` with `anchor_due_at` until then. The former time-window batching stays available (`XVCACHE_ANCHOR_MODE=window`).
+- **Daily shared anchor**: one Merkle root for all subscribers, timestamped by Certigna once a day (default 21:50 UTC = 22:50 Paris in winter, 23:50 in summer, always the same Paris calendar day; `XVCACHE_ANCHOR_MODE`, `XVCACHE_DAILY_ANCHOR_UTC`). The certified date is the issue time of the daily token, not the submission time. About one Certigna token per day. `certify_document` / `certify_hash` return `pending` with `anchor_due_at` until then. The former time-window batching stays available (`XVCACHE_ANCHOR_MODE=window`).
 - **Unlimited proofs**: usage is counted only when a qualified timestamp is obtained; a `pending` or `pending_qualified` proof is never counted. `certify_*` only checks the subscription.
 - **Qualification from the token only**: a proof is `qualified` only if its token carries the Certigna policy OID `1.2.250.1.177.2.9.1`, chains to Certigna and its signature verifies (from `fix/qualified-from-token`).
 - **Certigna token counter**: local ledger of tokens used, seeded with `XVCACHE_TSA_TOKEN_STOCK` or `--tsa-stock N`; a log alert is raised below `XVCACHE_TSA_TOKEN_ALERT_BELOW` (default 20). `--tsa-tokens` prints the status.
 - **API key by e-mail (off by default, `XVCACHE_KEY_EMAIL=on`)**: after `checkout.session.completed`, the payer's e-mail receives a one-time link (24 h by default) to `/key/<token>` on the MCP server, sent with Cloudflare Email Sending. The key is never in the e-mail; only a hash of the link token is stored and the key is kept encrypted until it is revealed once or expires. `GET` shows a button only (mail scanners do not consume the link); `POST` reveals the key once, then `410`.
 - `get_subscription`: the AI shows the `xvc_` key immediately, once, and tells the human to save it in a password manager.
 
-### Public texts (lawyer-reviewed wording, 23 November 2026)
+### Public texts (aligned on the internal legal review, 23 November 2026)
 - Product name **XVcache Coffre horodaté**; reserved for professionals; published and sold by **RENO'LINE SARL**; €19 excl. VAT per month per organisation; no trial; cancellation effective at the end of the paid month.
 - "prove/proof" claims replaced by "dated evidence"; "PDF certificate" becomes "PDF report"; no "soon"/"bientôt".
 - eIDAS cross-border recognition cited as art. 24a(6) (former art. 41(3) was deleted by Regulation (EU) 2024/1183); consolidated EUR-Lex link.

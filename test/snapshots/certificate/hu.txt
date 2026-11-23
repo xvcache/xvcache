@@ -40,8 +40,9 @@ továbbították, csak a lenyomatát. Tényleges bizonyító erejét a bírósá
 A fordítást jogász még nem ellenőrizte; az angol változat az irányadó. — Translation not yet reviewed by a legal professional; the
 English version prevails.
 Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
-electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
-recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
-by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust service and not legal advice. It is evidence that a fingerprint existed
-at the timestamp date; it establishes neither the author nor the content. The content of the document was never transmitted, only its fingerprint. Its
-concrete evidential weight is assessed by the court under national procedure.
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound. Art.
+24a(6), inserted by Regulation (EU) 2024/1183: it is recognised as qualified in all Member States. XVcache is not a qualified trust service provider. The
+qualified token is issued by Certigna. This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust
+service and not legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content. The
+document content stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address. Its concrete evidential
+weight is assessed by the court under national procedure.

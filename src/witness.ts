@@ -71,7 +71,7 @@ export type WitnessOptions = {
   batchWindowMs?: number;
   /** "window" (default here) or "daily" (hosted server default). */
   anchorMode?: AnchorMode;
-  /** Daily mode: time of the daily anchor, "HH:MM" UTC (default "22:50", i.e. 23:50 Paris in winter). */
+  /** Daily mode: time of the daily anchor, "HH:MM" UTC (default "21:50": 22:50 Paris in winter, 23:50 Paris in summer, so always the same Paris calendar day). */
   dailyAnchorUtc?: string;
   /** Daily mode: start the internal daily timer (default true). Tests call anchorNow() directly. */
   autoAnchor?: boolean;
@@ -104,7 +104,13 @@ const NOTICE = "Hash-only proof: XVcache never received the document, only its S
 
 const HEX64 = /^[0-9a-f]{64}$/;
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
-export const DEFAULT_DAILY_ANCHOR_UTC = "22:50";
+/**
+ * Default daily anchor, in UTC: 21:50 UTC = 22:50 Europe/Paris in winter (UTC+1) and 23:50 in summer (UTC+2).
+ * It therefore always falls on the same Paris calendar day as the submissions it covers (22:50 UTC would be
+ * 00:50 the next day in Paris in summer). The certified date of a proof is the issue time (genTime) of that
+ * day's Certigna token, never the time the fingerprint was submitted.
+ */
+export const DEFAULT_DAILY_ANCHOR_UTC = "21:50";
 const MERKLE_SCHEME = "sha256, leaf=H(0x00||canonical_json(leaf)), node=H(0x01||L||R), odd node promoted";
 
 /** Next occurrence of HH:MM UTC strictly after `from`. */

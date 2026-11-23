@@ -8,7 +8,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { startFakeTsa, type FakeTsa } from "./test-tsa.js";
 import { CERTIGNA_QUALIFIED_POLICY_OID, type TsaProvider, type FetchLike } from "./tsa.js";
-import { HostedWitness, nextDailyAnchor } from "./witness.js";
+import { HostedWitness, nextDailyAnchor, DEFAULT_DAILY_ANCHOR_UTC } from "./witness.js";
 import { TsaTokenLedger } from "./tsa-tokens.js";
 import { SubscriptionStore } from "./subscriptions.js";
 import { startRemoteServer } from "./remote.js";
@@ -29,7 +29,7 @@ test("nextDailyAnchor: same day if still ahead, else next day (UTC)", () => {
   assert.equal(nextDailyAnchor(new Date("2026-11-23T06:00:00Z"), "22:50").toISOString(), "2026-11-23T22:50:00.000Z");
   assert.equal(nextDailyAnchor(new Date("2026-11-23T22:50:00Z"), "22:50").toISOString(), "2026-11-24T22:50:00.000Z");
   assert.equal(nextDailyAnchor(new Date("2026-12-31T23:00:00Z"), "22:50").toISOString(), "2027-01-01T22:50:00.000Z");
-  assert.equal(nextDailyAnchor(new Date("2026-11-23T06:00:00Z"), "nonsense").toISOString(), "2026-11-23T22:50:00.000Z", "invalid → default");
+  assert.equal(nextDailyAnchor(new Date("2026-11-23T06:00:00Z"), "nonsense").toISOString(), "2026-11-23T21:50:00.000Z", "invalid → default");
 });
 
 test("daily mode: 3 firms all day → answered at once as pending, ONE token at the daily anchor, every proof V; empty day = no token", async () => {
@@ -166,4 +166,13 @@ test("hosted server in daily mode: certify answers at once (pending, receipt PDF
     assert.equal(again.qualified, true);
     await c.close();
   } finally { await srv.close(); }
+});
+
+test("default daily anchor (21:50 UTC) stays on the same Paris calendar day in winter and in summer", () => {
+  assert.equal(DEFAULT_DAILY_ANCHOR_UTC, "21:50");
+  const paris = (d: Date) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(d);
+  const winter = nextDailyAnchor(new Date("2026-12-15T08:00:00Z"));
+  const summer = nextDailyAnchor(new Date("2027-07-15T08:00:00Z"));
+  assert.equal(paris(winter), "15/12/2026 22:50");
+  assert.equal(paris(summer), "15/07/2027 23:50");
 });

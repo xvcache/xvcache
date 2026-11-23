@@ -52,7 +52,8 @@ test("get_offer / list_plans / present_to_client in all 24 languages; unsupporte
     assert.equal(o.lang, lang);
     assert.match(o.pitch, /41/, `${lang}: art. 41 missing in pitch`);
     const pr = presentToClient({ lang, context: "litige" });
-    const words = pr.message_markdown.split(/\s+/).filter(Boolean).length;
+    // Count words, not punctuation tokens (French typography puts spaces around ":" and ";").
+    const words = pr.message_markdown.split(/\s+/).filter((t) => /[\p{L}\p{N}]/u.test(t)).length;
     assert.ok(words < 180, `${lang}: ${words} words`);
     assert.match(pr.message_markdown, /19 EUR/);
     assert.match(pr.consent_prompt, /19 EUR/);

@@ -1,5 +1,5 @@
 XVcache
-TIMESTAMP CERTIFICATE
+TIMESTAMP REPORT
 V
 Document intact
 Verdict V — the fingerprint has not changed since the timestamp.
@@ -24,15 +24,16 @@ PROOF IDENTIFIER
 20261122T190839000Z-1a2b3c4d.0
 How to verify again
 1. Submit the same file again (verify_document), or check the attached token with openssl ts -verify.
-2. Its fingerprint is compared with the one printed on this certificate.
+2. Its fingerprint is compared with the one printed on this report.
 3. The result is “Intact” or “Modified since November 22, 2026 at 20:08:39”.
-Technical files attached to this certificate
+Technical files attached to this report
 token.tst — RFC 3161
 merkle-path.json — Merkle
 LEGAL NOTICE
 Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
-electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is
-recognised in all Member States. XVcache is not a qualified trust service provider. The qualified token is issued by Certigna. This certificate is not a report
-by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust service and not legal advice. It is evidence that a fingerprint existed
-at the timestamp date; it establishes neither the author nor the content. The content of the document was never transmitted, only its fingerprint. Its
-concrete evidential weight is assessed by the court under national procedure.
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound. Art.
+24a(6), inserted by Regulation (EU) 2024/1183: it is recognised as qualified in all Member States. XVcache is not a qualified trust service provider. The
+qualified token is issued by Certigna. This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust
+service and not legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content. The
+document content stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address. Its concrete evidential
+weight is assessed by the court under national procedure.

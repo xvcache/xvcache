@@ -66,10 +66,12 @@ for (const lang of EU_LANGS) {
     assert.ok(text.includes(L.title_intact), "localized title");
     assert.ok(r.lines.some((l) => l.includes("1.2.250.1.177.2.9.1")), "Certigna policy OID");
     assert.ok(text.includes("Art. 41") || text.includes("art. 41") || text.includes("41"), "eIDAS art. 41");
-    if (lang !== "en") {
+    const reviewed = (JSON.parse(readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "locales", `${lang}.json`), "utf8")) as { reviewed?: boolean }).reviewed === true;
+    if (lang !== "en" && !reviewed) {
       assert.ok(text.replace(/\n/g, " ").includes("English version prevails"), "English fallback notice");
       assert.ok(text.replace(/\n/g, " ").includes("Regulation (EU) No 910/2014"), "English legal paragraph");
     }
+    if (lang !== "en" && reviewed) assert.ok(!text.replace(/\n/g, " ").includes("English version prevails"), "reviewed locale: no fallback notice");
     assert.ok(!text.includes(L.banner_not_qualified), "qualified PDF must not carry the NOT QUALIFIED banner");
 
     const snapFile = path.join(SNAP_DIR, `${lang}.txt`);

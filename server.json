@@ -41,7 +41,7 @@
         },
         {
           "name": "XVCACHE_TSA_PROVIDER",
-          "description": "freetsa (default, test, not qualified), certigna (qualified eIDAS), custom, or off",
+          "description": "freetsa (default, not qualified), certigna (qualified eIDAS), custom, or off",
           "isRequired": false,
           "isSecret": false,
           "format": "string"

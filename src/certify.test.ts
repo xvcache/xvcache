@@ -36,7 +36,7 @@ test("provider selection: FreeTSA by default (not qualified), Certigna needs cre
   const def = resolveTsaProvider({}) as TsaProvider;
   assert.equal(def.id, "freetsa");
   assert.equal(def.qualified, false);
-  assert.match(def.label, /test, non qualifié/);
+  assert.match(def.label, /non qualifié, sans présomption légale/);
   const missing = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "certigna" });
   assert.ok(missing && "error" in missing);
   const cg = resolveTsaProvider({ XVCACHE_TSA_USER: "u", XVCACHE_TSA_PASSWORD: "p" }) as TsaProvider;
