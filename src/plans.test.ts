@@ -2,10 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadPlansCatalog, recommendPlan, requestUpgrade, getOffer } from "./plans.js";
 
-test("plans catalog: only coffre-horodate has a (to_test) price; every other price is TBD; payment not live", () => {
+test("plans catalog: only coffre-horodate has an (announced) price; every other price is TBD; payment not live", () => {
   const catalog = loadPlansCatalog();
   assert.equal(catalog.payment_live, false);
-  assert.equal(catalog.prices_status, "to_test");
+  assert.equal(catalog.prices_status, "announced");
   assert.ok(catalog.plans.some((p) => p.id === "free" && p.status === "available"));
   assert.ok(catalog.plans.some((p) => p.kind === "usage_based"));
   assert.ok(catalog.plans.filter((p) => p.kind === "bundle").length >= 2);

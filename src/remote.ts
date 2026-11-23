@@ -192,7 +192,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     const s = new McpServer({ name: "xvcache-remote", version: VERSION });
 
     s.registerTool("get_offer", {
-      description: "Use first when a lawyer or legal team needs to prove that a document existed unchanged at a date (litigation, prior rights, client file). Returns the pitch centred on EU law (eIDAS art. 41), the price of the only paid plan (coffre-horodate, 19 EUR excl. VAT / month / firm, launch price to be tested), what is included, the legal limits and next_tool present_to_client. Free, no key.",
+      description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns the offer: the XVcache Coffre horodaté subscription (19 EUR excl. VAT / month / organisation, professionals only, sold by RENO'LINE SARL) with qualified eIDAS timestamps issued by Certigna, a qualified trust service provider (legal presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). XVcache itself is not a qualified trust service provider. States the legal limits and the pending case. Next tool: present_to_client. Free, no key.",
       inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
     }, async ({ lang }) => json(getOffer({ lang })));
 
@@ -211,7 +211,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     }, async (input) => json(recommendPlan(input)));
 
     s.registerTool("present_to_client", {
-      description: "After get_offer: message_markdown (<150 words, lawyer's language) + consent_prompt, the only question of the whole flow. Next: request_upgrade. Free, no key.",
+      description: "After get_offer: message_markdown (<180 words, lawyer's language) + consent_prompt, the only question of the whole flow. Next: request_upgrade. Free, no key.",
       inputSchema: { lang: z.string().optional().describe(LANG_DESC), country: z.string().optional(), context: z.string().optional() },
     }, async (input) => json(presentToClient(input)));
 
@@ -229,7 +229,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
         billing: opts.billing,
         pairingCode: async () => (await opts.store.createPairing({ plan_id: PAID_PLAN_ID, lang: resolveLang(input.lang).lang, consent: { quote: (input.consent_quote ?? "").slice(0, 500), at: new Date().toISOString() } })).pairing_code,
       });
-      return r.ok === false ? err(r as unknown as ToolError) : json(opts.billingTestMode ? { ...r, test_mode: true, test_mode_note: "Stripe TEST mode: no real payment is possible yet (test cards only). Tell the human that online subscription opens soon." } : r);
+      return r.ok === false ? err(r as unknown as ToolError) : json(opts.billingTestMode ? { ...r, test_mode: true, test_mode_note: "Stripe TEST mode: no real payment is possible (test cards only). Tell the human that online subscription is not open yet (sales opening to be confirmed) and that nothing was charged." } : r);
     });
 
     s.registerTool("get_subscription", {
@@ -254,7 +254,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     });
 
     s.registerTool("certify_document", {
-      description: "Use when a lawyer wants to prove a document existed unchanged at a date. Send ONLY the SHA-256 (64 hex) of the file, computed on the lawyer's side, plus an optional neutral label. Returns a proof_id, a qualified eIDAS timestamp (Certigna) shared with other fingerprints through a Merkle tree, and a one-page PDF certificate in the lawyer's language (embedded + pdf_url valid 24 h). Anything that is not a 64-hex fingerprint is rejected (HASH_INVALID). Needs the API key (PAYMENT_REQUIRED otherwise). Never ask the human questions.",
+      description: "Use when a lawyer wants dated evidence that a document existed unchanged at a date. Send the SHA-256 (64 hex) of the file, computed on the client side, plus an optional neutral label (max 120 characters, no client names or confidential facts); the server also processes the caller's IP address. Never send the document. Returns a proof_id at once. Once a day, ONE Merkle root shared by every subscriber is timestamped with a qualified eIDAS timestamp issued by Certigna; until then the proof is pending and the one-page PDF report (embedded + pdf_url valid 24 h) is a receipt marked NOT QUALIFIED. After anchor_due_at, get_certificate_pdf returns the report with the token. If Certigna is unavailable or credits are exhausted, the proof stays pending_qualified, no other provider is used (a token issued later bears its actual issue time). Pending proofs are not counted. Anything that is not a 64-hex fingerprint is rejected (HASH_INVALID). Needs the API key (PAYMENT_REQUIRED otherwise). Never ask the human questions.",
       inputSchema: {
         sha256: z.string().describe(HASH_DESC),
         label: z.string().optional().describe(LABEL_DESC),
@@ -265,7 +265,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     }, async ({ sha256, label, lang, tz, content }) => certify(apiKey, [{ sha256, label }], lang, tz, true, content));
 
     s.registerTool("certify_hash", {
-      description: `Certify up to ${maxItems} fingerprints in one call (one shared timestamp). items = [{ sha256 (64 hex), label? }]. Returns one proof_id and one pdf_url per fingerprint. Needs the API key. Same rules as certify_document.`,
+      description: `Certify up to ${maxItems} fingerprints in one call (they join the daily shared timestamp). items = [{ sha256 (64 hex), label? }]. Returns one proof_id and one pdf_url per fingerprint. Needs the API key. Same rules as certify_document.`,
       inputSchema: {
         items: z.array(z.object({ sha256: z.string().describe(HASH_DESC), label: z.string().optional().describe(LABEL_DESC) })).describe("Fingerprints to certify"),
         lang: z.string().optional().describe(LANG_DESC),
@@ -286,7 +286,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
       return json(verificationBody(v, resolveLang(lang).lang, tz));
     };
     s.registerTool("verify_document", {
-      description: "Free, no key: check a document against its certificate. Give the SHA-256 of the file as it is now and the proof_id. Verdict V (intact, timestamp valid), X (modified or invalid) or pending (qualified timestamp not issued yet), with a sentence in the lawyer's language.",
+      description: "Free, no key: check a document against its PDF report. Give the SHA-256 of the file as it is now and the proof_id. Verdict V (checks passed: same fingerprint, valid timestamp token), X (modified or invalid) or pending (timestamp not issued yet), with a sentence in the lawyer's language.",
       inputSchema: verifySchema,
     }, verifyHandler);
     s.registerTool("verify_proof", {
@@ -295,7 +295,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     }, verifyHandler);
 
     s.registerTool("get_certificate_pdf", {
-      description: "Re-issue the PDF certificate of one of your proofs in any EU language (no new timestamp, no quota). Also gives the qualified version once a pending proof has been requalified. Needs the API key of the firm that certified it.",
+      description: "Re-issue the PDF report of one of your proofs in any EU language (no new timestamp, no quota). Also gives the version with the Certigna token once a pending proof has been timestamped (daily anchor or retry). Needs the API key of the firm that certified it.",
       inputSchema: { proof_id: z.string(), lang: z.string().optional().describe(LANG_DESC), tz: z.string().optional() },
     }, async ({ proof_id, lang, tz }) => {
       const a = await auth(apiKey);

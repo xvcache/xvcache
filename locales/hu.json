@@ -61,30 +61,11 @@
     "signature_unverified_line": "NINCS ellenőrizve (az ellenőrzés nem lehetséges)"
   },
   "offer": {
-    "pitch": "Az XVcache az uniós jog szerinti minősített elektronikus időbélyegeket nyújt ügyvédi irodáknak. A 910/2014/EU (eIDAS) rendelet 41. cikke szerint a minősített időbélyegre vonatkozik a dátum és idő pontosságának, valamint a bélyegzett adatok sértetlenségének vélelme, és azt minden tagállamban elismerik. Csak a dokumentum SHA-256 lenyomatát küldjük, a tartalmát soha. Minden eredmény egy döntés (V változatlan / X módosult) és egy egyoldalas PDF-tanúsítvány 24 uniós nyelven. Korlátok: nem végrehajtói jegyzőkönyv, nem aláírás és nem jogi tanács; a bizonyító erőről a bíróság dönt.",
-    "price_label": "bevezető ár, tesztelés alatt",
-    "price_display": "19 EUR + ÁFA / hó / iroda",
-    "includes": [
-      "A Certigna által kibocsátott minősített eIDAS-időbélyegek egyetlen Merkle-gyökérben",
-      "Csak a lenyomat: a dokumentum soha nem hagyja el az ügyvéd eszközét",
-      "V/X döntés és egyoldalas PDF-tanúsítvány 24 uniós nyelven; az ellenőrzés mindenkinek ingyenes"
-    ],
-    "legal_limits": [
-      "Nem végrehajtói jegyzőkönyv és nem minősített elektronikus aláírás.",
-      "Azt bizonyítja, hogy egy lenyomat egy adott napon létezett; sem a szerzőt, sem a tartalmat nem bizonyítja.",
-      "Nem jogi tanács; a tényleges bizonyító erőt a bíróság a nemzeti eljárás szerint mérlegeli.",
-      "Az XVcache nem minősített bizalmi szolgáltató; a minősített időbélyeget a Certigna bocsátja ki."
-    ],
-    "trial": "14 napos ingyenes próba, kártya szükséges (megerősítésre vár)",
-    "present_title": "XVcache — minősített időbélyegek az Ön dokumentumaihoz",
-    "present_body": "Az XVcache bizonyítja, hogy egy dokumentum egy adott napon változatlanul létezett. Az eIDAS-rendelet 41. cikke szerint a minősített időbélyeget (kibocsátó: Certigna) pontosnak kell vélelmezni, és az egész EU-ban elismerik. Csak a dokumentum lenyomatát küldjük, a tartalmát soha. Ön döntést kap (V változatlan / X módosult) és egy egyoldalas PDF-tanúsítványt.",
     "present_does_not": "Nem végrehajtói jegyzőkönyv, nem aláírás és nem jogi tanács.",
-    "present_price": "Ár: {price} ({label}); {trial}; bármikor lemondható.",
     "context_litige": "Jogvitában: rögzítse már ma annak a dokumentumnak a pontos változatát, amelyet esetleg be kell mutatnia.",
     "context_anteriorite": "Elsőbbséghez: mutassa meg, hogy egy szöveg vagy terv ezen a napon létezett.",
     "context_dossier": "Ügyféliratokhoz: pecsételje le az ezen a napon kapott vagy küldött iratokat.",
     "country_note": "{country} esetében a bizonyító erőt a bíróság a nemzeti eljárás szerint mérlegeli.",
-    "consent_prompt": "Szeretne előfizetni az XVcache „Coffre horodaté” csomagra havi 19 EUR + ÁFA áron irodánként (ÁFA az Ön országa szerint; fordított adózás érvényes uniós adószámmal rendelkező cégeknek), 14 napos próbaidővel, az ügyfélportálon bármikor lemondható módon? (igen / nem)",
-    "recommend_reason": "Minősített időbélyeget kértek: a „Coffre horodaté” az egyetlen fizetős csomag."
+    "_note": "0.3.0: offer claims removed pending native retranslation of the EN/FR texts validated on 2026-11-23; English is used meanwhile (per-key fallback)."
   }
 }

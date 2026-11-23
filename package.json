@@ -1,7 +1,7 @@
 {
   "name": "xvcache-mcp",
-  "version": "0.2.0",
-  "description": "Local MCP server for Markdown vaults: sha256-chained journal with V (intact) / X (modified) verdicts, batched RFC 3161 + OpenTimestamps proofs, one-page PDF certificate. Timestamps are eIDAS-qualified only with your own Certigna account (optional); default FreeTSA is test-only. Paid plans not yet on sale.",
+  "version": "0.3.0",
+  "description": "Local MCP server for Markdown vaults: sha256-chained journal, V/X technical verdicts, batched RFC 3161 + OpenTimestamps evidence, one-page PDF report. Default TSA: FreeTSA (not qualified). Qualified eIDAS timestamps only when issued by Certigna (hosted Coffre horodaté subscription or your own Certigna account). XVcache is not a qualified trust service provider.",
   "type": "module",
   "main": "dist/server.js",
   "bin": {
@@ -48,7 +48,8 @@
     "dist/remote.js",
     "dist/tsa-tokens.js",
     "dist/key-delivery.js",
-    "dist/remote-server.js"
+    "dist/remote-server.js",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsc && chmod +x dist/server.js dist/export-certificate.js dist/remote-server.js",

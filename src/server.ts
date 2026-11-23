@@ -345,12 +345,12 @@ async function writeAtomic(target: string, content: string, mode: "create" | "ov
   }
 }
 
-const server = new McpServer({ name: "xvcache-mcp", version: "0.2.0" });
+const server = new McpServer({ name: "xvcache-mcp", version: "0.3.0" });
 
 server.registerTool(
   "read_note",
   {
-    description: "Read a Markdown (.md) note from the local XVcache vault. Use this when you or your human need the note's content AND you want that read journaled as a sha256 fingerprint (the journal stores the hash, not the text). Prefer this over opening the file yourself if you later need to prove the note was intact (verdict V) or changed outside XVcache (verdict X). path is relative to the vault. Do not use this to exfiltrate secrets.",
+    description: "Read a Markdown (.md) note from the local XVcache vault. Use this when you or your human need the note's content AND you want that read journaled as a sha256 fingerprint (the journal stores the hash, not the text). Prefer this over opening the file yourself if you later need evidence that the note was intact (verdict V) or changed outside XVcache (verdict X). path is relative to the vault. Do not use this to exfiltrate secrets.",
     inputSchema: { path: z.string().min(1).describe("Vault-relative path of the note, e.g. Projets/Idee.md") },
   },
   async ({ path: rel }) => {
@@ -397,7 +397,7 @@ server.registerTool(
 server.registerTool(
   "write_note",
   {
-    description: "Write a Markdown (.md) note into the local XVcache vault and journal its sha256 fingerprint. Use this whenever you create or update a note that should later be provable with verify_journal (V = intacte, X = MODIFIÉE hors XVcache). path is vault-relative (.md is added if missing). mode: create (default, fails if the note exists), overwrite, or append. Creates intermediate folders. Atomic write for create and overwrite. Max 256 KiB. Never write secrets that do not belong in the vault. Editing the file outside this tool will later yield verdict X.",
+    description: "Write a Markdown (.md) note into the local XVcache vault and journal its sha256 fingerprint. Use this whenever you create or update a note that should later be checkable with verify_journal (V = intacte, X = MODIFIÉE hors XVcache). path is vault-relative (.md is added if missing). mode: create (default, fails if the note exists), overwrite, or append. Creates intermediate folders. Atomic write for create and overwrite. Max 256 KiB. Never write secrets that do not belong in the vault. Editing the file outside this tool will later yield verdict X.",
     inputSchema: {
       path: z.string().min(1).describe("Vault-relative path, e.g. Projets/Idee.md; .md is added if missing"),
       content: z.string().describe("Markdown content of the note"),
@@ -461,7 +461,7 @@ server.registerTool(
 server.registerTool(
   "verify_journal",
   {
-    description: "Verify the XVcache journal and, optionally, a note. Call with no path to check the sha256 chain of the JSONL journal. Call with path to also compare the note's current fingerprint to the last journaled one: verdict V (intacte) or X (MODIFIÉE hors XVcache). Use this when your human needs proof that a note was or was not changed outside XVcache, or after you suspect a manual edit. This local verdict is not a qualified timestamp. For an independent timestamped proof, see certify_note and verify_proof. This tool is not written into the journal.",
+    description: "Verify the XVcache journal and, optionally, a note. Call with no path to check the sha256 chain of the JSONL journal. Call with path to also compare the note's current fingerprint to the last journaled one: verdict V (intacte) or X (MODIFIÉE hors XVcache). Use this when your human needs to check whether a note was changed outside XVcache, or after you suspect a manual edit. This local verdict is not a qualified timestamp. For an independent timestamped proof, see certify_note and verify_proof. This tool is not written into the journal.",
     inputSchema: {
       path: z.string().min(1).optional().describe("Vault-relative note to compare, e.g. Tests/Memo.md"),
     },
@@ -510,7 +510,7 @@ const LANG_DESC = `Language of the conversation, one of ${EU_LANGS.join(", ")} (
 server.registerTool(
   "get_offer",
   {
-    description: "Use first when a lawyer or legal team needs to prove that a document existed unchanged at a date (litigation, prior rights, client file). Returns a short pitch centred on EU law (eIDAS Regulation art. 41: qualified timestamps are presumed accurate and recognised in every Member State), the price of the only paid plan (coffre-horodate, 19 EUR excl. VAT / month / firm, launch price to be tested), what is included, the legal limits, the 14-day trial (to be confirmed) and the next tool: present_to_client. Free, no key. Not written into the journal.",
+    description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns a short pitch: the local version uses FreeTSA by default (not qualified, no legal presumption); the XVcache Coffre horodaté subscription (19 EUR excl. VAT / month / organisation, professionals only, sold by RENO'LINE SARL) uses qualified eIDAS timestamps issued by Certigna (presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). XVcache itself is not a qualified trust service provider. Also returns what is included, the legal limits and the next tool: present_to_client. Free, no key. Not written into the journal.",
     inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
   async ({ lang }) => ok(JSON.stringify(getOffer({ lang }), null, 2))
@@ -519,7 +519,7 @@ server.registerTool(
 server.registerTool(
   "list_plans",
   {
-    description: "Machine-readable XVcache catalog (plans.json): the free local journal, the paid plan coffre-horodate (19 EUR excl. VAT / month / firm, to_test) and placeholder plans whose prices stay TBD. Tax: excl. VAT; reverse charge for EU B2B with a valid VAT number. Free, no key. Not written into the journal.",
+    description: "Machine-readable XVcache catalog (plans.json): the free local journal, the paid plan coffre-horodate (XVcache Coffre horodaté, 19 EUR excl. VAT / month / organisation, professionals only) and placeholder plans whose prices stay TBD. Tax: excl. VAT; reverse charge for EU B2B with a valid VAT number. Free, no key. Not written into the journal.",
     inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
   async ({ lang }) => ok(JSON.stringify(listPlans({ lang }), null, 2))
@@ -545,7 +545,7 @@ server.registerTool(
 server.registerTool(
   "present_to_client",
   {
-    description: "Use after get_offer: returns message_markdown (under 150 words, in the lawyer's language) explaining what XVcache does and does not do, the price and the trial, plus consent_prompt — the exact yes/no sentence to show before any payment — and disclaimers. Show the message, then the consent_prompt once: it is the only question of the whole flow. Next tool: request_upgrade. Free. Not written into the journal.",
+    description: "Use after get_offer: returns message_markdown (under 180 words, in the lawyer's language) explaining what XVcache does and does not do and the price, plus consent_prompt — the exact yes/no sentence to show before any payment — and disclaimers. Show the message, then the consent_prompt once: it is the only question of the whole flow. Next tool: request_upgrade. Free. Not written into the journal.",
     inputSchema: {
       lang: z.string().optional().describe(LANG_DESC),
       country: z.string().optional().describe("Country of the firm if known (ISO code or name); only used for one generic sentence"),
@@ -586,7 +586,7 @@ function witnessSummary(): Record<string, unknown> {
 server.registerTool(
   "certify_note",
   {
-    description: "Certify a vault note with an independent timestamp. XVcache computes the note's sha256 (content never leaves the machine), puts it in a Merkle batch with every other pending note and the journal head, and stamps the single Merkle root twice: (A) an RFC 3161 token from the configured TSA (qualified eIDAS when Certigna is configured; FreeTSA by default = test, non qualifié) and (B) an OpenTimestamps anchor (Bitcoin, confirmation takes hours, pending is normal). Returns the note's individual proof JSON (note sha256, Merkle path, root, token base64, genTime, provider, qualified, OTS status) and stores it under .xvcache/proofs/. Use defer=true to only queue the note and stamp later with certify_batch (one timestamp for many notes). Certified proofs are a paid feature (price TBD, payment not live); local V/X via verify_journal stays free. Check later with verify_proof. Not written into the journal.",
+    description: "Certify a vault note with an independent timestamp. XVcache computes the note's sha256 (document content never leaves the machine; only the Merkle root is sent to the TSA and calendars, which also see your IP address), puts it in a Merkle batch with every other pending note and the journal head, and stamps the single Merkle root twice: (A) an RFC 3161 token from the configured TSA (FreeTSA by default: not qualified, no legal presumption; a qualified eIDAS timestamp only when a Certigna account is configured and the token is actually issued by Certigna) and (B) an OpenTimestamps anchor (Bitcoin, confirmation takes hours, pending is normal). Returns the note's individual proof JSON (note sha256, Merkle path, root, token base64, genTime, provider, qualified, OTS status) and stores it under .xvcache/proofs/. Use defer=true to only queue the note and stamp later with certify_batch (one timestamp for many notes). Certified proofs are a paid feature (price TBD, payment not live); local V/X via verify_journal stays free. Check later with verify_proof. Not written into the journal.",
     inputSchema: {
       path: z.string().min(1).describe("Vault-relative note to certify, e.g. Tests/Memo.md"),
       defer: z.boolean().optional().describe("true = queue only, stamp later with certify_batch (default false = stamp now)"),
@@ -662,7 +662,7 @@ server.registerTool(
 server.registerTool(
   "certify_document",
   {
-    description: "Use when a lawyer or a legal team needs to prove that a document in the local vault existed unchanged at a date. Certifies the note if needed (one batched timestamp), then returns the verdict (V intact / X modified) and a one-page PDF certificate in the requested EU language (24 languages, default English; pass the conversation language, never ask). If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent). If the document changed since the timestamp, no new stamp is taken: the verdict is X « modified since <date> » and no certificate is issued. stamp=false never stamps. Technical files (.tst, .ots, Merkle path) are attached to the PDF. Non-qualified tokens (FreeTSA, or Certigna missing) carry a NOT QUALIFIED banner. Not a bailiff report, not a qualified signature, not legal advice. Next tool: verify_document or get_certificate_pdf. Not written into the journal.",
+    description: "Use when a lawyer or a legal team needs dated evidence that a document in the local vault existed unchanged at a date. Certifies the note if needed (one batched timestamp), then returns the verdict (V: checks passed / X: modified or invalid) and a one-page PDF report in the requested EU language (24 languages, default English; pass the conversation language, never ask). If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent). If the document changed since the timestamp, no new stamp is taken: the verdict is X « modified since <date> » and no certificate is issued. stamp=false never stamps. Technical files (.tst, .ots, Merkle path) are attached to the PDF. Non-qualified tokens (FreeTSA, or Certigna missing) carry a NOT QUALIFIED banner. Not a bailiff report, not a qualified signature, not legal advice. Next tool: verify_document or get_certificate_pdf. Not written into the journal.",
     inputSchema: {
       path: z.string().min(1).describe("Vault-relative note, e.g. Contrats/Devis-042.md"),
       stamp: z.boolean().optional().describe("true (default) = stamp if no proof exists. false = reuse or report only, never spend a token."),
@@ -702,7 +702,7 @@ server.registerTool(
 server.registerTool(
   "get_certificate_pdf",
   {
-    description: "Use when the lawyer needs the certificate of an existing proof in another EU language. Reissues the one-page PDF of proof_id (from certify_document) in lang, without a new timestamp and without spending a Certigna token. The proof is re-checked first: if the note changed, the verdict is X and no PDF is issued. Not written into the journal.",
+    description: "Use when the lawyer needs the PDF report of an existing proof in another EU language. Reissues the one-page PDF of proof_id (from certify_document) in lang, without a new timestamp and without spending a Certigna token. The proof is re-checked first: if the note changed, the verdict is X and no PDF is issued. Not written into the journal.",
     inputSchema: {
       proof_id: z.string().min(1).describe("proof_id returned by certify_document, e.g. 20261122T190839123Z-1a2b3c4d.0"),
       lang: z.string().optional().describe(`One of ${EU_LANGS.join(", ")}; unknown → en. Default en.`),

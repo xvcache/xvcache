@@ -61,30 +61,11 @@
     "signature_unverified_line": "NEOVĚŘEN (ověření nemožné)"
   },
   "offer": {
-    "pitch": "XVcache poskytuje advokátním kancelářím kvalifikovaná elektronická časová razítka podle práva EU. Podle čl. 41 nařízení eIDAS (EU) č. 910/2014 se u kvalifikovaného časového razítka uplatní domněnka přesnosti data a času a integrity orazítkovaných dat a je uznáváno ve všech členských státech. Odesílá se pouze otisk SHA-256 dokumentu, nikdy jeho obsah. Každý výsledek je verdikt (V nezměněn / X změněn) a jednostránkový certifikát PDF ve 24 jazycích EU. Omezení: nejde o protokol exekutora, podpis ani právní radu; o důkazní hodnotě rozhoduje soud.",
-    "price_label": "zaváděcí cena, k otestování",
-    "price_display": "19 EUR bez DPH / měsíc / kancelář",
-    "includes": [
-      "Kvalifikovaná časová razítka eIDAS od Certigna, seskupená do jednoho kořene Merkle",
-      "Pouze otisk: dokument nikdy neopustí zařízení advokáta",
-      "Verdikt V/X a jednostránkový certifikát PDF ve 24 jazycích EU; ověření zdarma pro každého"
-    ],
-    "legal_limits": [
-      "Není protokolem soudního exekutora ani kvalifikovaným elektronickým podpisem.",
-      "Prokazuje, že otisk existoval k určitému datu; neprokazuje autora ani obsah.",
-      "Není právní radou; konkrétní důkazní hodnotu posuzuje soud podle vnitrostátního práva.",
-      "XVcache není kvalifikovaným poskytovatelem služeb vytvářejících důvěru; kvalifikované razítko vydává Certigna."
-    ],
-    "trial": "14denní zkušební verze zdarma, vyžaduje kartu (bude potvrzeno)",
-    "present_title": "XVcache — kvalifikovaná časová razítka pro vaše dokumenty",
-    "present_body": "XVcache prokazuje, že dokument k danému datu existoval v nezměněné podobě. Podle čl. 41 nařízení eIDAS se kvalifikované časové razítko (vydané Certigna) považuje za přesné a je uznáváno v celé EU. Odesílá se pouze otisk dokumentu, nikdy jeho obsah. Obdržíte verdikt (V nezměněn / X změněn) a jednostránkový certifikát PDF.",
     "present_does_not": "Nejde o protokol exekutora, podpis ani právní radu.",
-    "present_price": "Cena: {price} ({label}); {trial}; kdykoli zrušitelné.",
     "context_litige": "Ve sporu: zafixujte již dnes přesné znění dokumentu, který možná budete muset předložit.",
     "context_anteriorite": "Pro přednost: doložte, že text nebo návrh existoval k tomuto datu.",
     "context_dossier": "Pro spis klienta: zapečeťte dokumenty přijaté nebo odeslané k tomuto datu.",
     "country_note": "V zemi {country} posuzuje důkazní hodnotu soud podle vnitrostátního práva.",
-    "consent_prompt": "Chcete si předplatit XVcache „Coffre horodaté“ za 19 EUR bez DPH měsíčně za kancelář (DPH podle vaší země; přenesení daňové povinnosti pro firmy z EU s platným DIČ), se 14denní zkušební dobou a možností kdykoli zrušit v zákaznickém portálu? (ano / ne)",
-    "recommend_reason": "Bylo požadováno kvalifikované časové razítko: „Coffre horodaté“ je jediný placený tarif."
+    "_note": "0.3.0: offer claims removed pending native retranslation of the EN/FR texts validated on 2026-11-23; English is used meanwhile (per-key fallback)."
   }
 }

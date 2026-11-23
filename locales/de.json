@@ -61,30 +61,11 @@
     "signature_unverified_line": "NICHT geprüft (Prüfung nicht möglich)"
   },
   "offer": {
-    "pitch": "XVcache bietet Kanzleien qualifizierte elektronische Zeitstempel nach EU-Recht. Nach Art. 41 der eIDAS-Verordnung (EU) Nr. 910/2014 gilt für einen qualifizierten Zeitstempel die Vermutung der Richtigkeit von Datum und Uhrzeit sowie der Unversehrtheit der gestempelten Daten, und er wird in allen Mitgliedstaaten anerkannt. Übermittelt wird nur der SHA-256-Fingerabdruck des Dokuments, nie sein Inhalt. Jedes Ergebnis ist ein Befund (V unverändert / X geändert) und ein einseitiges PDF-Zertifikat in 24 EU-Sprachen. Grenzen: kein Protokoll eines Gerichtsvollziehers, keine Signatur, keine Rechtsberatung; über den Beweiswert entscheidet das Gericht.",
-    "price_label": "Einführungspreis, noch zu testen",
-    "price_display": "19 EUR zzgl. MwSt. / Monat / Kanzlei",
-    "includes": [
-      "Qualifizierte eIDAS-Zeitstempel von Certigna, gebündelt in einer Merkle-Wurzel",
-      "Nur der Fingerabdruck: das Dokument verlässt nie das Gerät der Kanzlei",
-      "Befund V/X und einseitiges PDF-Zertifikat in 24 EU-Sprachen; die Prüfung ist für alle kostenlos"
-    ],
-    "legal_limits": [
-      "Kein Protokoll eines Gerichtsvollziehers und keine qualifizierte elektronische Signatur.",
-      "Belegt, dass ein Fingerabdruck zu einem Zeitpunkt existierte; belegt weder den Urheber noch den Inhalt.",
-      "Keine Rechtsberatung; den konkreten Beweiswert beurteilt das Gericht nach nationalem Verfahrensrecht.",
-      "XVcache ist kein qualifizierter Vertrauensdiensteanbieter; der qualifizierte Zeitstempel wird von Certigna ausgestellt."
-    ],
-    "trial": "14 Tage kostenlos testen, Karte erforderlich (noch zu bestätigen)",
-    "present_title": "XVcache — qualifizierte Zeitstempel für Ihre Dokumente",
-    "present_body": "XVcache belegt, dass ein Dokument zu einem bestimmten Zeitpunkt unverändert existierte. Nach Art. 41 der eIDAS-Verordnung gilt der qualifizierte Zeitstempel (ausgestellt von Certigna) als richtig und wird in der ganzen EU anerkannt. Übermittelt wird nur der Fingerabdruck des Dokuments, nie sein Inhalt. Sie erhalten einen Befund (V unverändert / X geändert) und ein einseitiges PDF-Zertifikat.",
     "present_does_not": "Es ist kein Protokoll eines Gerichtsvollziehers, keine Signatur und keine Rechtsberatung.",
-    "present_price": "Preis: {price} ({label}); {trial}; jederzeit kündbar.",
     "context_litige": "Im Rechtsstreit: Halten Sie heute die genaue Fassung eines Dokuments fest, das Sie vorlegen müssen.",
     "context_anteriorite": "Für frühere Rechte: Zeigen Sie, dass ein Text oder ein Entwurf an diesem Tag existierte.",
     "context_dossier": "Für eine Mandantenakte: Versiegeln Sie die an diesem Tag erhaltenen oder versandten Unterlagen.",
     "country_note": "In {country} beurteilt das Gericht den Beweiswert nach nationalem Verfahrensrecht.",
-    "consent_prompt": "Möchten Sie XVcache „Coffre horodaté“ für 19 EUR zzgl. MwSt. pro Monat und Kanzlei abonnieren (MwSt. je nach Land; Reverse-Charge für EU-Unternehmen mit gültiger USt-IdNr.), mit 14 Tagen Testzeit und jederzeit über das Kundenportal kündbar? (ja / nein)",
-    "recommend_reason": "Ein qualifizierter Zeitstempel wurde gewünscht: „Coffre horodaté“ ist der einzige kostenpflichtige Tarif."
+    "_note": "0.3.0: offer claims removed pending native retranslation of the EN/FR texts validated on 2026-11-23; English is used meanwhile (per-key fallback)."
   }
 }

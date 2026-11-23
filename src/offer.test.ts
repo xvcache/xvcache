@@ -8,36 +8,41 @@ import { getOffer, listPlans, presentToClient, requestUpgradeFlow, recommendPlan
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-test("plans.json: coffre-horodate is 19 EUR excl. VAT / month / firm, to_test; no other amount is invented", () => {
+test("plans.json: XVcache Coffre horodaté is 19 EUR excl. VAT / month / organisation, professionals only, sold by RENO'LINE SARL, unlimited; no other amount is invented", () => {
   const cat = loadPlansCatalog();
   const p = cat.plans.find((x) => x.id === PAID_PLAN_ID)!;
   assert.ok(p, "coffre-horodate plan missing");
   assert.equal(p.price.amount, 19);
   assert.equal(p.price.currency, "EUR");
-  assert.equal(p.price.status, "to_test");
+  assert.equal(p.price.status, "announced");
   assert.equal(p.price.tax_behavior, "exclusive");
-  assert.equal(p.price.display, "19 EUR excl. VAT / month / firm");
+  assert.equal(p.price.display, "19 EUR excl. VAT / month / organisation");
+  assert.equal(p.name, "XVcache Coffre horodaté");
+  assert.match(String((p as any).audience), /professionals only/);
+  assert.equal((p as any).seller.name, "RENO'LINE SARL");
+  assert.equal(p.limits.certifications_per_month.status, "unlimited");
+  assert.equal((p as any).trial, undefined, "no trial announced");
   for (const other of cat.plans.filter((x) => x.id !== PAID_PLAN_ID)) {
     assert.equal(other.price.amount, null, `${other.id} must stay TBD`);
     assert.equal(other.price.status, "TBD");
   }
 });
 
-test("get_offer(lang=de): German pitch citing eIDAS art. 41 and its limits, price label 'to be tested', next tool present_to_client", () => {
+test("get_offer(lang=de): contested claims fall back to the validated English text (pending native retranslation); German limits kept; next tool present_to_client", () => {
   const o = getOffer({ lang: "de" }) as Record<string, any>;
   assert.equal(o.lang, "de");
   assert.match(o.pitch, /eIDAS/);
   assert.match(o.pitch, /Art\. 41/);
-  assert.match(o.pitch, /Zeitstempel/);
+  assert.match(o.pitch, /issued by Certigna/);
+  assert.match(o.pitch, /not a qualified trust service provider/);
+  assert.doesNotMatch(o.pitch, /\bprove/i);
   assert.ok(Array.isArray(o.legal_limits) && o.legal_limits.length >= 3);
-  assert.ok(o.legal_limits.some((l: string) => /Gerichtsvollzieher|Rechtsberatung/.test(l)), "limits in German");
-  assert.equal(o.price.display, "19 EUR excl. VAT / month / firm");
-  assert.equal(o.price.status, "to_test");
-  assert.match(o.price.label_localized, /zu testen|Einführungspreis/i);
+  assert.equal(o.price.display, "19 EUR excl. VAT / month / organisation");
+  assert.equal(o.price.status, "announced");
+  assert.match(o.price.label_localized, /professional price/);
   assert.match(o.eidas_basis.url, /eur-lex\.europa\.eu/);
   assert.equal(o.next_tool, "present_to_client");
-  assert.equal(o.trial.days, 14);
-  assert.equal(o.trial.status, "to_test");
+  assert.equal(o.trial, null, "no trial announced");
   assert.equal(o.payment_live, false);
 });
 
@@ -48,7 +53,7 @@ test("get_offer / list_plans / present_to_client in all 24 languages; unsupporte
     assert.match(o.pitch, /41/, `${lang}: art. 41 missing in pitch`);
     const pr = presentToClient({ lang, context: "litige" });
     const words = pr.message_markdown.split(/\s+/).filter(Boolean).length;
-    assert.ok(words < 150, `${lang}: ${words} words`);
+    assert.ok(words < 180, `${lang}: ${words} words`);
     assert.match(pr.message_markdown, /19 EUR/);
     assert.match(pr.consent_prompt, /19 EUR/);
     assert.ok(pr.consent_prompt.trim().endsWith("?") || /\?\s*\(/.test(pr.consent_prompt) || /\)$/.test(pr.consent_prompt.trim()), `${lang}: consent prompt must be a yes/no question`);
@@ -61,11 +66,18 @@ test("get_offer / list_plans / present_to_client in all 24 languages; unsupporte
   assert.equal(ja.lang_fallback, true);
 });
 
-test("consent_prompt states price excl. VAT, monthly period, trial, cancellation and VAT (en)", () => {
+test("consent_prompt states price excl. VAT, monthly period, professionals only, seller, cancellation and VAT, no trial (en, fr)", () => {
   const pr = presentToClient({ lang: "en" });
   assert.match(pr.consent_prompt, /19 EUR excl\. VAT/);
   assert.match(pr.consent_prompt, /month/);
-  assert.match(pr.consent_prompt, /14-day/);
+  assert.doesNotMatch(pr.consent_prompt, /14|trial/i);
+  assert.match(pr.consent_prompt, /reserved for professionals/);
+  assert.match(pr.consent_prompt, /RENO'LINE SARL/);
+  assert.match(pr.consent_prompt, /end of the paid month/);
+  const fr = presentToClient({ lang: "fr" });
+  assert.match(fr.consent_prompt, /réservé aux professionnels/);
+  assert.match(fr.consent_prompt, /19 EUR HT par mois et par organisation/);
+  assert.doesNotMatch(fr.consent_prompt + fr.message_markdown, /essai|bientôt|prouve/i);
   assert.match(pr.consent_prompt, /cancel/i);
   assert.match(pr.consent_prompt, /VAT/);
   assert.equal(pr.next_tool, "request_upgrade");

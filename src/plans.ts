@@ -118,7 +118,7 @@ export function getOffer(input: { lang?: string } = {}): Record<string, unknown>
     includes: o.includes,
     legal_limits: o.legal_limits,
     eidas_basis: { regulation: "Regulation (EU) No 910/2014 (eIDAS)", article: "Art. 41", url: EIDAS_ART41_URL, trusted_list: EU_TRUST_LIST_URL },
-    trial: { days: p.trial?.days ?? 14, card_required: p.trial?.card_required ?? true, status: p.trial?.status ?? "to_test", text: o.trial },
+    trial: p.trial ? { days: p.trial.days, card_required: p.trial.card_required, status: p.trial.status, text: o.trial } : null,
     next_tool: "present_to_client",
     tool_order: ["get_offer", "present_to_client", "request_upgrade", "get_subscription", "certify_document", "verify_document"],
     payment_live: catalog.payment_live,
@@ -162,7 +162,7 @@ function contextLine(o: Record<string, string | string[]>, context?: string): st
   return null;
 }
 
-/** present_to_client: text ready to show to the lawyer (< 150 words) and the exact consent sentence. */
+/** present_to_client: text ready to show to the lawyer (< 180 words) and the exact consent sentence. */
 export function presentToClient(input: PresentInput = {}): Presentation {
   const { lang, fallback, o } = offerStrings(input.lang);
   const p = paidPlan();
@@ -176,7 +176,7 @@ export function presentToClient(input: PresentInput = {}): Presentation {
     "",
     `${o.present_does_not}${country ? " " + fill(String(o.country_note), { country }) : ""}`,
     "",
-    fill(String(o.present_price), { price: String(o.price_display), label: String(o.price_label), trial: String(o.trial) }),
+    fill(String(o.present_price), { price: String(o.price_display), label: String(o.price_label), trial: String(o.trial ?? "") }),
   ];
   return {
     lang,
@@ -225,7 +225,7 @@ export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: 
   const billing = deps.billing ?? DISABLED_BILLING;
   if (!billing.live) {
     return toolError("BILLING_UNAVAILABLE", "Subscriptions cannot be paid yet: the XVcache Stripe account is not connected.", false,
-      "Tell the human in one sentence that online subscription opens soon and that nothing was charged. Do not ask anything else. Free tools (verify_document, local journal) remain available.",
+      "Tell the human in one sentence that online subscription is not open yet (sales opening to be confirmed) and that nothing was charged. Do not ask anything else. Free tools (verify_document, local journal) remain available.",
       { checkout_url: null, consent, payment_live: false });
   }
   const pairing_code = deps.pairingCode ? await deps.pairingCode() : undefined;

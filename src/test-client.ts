@@ -39,7 +39,7 @@ async function openClient(logFile: string, name = "xvcache-test"): Promise<Clien
     command: "node", args: ["dist/server.js"],
     env: serverEnv(logFile),
   });
-  const c = new Client({ name, version: "0.2.0" });
+  const c = new Client({ name, version: "0.3.0" });
   await c.connect(transport);
   return c;
 }
@@ -486,8 +486,8 @@ try {
     const present = asJson(rPresent);
     const offerDe = asJson(rOfferDe);
     const cert = asJson(rCert);
-    if (offer.payment_live !== false || plans.payment_live !== false || plans.prices_status !== "to_test") {
-      console.error("FAIL 21: le catalogue doit déclarer payment_live=false et prices_status=to_test");
+    if (offer.payment_live !== false || plans.payment_live !== false || plans.prices_status !== "announced") {
+      console.error("FAIL 21: le catalogue doit déclarer payment_live=false et prices_status=announced");
       failed = true;
     }
     if (!Array.isArray(plans.plans) || (plans.plans as unknown[]).length < 3) {

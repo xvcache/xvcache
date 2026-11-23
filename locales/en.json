@@ -47,7 +47,7 @@
     "legal_title": "Legal notice",
     "legal_art41": "Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound, and is recognised in all Member States.",
     "legal_not_qtsp": "XVcache is not a qualified trust service provider. The qualified token is issued by Certigna.",
-    "legal_not": "This certificate is not a report by a judicial officer (bailiff), not a qualified electronic signature and not legal advice. It proves that a fingerprint existed at a date; it proves neither the author nor the content.",
+    "legal_not": "This certificate is not a report by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust service and not legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content.",
     "legal_hash_only": "The content of the document was never transmitted, only its fingerprint.",
     "legal_court": "Its concrete evidential weight is assessed by the court under national procedure.",
     "mt_notice": "Translation not yet reviewed by a legal professional; the English version prevails.",
@@ -61,30 +61,29 @@
     "signature_unverified_line": "NOT verified (verification impossible)"
   },
   "offer": {
-    "pitch": "XVcache gives law firms qualified electronic timestamps under EU law. Under Art. 41 of the eIDAS Regulation (EU) No 910/2014, a qualified timestamp is presumed accurate as to its date and time and as to the integrity of the stamped data, and it is recognised in every Member State. Only the document's SHA-256 fingerprint is sent, never its content. Each result is a verdict (V intact / X modified) and a one-page PDF certificate in 24 EU languages. Limits: not a bailiff report, not a signature, not legal advice; the evidential weight is for the court.",
-    "price_label": "launch price, to be tested",
-    "price_display": "19 EUR excl. VAT / month / firm",
+    "pitch": "XVcache gives organisations dated evidence that a document existed, unchanged, at a given time. With the XVcache Coffre horodaté subscription, timestamps are qualified electronic timestamps issued by Certigna, a qualified trust service provider: under Art. 41(2) of the eIDAS Regulation their date and the integrity of the data are presumed, and they are recognised as qualified in all Member States (Art. 24a(6)). XVcache itself is not a qualified trust service provider. The document content stays on your computer; the hosted server receives the SHA-256 fingerprint and an optional label, and processes your IP address. Each result is a V/X verdict and a one-page PDF report in 24 EU languages. Limits: not a bailiff report, not a signature, not legal advice; the evidential weight is for the court.",
+    "price_label": "monthly subscription; professional price",
+    "price_display": "19 EUR excl. VAT / month / organisation",
     "includes": [
-      "Qualified eIDAS timestamps issued by Certigna, batched in one Merkle root",
-      "Hash only: the document never leaves the lawyer's device",
-      "Verdict V/X and a one-page PDF certificate in 24 EU languages; verification is free for anyone"
+      "Qualified eIDAS timestamps issued by Certigna: one Merkle root shared by all subscribers, stamped once a day; unlimited proofs (pending proofs are never counted)",
+      "Document content stays on your computer; the hosted server receives the fingerprint and an optional label, and processes the IP address",
+      "V/X verdict and a one-page PDF report in 24 EU languages; verification is free for anyone"
     ],
     "legal_limits": [
       "Not a report by a judicial officer (bailiff) and not a qualified electronic signature.",
-      "Proves that a fingerprint existed at a date; proves neither the author nor the content.",
+      "Evidence that a fingerprint existed at a date; establishes neither the author nor the content.",
       "Not legal advice; the concrete evidential weight is assessed by the court under national procedure.",
       "XVcache is not a qualified trust service provider; the qualified token is issued by Certigna."
     ],
-    "trial": "14-day free trial, card required (to be confirmed)",
-    "present_title": "XVcache — qualified timestamps for your documents",
-    "present_body": "XVcache proves that a document existed, unchanged, at a given date. Under Art. 41 of the eIDAS Regulation, the qualified timestamp (issued by Certigna) is presumed accurate and is recognised throughout the EU. Only the document's fingerprint is sent, never its content. You receive a verdict (V intact / X modified) and a one-page PDF certificate.",
+    "present_title": "XVcache — dated evidence for your documents",
+    "present_body": "XVcache gives dated evidence that a document existed, unchanged, at a given time. With the Coffre horodaté subscription, the timestamp is a qualified electronic timestamp issued by Certigna: under eIDAS art. 41(2) its date and the integrity of the data are presumed, and it is recognised as qualified in all Member States (art. 24a(6)). XVcache itself is not a qualified provider. The document content stays on your computer; the server receives the fingerprint and an optional label, and processes your IP address. You receive a V/X verdict and a one-page PDF report.",
     "present_does_not": "It is not a bailiff report, not a signature and not legal advice.",
-    "present_price": "Price: {price} ({label}); {trial}; cancel at any time.",
+    "present_price": "Price: {price}, professionals only; cancel at any time (effective at the end of the paid month).",
     "context_litige": "In a dispute: fix today the exact version of a document you may have to produce.",
     "context_anteriorite": "For prior rights: show that a text or a design existed on this date.",
     "context_dossier": "For a client file: seal the documents received or sent on this date.",
     "country_note": "In {country}, the evidential weight is assessed by the court under national procedure.",
-    "consent_prompt": "Do you want to subscribe to XVcache “Coffre horodaté” for 19 EUR excl. VAT per month per firm (VAT according to your country; reverse charge for EU businesses with a valid VAT number), with a 14-day trial, cancellable at any time from the customer portal? (yes / no)",
-    "recommend_reason": "A qualified timestamp was requested: “Coffre horodaté” is the only paid plan."
+    "consent_prompt": "Do you want to subscribe to XVcache Coffre horodaté, reserved for professionals and sold by RENO'LINE SARL, for 19 EUR excl. VAT per month per organisation (VAT according to your country; reverse charge for EU businesses with a valid VAT number), cancellable at any time from the customer portal, effective at the end of the paid month? (yes / no)",
+    "recommend_reason": "A qualified timestamp was requested: XVcache Coffre horodaté is the only paid plan."
   }
 }

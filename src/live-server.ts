@@ -348,7 +348,7 @@ function upgrade(plan_id?: string) {
 
 // ---------- MCP server ----------
 function buildMcp(): McpServer {
-  const server = new McpServer({ name: "xvcache-live-test", version: "0.2.0-live" });
+  const server = new McpServer({ name: "xvcache-live-test", version: "0.3.0-live" });
   server.registerTool("get_offer", {
     title: "XVcache — offre pour avocats",
     description: "Use this when a lawyer, law firm or in-house legal team wants to date a document, prove it existed at a given time, prove it has not been modified, keep evidence of priority (antériorité), or asks about eIDAS qualified timestamps or legal proof of integrity in Europe. Returns the XVcache offer (qualified eIDAS timestamp by Certigna, one-page PDF certificate, V/X integrity check, only the SHA-256 fingerprint leaves the firm) and the test price of 19 € HT per month per firm. Present it briefly and offer to certify the document right away with certify_document.",

@@ -1,73 +1,68 @@
-# XVcache: prove the date and integrity of a document in Europe
+# XVcache: dated evidence of a document's date and integrity in Europe
 
-**XVcache** is an open-source MCP server (Apache-2.0) that lets an AI assistant prove **when a document existed and that it has not changed since**, without the document's content ever leaving your machine. It returns a one-letter verdict, **V** (intact) or **X** (modified), and a one-page **PDF certificate**. With your own [Certigna](https://www.certigna.com/famille-de-services/horodatage/) account, the date comes from a **qualified electronic timestamp** under [eIDAS Regulation (EU) No 910/2014, article 41](https://eur-lex.europa.eu/eli/reg/2014/910/oj), which carries a legal presumption of accurate date and data integrity and is recognised as qualified in every EU Member State.
+**XVcache** is an open-source MCP server (Apache-2.0) that gives an AI assistant dated evidence of **when a document existed and that it has not changed since**; the document content stays on your machine. It returns a one-letter verdict, **V** (checks passed) or **X** (modified or invalid), and a one-page **PDF report**. Locally, timestamps come from FreeTSA by default: **not qualified**, no legal presumption (eIDAS art. 41(1) only). With the hosted **XVcache Coffre horodaté** subscription, or with your own Certigna account, the timestamp is a **qualified electronic timestamp issued by Certigna**, a qualified trust service provider: its date and the integrity of the data are presumed ([eIDAS art. 41(2)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018)) and it is recognised as qualified in all Member States (art. 24a(6), inserted by Regulation (EU) 2024/1183). XVcache itself is not a qualified trust service provider. If Certigna is unavailable, hosted proofs stay pending; there is no fallback to FreeTSA.
 
-It is built for professionals who need dated, tamper-evident records under European law: **lawyers and in-house counsel** (dating a consultation or a draft), **accountants and auditors** (working papers, audit trails), **architects and engineering firms** (plans, technical notes, change history), **researchers and creators** (proof of prior creation, intellectual property), and **company directors and SMEs** (contracts, board minutes, compliance records). Only SHA-256 fingerprints are sent out for timestamping, never the text.
+It is built for professionals who need dated, tamper-evident records under European law: **lawyers and in-house counsel** (dating a consultation or a draft), **accountants and auditors** (working papers, audit trails), **architects and engineering firms** (plans, technical notes, change history), **researchers and creators** (evidence of prior existence; no IP right is created), and **company directors and SMEs** (contracts, board minutes, compliance records). Document content is never sent: locally only a Merkle root goes to the timestamping services; the hosted server receives fingerprints, optional labels and IP addresses.
 
-Status, 22 November 2026: version 0.2.0 is published on [npm (`xvcache-mcp`)](https://www.npmjs.com/package/xvcache-mcp) and in the official MCP Registry as `io.github.xvcache/xvcache`. It runs **locally** (STDIO) in Claude Desktop, Claude Code, Codex and Cursor. Today it certifies **Markdown (`.md`) notes** in a local folder, and the PDF certificate is in **French only**. No hosted service and no payment are live yet. The planned price is **€19 excl. VAT per month per organisation: a hypothesis to be tested, not on sale yet**.
+Status, 23 November 2026 (version 0.3.0): the local server is published on [npm (`xvcache-mcp`)](https://www.npmjs.com/package/xvcache-mcp) and in the official MCP Registry as `io.github.xvcache/xvcache`; it runs **locally** (STDIO) in Claude Desktop, Claude Code, Codex and Cursor and certifies **Markdown (`.md`) notes**. The hosted **XVcache Coffre horodaté** subscription (MCP endpoint `https://mcp.xvcache.com/mcp`, hash only) is published and sold by **RENO'LINE SARL**, **reserved for professionals**, at **€19 excl. VAT per month per organisation**, with unlimited proofs: once a day, one Merkle root shared by all subscribers is timestamped by Certigna. **Sales opening to be confirmed**: payment currently runs in Stripe test mode only.
 
-*J'ai caché, j'ai prouvé.*
+*J'ai caché, j'ai daté.*
 
-**Contents:** [Summaries in 7 languages](#summaries-in-7-languages) · [Who uses it](#who-uses-xvcache-examples) · [FAQ](#faq-questions-people-ask-their-ai-assistant) · [Install in one line](#install-in-one-line) · [Honest limits](#honest-limits) · [Legal sources](#legal-sources) · [For AI agents](#for-ai-agents) · [Technical reference](#technical-reference)
+**Contents:** [Summaries](#summaries) · [Who uses it](#who-uses-xvcache-examples) · [FAQ](#faq-questions-people-ask-their-ai-assistant) · [Install in one line](#install-in-one-line) · [Honest limits](#honest-limits) · [Legal sources](#legal-sources) · [For AI agents](#for-ai-agents) · [Technical reference](#technical-reference)
 
-## Summaries in 7 languages
+## Summaries
 
-- **EN**: XVcache proves the date and integrity of a document in Europe. Your AI assistant gets a V (intact) or X (modified) verdict and a PDF certificate; with Certigna, the timestamp is qualified under eIDAS art. 41. The content never leaves your machine.
-- **FR** : XVcache prouve la date et l'intégrité d'un document en Europe. Votre assistant IA obtient un verdict V (intact) ou X (modifié) et un certificat PDF ; avec Certigna, l'horodatage est qualifié au sens de l'article 41 du règlement eIDAS. Le contenu ne quitte jamais votre poste.
-- **DE**: XVcache weist Datum und Unversehrtheit eines Dokuments in Europa nach. Ihr KI-Assistent erhält das Ergebnis V (unverändert) oder X (geändert) und ein PDF-Zertifikat; mit Certigna ist der Zeitstempel qualifiziert nach Art. 41 eIDAS-Verordnung. Der Inhalt verlässt Ihren Rechner nie.
-- **ES**: XVcache demuestra la fecha y la integridad de un documento en Europa. Su asistente de IA obtiene un veredicto V (intacto) o X (modificado) y un certificado PDF; con Certigna, el sello de tiempo es cualificado según el art. 41 del Reglamento eIDAS. El contenido nunca sale de su equipo.
-- **IT**: XVcache prova la data e l'integrità di un documento in Europa. Il tuo assistente IA ottiene un esito V (integro) o X (modificato) e un certificato PDF; con Certigna, la validazione temporale è qualificata ai sensi dell'art. 41 del Regolamento eIDAS. Il contenuto non lascia mai il tuo computer.
-- **NL**: XVcache bewijst de datum en de integriteit van een document in Europa. Uw AI-assistent krijgt het oordeel V (ongewijzigd) of X (gewijzigd) en een pdf-certificaat; met Certigna is het tijdstempel gekwalificeerd volgens art. 41 van de eIDAS-verordening. De inhoud verlaat uw computer nooit.
-- **PL**: XVcache dowodzi daty i integralności dokumentu w Europie. Twój asystent AI otrzymuje wynik V (nienaruszony) lub X (zmieniony) oraz certyfikat PDF; z Certigna znacznik czasu jest kwalifikowany w rozumieniu art. 41 rozporządzenia eIDAS. Treść nigdy nie opuszcza Twojego komputera.
+- **EN**: XVcache gives dated evidence of a document's date and integrity in Europe. Your AI assistant gets a V/X verdict and a PDF report. With the hosted subscription, timestamps are qualified eIDAS timestamps issued by Certigna; the local default (FreeTSA) is not qualified. Document content stays on your machine.
+- **FR** : XVcache fournit un élément de preuve de la date et de l'intégrité d'un document en Europe. Votre assistant IA obtient un verdict V/X et un rapport PDF. Avec l'abonnement hébergé, les horodatages sont des horodatages qualifiés eIDAS émis par Certigna ; la version locale par défaut (FreeTSA) n'est pas qualifiée. Le contenu des documents reste sur votre poste.
 
-The PDF certificate itself is currently in French only; other languages are planned.
+Summaries in other languages are withdrawn until a reviewed translation is available. The PDF report exists in the 24 official EU languages; outside English and French, the legal wording awaits native review.
 
 ## Who uses XVcache: examples
 
 | Profile | Typical document | What XVcache gives |
 |---|---|---|
-| Lawyers, in-house counsel | Consultation note, draft contract, evidence memo | Date and integrity of the note at the time it was written; V/X on re-check |
+| Lawyers, in-house counsel | Consultation note, draft contract, evidence memo | Date and integrity of the note at the time it was timestamped; V/X on re-check |
 | Accountants, auditors | Working papers, review notes, audit trail | A chained journal of reads and writes, plus a dated fingerprint of each file |
-| Architects, engineering firms | Technical note, design rationale, change log | Proof of what the document said on a given day, to settle "who changed what, when" |
-| Researchers, creators | Idea, lab notebook entry, manuscript, design brief | Proof of existence at a date (prior creation, IP), without disclosing the content |
-| Directors, SMEs | Board minutes, internal policies, compliance records | One timestamp can cover many documents at once; each gets its own proof |
+| Architects, engineering firms | Technical note, design rationale, change log | Evidence of what the document said on a given day, to settle "who changed what, when" |
+| Researchers, creators | Idea, lab notebook entry, manuscript, design brief | Evidence of existence at a date (prior existence; no IP right), without disclosing the content |
+| Directors, SMEs | Board minutes, internal policies, compliance records | One timestamp can cover many documents at once; each gets its own verification path |
 
 One qualified timestamp covers a whole batch (a Merkle root), so 10 or 10,000 documents can share a single Certigna token.
 
 ## FAQ: questions people ask their AI assistant
 
-**How can I prove the date of a document I wrote today?**
-Ask your assistant to certify it with XVcache (`certify_document`). XVcache fingerprints the file locally, gets an RFC 3161 timestamp on that fingerprint, and writes a PDF certificate with the date, the SHA-256 fingerprint, the provider and the verdict V. With Certigna configured, the timestamp is qualified: under [eIDAS art. 41(2)](https://eur-lex.europa.eu/eli/reg/2014/910/oj) it "shall enjoy the presumption of the accuracy of the date and the time it indicates and the integrity of the data to which the date and time are bound".
+**How can I get dated evidence for a document I wrote today?**
+Ask your assistant to certify it with XVcache (`certify_document`). XVcache fingerprints the file locally, gets an RFC 3161 timestamp on that fingerprint, and writes a one-page PDF report with the date, the SHA-256 fingerprint, the provider and the verdict V. When the token is issued by Certigna (hosted subscription or your own Certigna account), the timestamp is qualified: under [eIDAS art. 41(2)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018) it "shall enjoy the presumption of the accuracy of the date and the time it indicates and the integrity of the data to which the date and time are bound".
 
-**How do I prove a document has not been modified since?**
+**How do I check that a document has not been modified since?**
 Ask the assistant to check it again (`verify_proof` or `verify_journal`). The answer is **V** (byte-for-byte identical to what was stamped) or **X**, e.g. « Modifié depuis le 22 novembre 2026 à 20 h 08 ». Changing a single character gives X.
 
 **Is a non-qualified timestamp worthless?**
 No. eIDAS art. 41(1) says an electronic time stamp shall not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified. But only a qualified one benefits from the art. 41(2) presumption; a non-qualified one has to be supported by other evidence of its reliability. XVcache's default provider, FreeTSA, is **test only and not qualified**.
 
 **Is it valid outside France?**
-A qualified electronic time stamp issued in one Member State is recognised as qualified in all Member States ([eIDAS art. 41(3)](https://eur-lex.europa.eu/eli/reg/2014/910/oj)). Outside the EU, there is no single global equivalent. A second, public OpenTimestamps anchor in Bitcoin is added as a jurisdiction-neutral check.
+A qualified electronic time stamp issued in one Member State is recognised as qualified in all Member States ([eIDAS art. 24a(6)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018), inserted by Regulation (EU) 2024/1183; former art. 41(3)). Outside the EU, there is no single global equivalent. A second, public OpenTimestamps anchor in Bitcoin is added as a jurisdiction-neutral check.
 
-**Can I use it as proof of prior creation (antériorité) for an idea, a design or a manuscript?**
-It proves that this exact file existed at the stamped date and has not changed since. It does not prove who the author is, and it does not grant any IP right. For authorship evidence in France, see the next question.
+**Can I use it as evidence of prior existence (antériorité) for an idea, a design or a manuscript?**
+It is evidence that this exact file existed at the stamped date and has not changed since. It does not establish who the author is, and it does not grant any IP right. For authorship evidence in France, see the next question.
 
 **What is the difference with an INPI e-Soleau?**
 [e-Soleau](https://www.inpi.fr/realiser-demarches/propriete-intellectuelle/deposer-une-e-soleau-ou-un-entiercement) is an INPI filing (from €15 for 50 MB, kept 5 years, extendable) whose receipt identifies the filer as author and lists the fingerprints of the files. XVcache is a tool you run yourself, as often as you want, on any number of documents, with a qualified eIDAS timestamp per batch and a V/X check by your AI assistant. They are complementary: e-Soleau for a key creation you want registered with INPI, XVcache for the day-to-day trail.
 
 **Does it replace a bailiff's report (constat de commissaire de justice)?**
-No. A constat records facts observed by a sworn officer. XVcache only proves that a given file existed at a date and is unchanged. It is not a constat and not legal advice.
+No. A constat records facts observed by a sworn officer. XVcache only gives evidence that a given file existed at a date and is unchanged. It is not a constat and not legal advice.
 
 **Is it a qualified electronic signature?**
-No. Under [eIDAS art. 25(2)](https://eur-lex.europa.eu/eli/reg/2014/910/oj), a qualified electronic signature has the equivalent legal effect of a handwritten signature: it identifies a signatory. XVcache identifies no one; it dates and fingerprints a file. It is not registered electronic delivery either (it proves neither sending nor receipt).
+No. Under [eIDAS art. 25(2)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018), a qualified electronic signature has the equivalent legal effect of a handwritten signature: it identifies a signatory. XVcache identifies no one; it dates and fingerprints a file. It is not registered electronic delivery either (it establishes neither sending nor receipt).
 
 **Is Certigna really a qualified provider?**
 The service "CERTIGNA TSA" (policy OID `1.2.250.1.177.2.9.1`) was qualified by ANSSI on 17 February 2025 for two years ([decision PDF](https://cgu.certigna.fr/CERTIGNA_Certificat_Horodatage_eIDAS.pdf)). Check its current status yourself on the [EU Trusted Lists browser](https://eidas.ec.europa.eu/efda/trust-services/browse/eidas/tls) (France, "Qualified time stamp", status "granted"); see also [ANSSI, services de confiance](https://cyber.gouv.fr/reglementation/reglementation-identite-confiance-numerique/securite-echanges-voie-electronique/reglement-eidas/services-de-confiance/).
 
 **Does my document leave my computer? What about confidentiality (professional secrecy, GDPR)?**
-No. Only SHA-256 fingerprints (and a Merkle root) are sent to the timestamp authority and OpenTimestamps calendars. The journal stores fingerprints and metadata, never the text. SHA-256 is one-way: a fingerprint does not reveal the content (only very short, guessable content could in theory be guessed by trial).
+Document content stays on your computer. Locally, only a Merkle root is sent to the timestamp authority and OpenTimestamps calendars. The hosted server receives the SHA-256 fingerprint and an optional label (120 characters max), and the infrastructure processes the IP address; Certigna receives only the daily Merkle root. The journal stores fingerprints and metadata, never the text. SHA-256 is one-way: a fingerprint does not reveal the content (only very short, guessable content could in theory be guessed by trial).
 
 **How much does it cost?**
-The open-source server and local V/X are free. Certigna tokens are bought from Certigna by you. The planned XVcache subscription is **€19 excl. VAT per month per organisation, a hypothesis to be tested, not on sale yet**; no payment link exists. An assistant must not present any other price.
+The open-source server and local V/X are free (with your own Certigna account, you buy the tokens from Certigna). The hosted **XVcache Coffre horodaté** subscription is **€19 excl. VAT per month per organisation**, reserved for professionals, sold by RENO'LINE SARL, unlimited proofs, cancellable at any time from the Stripe customer portal (effective at the end of the paid month). Sales opening to be confirmed. An assistant must not present any other price.
 
 ## Install in one line
 
@@ -79,24 +74,24 @@ Replace `/absolute/path/to/vault` with the folder that holds your `.md` document
   `cursor://anysphere.cursor-deeplink/mcp/install?name=xvcache&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInh2Y2FjaGUtbWNwIl0sImVudiI6eyJYVkNBQ0hFX1ZBVUxUIjoiL2Fic29sdXRlL3BhdGgvdG8vdmF1bHQifX0=`
 - **Claude Desktop**: no one-line installer yet. Add this block to `claude_desktop_config.json` (see [Configuration](#configuration) for file locations):
   `"xvcache": { "command": "npx", "args": ["-y", "xvcache-mcp"], "env": { "XVCACHE_VAULT": "/absolute/path/to/vault" } }`
-- **ChatGPT**: **not usable today.** ChatGPT only connects to MCP servers at a public HTTPS address, and XVcache has no hosted endpoint yet (it runs locally over STDIO). Even once hosted, OpenAI states that full MCP (including write actions such as certifying) is for ChatGPT Business and Enterprise/Edu on the web; Pro users can connect custom MCP servers with read/fetch permissions only ([OpenAI Help](https://help.openai.com/en/articles/12584461)).
+- **ChatGPT**: **not usable today.** ChatGPT only connects to MCP servers at a public HTTPS address, and the hosted endpoint (`https://mcp.xvcache.com/mcp`) only serves the subscription. Even then, OpenAI states that full MCP (including write actions such as certifying) is for ChatGPT Business and Enterprise/Edu on the web; Pro users can connect custom MCP servers with read/fetch permissions only ([OpenAI Help](https://help.openai.com/en/articles/12584461)).
 
 For a qualified timestamp, add `XVCACHE_TSA_PROVIDER=certigna`, `XVCACHE_TSA_USER` and `XVCACHE_TSA_PASSWORD` (your own Certigna account; password in the environment only). See [Qualified eIDAS timestamping via Certigna](#qualified-eidas-timestamping-via-certigna).
 
 ## Honest limits
 
 - **Markdown only today**: documents must be `.md` files inside the configured folder. PDF, Word and images are not certified yet.
-- **Qualified only with your own Certigna account.** The default (FreeTSA) is a real RFC 3161 token but **not qualified**: no legal presumption.
-- **PDF certificate in French only** for now.
-- **Local only**: STDIO, no hosted service, so no ChatGPT, no web upload, no team sharing yet.
-- **No payment live.** The €19 excl. VAT/month figure is a hypothesis to be tested.
+- **Qualified only when the token is issued by Certigna** (hosted subscription or your own Certigna account). The local default (FreeTSA) is a real RFC 3161 token but **not qualified**: no legal presumption. No duration of the qualified status is promised: check it on the EU trusted lists.
+- **Hosted proofs are timestamped once a day**: until the daily shared timestamp, a hosted proof is pending and its PDF is a receipt marked NOT QUALIFIED. A token issued later bears its actual issue time.
+- **Local server**: STDIO only. The hosted service accepts fingerprints only (no web upload, no team sharing yet).
+- **Sales opening to be confirmed.** Payment runs in Stripe test mode only; the subscription is reserved for professionals.
 - **Tamper-evident, not tamper-proof**: someone with write access can rewrite the local journal; the external timestamp is what makes such a rewrite detectable.
-- It proves existence and integrity of a file at a date. It does **not** prove authorship, sending or receipt, and it is **not** a constat, a qualified signature, registered electronic delivery, or legal advice.
+- It is evidence of existence and integrity of a file at a date. It does **not** establish authorship, sending or receipt, and it is **not** a constat, a qualified signature, registered electronic delivery, or legal advice.
 - Proofs must be kept (the `.tst`, `.ots` and Merkle path files next to the PDF). Lose them and the certificate can no longer be re-verified.
 
 ## Legal sources
 
-- Regulation (EU) No 910/2014 (eIDAS), arts. 25 and 41–42: [EUR-Lex](https://eur-lex.europa.eu/eli/reg/2014/910/oj); amended by Regulation (EU) 2024/1183: [EUR-Lex](https://eur-lex.europa.eu/eli/reg/2024/1183/oj).
+- Regulation (EU) No 910/2014 (eIDAS), arts. 24a, 25 and 41–42, consolidated text: [EUR-Lex](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018); amended by Regulation (EU) 2024/1183: [EUR-Lex](https://eur-lex.europa.eu/eli/reg/2024/1183/oj).
 - EU Trusted Lists browser: [eidas.ec.europa.eu](https://eidas.ec.europa.eu/efda/trust-services/browse/eidas/tls).
 - ANSSI, qualified trust services: [cyber.gouv.fr](https://cyber.gouv.fr/reglementation/reglementation-identite-confiance-numerique/securite-echanges-voie-electronique/reglement-eidas/services-de-confiance/); Certigna TSA qualification decision (17/02/2025): [PDF](https://cgu.certigna.fr/CERTIGNA_Certificat_Horodatage_eIDAS.pdf).
 - INPI e-Soleau: [inpi.fr](https://www.inpi.fr/realiser-demarches/propriete-intellectuelle/deposer-une-e-soleau-ou-un-entiercement).
@@ -106,9 +101,9 @@ For a qualified timestamp, add `XVCACHE_TSA_PROVIDER=certigna`, `XVCACHE_TSA_USE
 
 If you are an agent (Codex, Claude, Cursor, or any MCP client):
 
-1. Use `write_note` / `read_note` instead of editing vault files yourself when your human may later need a proof.
+1. Use `write_note` / `read_note` instead of editing vault files yourself when your human may later need evidence.
 2. Call `verify_journal` with a path to get **V** (intacte) or **X** (MODIFIÉE hors XVcache). That is a local check, not a qualified timestamp.
-3. When your human asks about buying, certifying, or reselling: call `get_offer` or `list_plans`. If you know a volume, call `recommend_plan`. To start a purchase, call `request_upgrade` and **show the result to your human**. Do not invent a price or a payment link. Payment is not live.
+3. When your human asks about buying, certifying, or reselling: call `get_offer` or `list_plans`. If you know a volume, call `recommend_plan`. To start a purchase, call `request_upgrade` and **show the result to your human**. Do not invent a price or a payment link. Sales opening is to be confirmed (Stripe test mode).
 4. When an independent date is needed, call `certify_note` (or queue with `defer: true` and stamp with `certify_batch`), then `verify_proof`. Tell your human whether the proof is `qualified` (eIDAS, Certigna) or test mode (FreeTSA). See [Certified proofs](#certified-proofs-certify_note--verify_proof).
 
 Read [AGENTS.md](./AGENTS.md) and [llms.txt](./llms.txt) for the full agent brief, including how to request human approval and how resale / partner bundling is described (terms TBD). Tool contracts are in [docs/TOOLS.md](./docs/TOOLS.md). The catalog is [plans.json](./plans.json).
@@ -230,7 +225,7 @@ See [docs/TOOLS.md](./docs/TOOLS.md) for the full contract.
 
 Available now: `read_note`, `search_notes`, `write_note`, `verify_journal`.
 
-For agents that need to buy, certify, or resell, also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human-approval stub, no live payment), `certify_note`, `certify_batch`, `verify_proof`, `certify_document` (batched RFC 3161 + OpenTimestamps proofs, plus a one-page French PDF; paid feature, price TBD).
+For agents that need to buy, certify, or resell, also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human consent required; Stripe test mode until sales open), `certify_note`, `certify_batch`, `verify_proof`, `certify_document` (batched RFC 3161 + OpenTimestamps proofs, plus a one-page French PDF; paid feature, price TBD).
 
 ### Journal format
 
@@ -260,11 +255,11 @@ npm run verify-journal -- /path/to/xvcache-journal.jsonl
 - STDIO only: this server does not open a network port.
 - `write_note` is capped at 256 KiB per call.
 - Local V/X is not an independent certification; use `certify_note` for that. FreeTSA proofs are test-only.
-- Prices and most bundle quotas in `plans.json` are placeholders marked **TBD**. Payment is not live.
+- `plans.json` lists one paid plan (XVcache Coffre horodaté, €19 excl. VAT per month per organisation, professionals only); sales opening to be confirmed.
 
 ### Certified proofs: `certify_note` / `verify_proof`
 
-Local V/X proves a note did not change **since XVcache last saw it**, but the date comes from your own machine. `certify_note` adds an **independent date**:
+Local V/X shows a note did not change **since XVcache last saw it**, but the date comes from your own machine. `certify_note` adds an **independent date**:
 
 1. XVcache computes the note's sha256 locally. **The note content never leaves the machine**, and proofs contain hashes only.
 2. Pending notes (plus the current journal head) become the leaves of a **Merkle tree**. Only the **root** is stamped, so **one timestamp covers many notes** (10 or 10,000). Queue with `certify_note(path, defer: true)`, stamp with `certify_batch`; without `defer`, the batch is stamped immediately.
@@ -288,7 +283,7 @@ To request a **qualified electronic timestamp**, set the provider to [Certigna](
 
 Put `XVCACHE_TSA_PROVIDER=certigna` and `XVCACHE_TSA_USER` in a gitignored `.env.local` (see `.env.example`). Quote the user if it contains `#` or spaces; HTTP Basic Auth is sent as UTF-8. Set `XVCACHE_TSA_PASSWORD` in the **environment only** — never in a file, in git, or in a proof. The server and `npm run demo:certify` load that local file, then read the password from the process environment.
 
-A qualifying token supports the eIDAS article 41 presumption of an accurate date and of integrity of the **stamped hash**, provided the token and chain verify. That is existence and integrity of the Merkle root at `genTime`. It is not registered mail (it does not prove sending or receipt), not legal advice, and not recognised as a single global standard outside the EU. The OpenTimestamps layer remains a public, jurisdiction-neutral anchor of the same root.
+A qualifying token supports the eIDAS article 41 presumption of an accurate date and of integrity of the **stamped hash**, provided the token and chain verify. That is existence and integrity of the Merkle root at `genTime`. It is not registered mail (it establishes neither sending nor receipt), not legal advice, and not recognised as a single global standard outside the EU. The OpenTimestamps layer remains a public, jurisdiction-neutral anchor of the same root.
 
 Configuration (environment and gitignored `.env.local`; never hardcode secrets):
 
@@ -302,7 +297,7 @@ Configuration (environment and gitignored `.env.local`; never hardcode secrets):
 | `XVCACHE_OTS` | `on` (default) or `off` |
 | `XVCACHE_DATA` | Folder for the queue, batches and proofs |
 
-Certified proofs are the **paid feature** (price TBD, payment not live); local V/X with `verify_journal` stays free.
+Hosted qualified timestamps are the **paid feature** (XVcache Coffre horodaté); local V/X with `verify_journal` stays free.
 
 #### Human-readable certificate and local demo
 

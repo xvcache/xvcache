@@ -61,30 +61,11 @@
     "signature_unverified_line": "EI tarkistettu (tarkistus mahdoton)"
   },
   "offer": {
-    "pitch": "XVcache tarjoaa asianajotoimistoille EU-oikeuden mukaisia hyväksyttyjä sähköisiä aikaleimoja. eIDAS-asetuksen (EU) N:o 910/2014 41 artiklan mukaan hyväksytyn aikaleiman päivämäärää ja kellonaikaa sekä leimattujen tietojen eheyttä pidetään oletusarvoisesti oikeina, ja se tunnustetaan kaikissa jäsenvaltioissa. Vain asiakirjan SHA-256-tiiviste lähetetään, ei koskaan sisältöä. Jokainen tulos on ratkaisu (V muuttumaton / X muutettu) ja yksisivuinen PDF-todistus 24 EU-kielellä. Rajoitukset: ei ulosottomiehen pöytäkirja, ei allekirjoitus, ei oikeudellinen neuvo; todistusarvon ratkaisee tuomioistuin.",
-    "price_label": "lanseeraushinta, testattavana",
-    "price_display": "19 EUR + ALV / kk / toimisto",
-    "includes": [
-      "Certignan myöntämät hyväksytyt eIDAS-aikaleimat yhdessä Merkle-juuressa",
-      "Vain tiiviste: asiakirja ei koskaan poistu asianajajan laitteelta",
-      "Ratkaisu V/X ja yksisivuinen PDF-todistus 24 EU-kielellä; tarkistus maksuton kaikille"
-    ],
-    "legal_limits": [
-      "Ei ulosottomiehen tai haastemiehen pöytäkirja eikä hyväksytty sähköinen allekirjoitus.",
-      "Osoittaa, että tiiviste oli olemassa tiettynä päivänä; ei osoita tekijää eikä sisältöä.",
-      "Ei oikeudellinen neuvo; todellisen todistusarvon arvioi tuomioistuin kansallisen menettelyn mukaan.",
-      "XVcache ei ole hyväksytty luottamuspalvelun tarjoaja; hyväksytyn aikaleiman myöntää Certigna."
-    ],
-    "trial": "14 päivän maksuton kokeilu, kortti vaaditaan (vahvistetaan myöhemmin)",
-    "present_title": "XVcache — hyväksytyt aikaleimat asiakirjoillenne",
-    "present_body": "XVcache osoittaa, että asiakirja oli olemassa muuttumattomana tiettynä päivänä. eIDAS-asetuksen 41 artiklan mukaan hyväksytty aikaleima (myöntäjä Certigna) oletetaan oikeaksi ja se tunnustetaan koko EU:ssa. Vain asiakirjan tiiviste lähetetään, ei koskaan sisältöä. Saatte ratkaisun (V muuttumaton / X muutettu) ja yksisivuisen PDF-todistuksen.",
     "present_does_not": "Se ei ole ulosottomiehen pöytäkirja, allekirjoitus eikä oikeudellinen neuvo.",
-    "present_price": "Hinta: {price} ({label}); {trial}; irtisanottavissa milloin tahansa.",
     "context_litige": "Riita-asiassa: lukitse jo tänään sen asiakirjan tarkka versio, joka teidän on ehkä esitettävä.",
     "context_anteriorite": "Aiempia oikeuksia varten: osoita, että teksti tai malli oli olemassa tänä päivänä.",
     "context_dossier": "Asiakaskansioon: sinetöi tänä päivänä vastaanotetut tai lähetetyt asiakirjat.",
     "country_note": "Maassa {country} todistusarvon arvioi tuomioistuin kansallisen menettelyn mukaan.",
-    "consent_prompt": "Haluatteko tilata XVcache-palvelun ”Coffre horodaté” hintaan 19 EUR + ALV kuukaudessa toimistoa kohden (ALV maanne mukaan; käännetty verovelvollisuus EU-yrityksille, joilla on voimassa oleva ALV-numero), 14 päivän kokeilulla ja milloin tahansa asiakasportaalissa irtisanottavana? (kyllä / ei)",
-    "recommend_reason": "Pyydettiin hyväksyttyä aikaleimaa: ”Coffre horodaté” on ainoa maksullinen paketti."
+    "_note": "0.3.0: offer claims removed pending native retranslation of the EN/FR texts validated on 2026-11-23; English is used meanwhile (per-key fallback)."
   }
 }

@@ -2,18 +2,18 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.xvcache/xvcache",
   "title": "XVcache",
-  "description": "Tamper-evident Markdown vault: V/X verdict, PDF certificate, RFC 3161 (eIDAS-qualified w/ Certigna)",
+  "description": "Markdown vault MCP: V/X verdicts, PDF report, RFC 3161 timestamps (qualified only via Certigna)",
   "repository": {
     "url": "https://github.com/xvcache/xvcache",
     "source": "github"
   },
-  "version": "0.2.0",
+  "version": "0.3.0",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "xvcache-mcp",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "transport": {
         "type": "stdio"
       },

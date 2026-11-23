@@ -22,4 +22,4 @@ Do not open a public issue with exploit details.
 
 Once a public GitHub repository exists, use GitHub's private vulnerability reporting on that repository. Until then, do not publish a report in a public channel.
 
-Please include the version (for example `0.2.0`, or the git revision), what you did, and what you observed. Allow time for a fix before any public disclosure.
+Please include the version (for example `0.3.0`, or the git revision), what you did, and what you observed. Allow time for a fix before any public disclosure.

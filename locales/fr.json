@@ -47,7 +47,7 @@
     "legal_title": "Mentions légales",
     "legal_art41": "Règlement (UE) n° 910/2014 (eIDAS), art. 41 : l'effet juridique d'un horodatage électronique ne peut être refusé au seul motif qu'il se présente sous une forme électronique ; un horodatage électronique qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure qu'il indique et d'intégrité des données auxquelles il se rapporte, et il est reconnu dans tous les États membres.",
     "legal_not_qtsp": "XVcache n'est pas un prestataire de services de confiance qualifié. Le jeton qualifié est émis par Certigna.",
-    "legal_not": "Ce certificat n'est ni un constat de commissaire de justice (huissier), ni une signature électronique qualifiée, ni un avis juridique. Il prouve qu'une empreinte existait à une date ; il ne prouve ni l'auteur ni le contenu.",
+    "legal_not": "Ce certificat n'est ni un constat de commissaire de justice, ni une signature électronique qualifiée, ni un service de confiance qualifié, ni un avis juridique. C'est un élément de preuve qu'une empreinte existait à la date de l'horodatage ; il n'établit ni l'auteur ni le contenu.",
     "legal_hash_only": "Le contenu du document n'a jamais été transmis, seule son empreinte l'a été.",
     "legal_court": "Sa force probante concrète est appréciée par le juge selon la procédure nationale.",
     "mt_notice": "Traduction non encore relue par un juriste ; la version anglaise fait foi.",
@@ -61,30 +61,29 @@
     "signature_unverified_line": "NON vérifiée (vérification impossible)"
   },
   "offer": {
-    "pitch": "XVcache fournit aux cabinets d'avocats des horodatages électroniques qualifiés au sens du droit de l'Union. Selon l'art. 41 du règlement eIDAS (UE) n° 910/2014, un horodatage qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure et d'intégrité des données horodatées, et il est reconnu dans tous les États membres. Seule l'empreinte SHA-256 du document est envoyée, jamais son contenu. Chaque résultat est un verdict (V intact / X modifié) et un certificat PDF d'une page dans 24 langues de l'UE. Limites : ni constat d'huissier, ni signature, ni avis juridique ; la force probante relève du juge.",
-    "price_label": "prix de lancement, à tester",
-    "price_display": "19 EUR HT / mois / cabinet",
+    "pitch": "XVcache fournit aux organisations un élément de preuve daté qu'un document existait, inchangé, à un moment donné. Avec l'abonnement XVcache Coffre horodaté, les horodatages sont des horodatages électroniques qualifiés émis par Certigna, prestataire de services de confiance qualifié : selon l'art. 41, § 2 du règlement eIDAS, leur date et l'intégrité des données sont présumées, et ils sont reconnus comme qualifiés dans tous les États membres (art. 24 bis, § 6). XVcache n'est pas lui-même prestataire qualifié. Le contenu du document reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte SHA-256 et un libellé facultatif, et traite votre adresse IP. Chaque résultat est un verdict V/X et un rapport PDF d'une page dans 24 langues de l'UE. Limites : ni constat de commissaire de justice, ni signature, ni avis juridique ; la force probante relève du juge.",
+    "price_label": "abonnement mensuel ; tarif professionnel",
+    "price_display": "19 EUR HT / mois / organisation",
     "includes": [
-      "Horodatages qualifiés eIDAS émis par Certigna, groupés dans une racine Merkle",
-      "Empreinte seule : le document ne quitte jamais le poste de l'avocat",
-      "Verdict V/X et certificat PDF d'une page en 24 langues de l'UE ; vérification gratuite pour tous"
+      "Horodatages qualifiés eIDAS émis par Certigna : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; preuves illimitées (une preuve en attente n'est jamais décomptée)",
+      "Le contenu des documents reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte et un libellé facultatif, et traite l'adresse IP",
+      "Verdict V/X et rapport PDF d'une page en 24 langues de l'UE ; vérification gratuite pour tous"
     ],
     "legal_limits": [
       "Ni constat de commissaire de justice (huissier), ni signature électronique qualifiée.",
-      "Prouve qu'une empreinte existait à une date ; ne prouve ni l'auteur ni le contenu.",
+      "Élément de preuve qu'une empreinte existait à une date ; n'établit ni l'auteur ni le contenu.",
       "Pas un avis juridique ; la force probante concrète est appréciée par le juge selon la procédure nationale.",
       "XVcache n'est pas un prestataire de services de confiance qualifié ; le jeton qualifié est émis par Certigna."
     ],
-    "trial": "essai gratuit de 14 jours, carte demandée (à confirmer)",
-    "present_title": "XVcache — horodatage qualifié de vos documents",
-    "present_body": "XVcache prouve qu'un document existait, inchangé, à une date donnée. Selon l'art. 41 du règlement eIDAS, l'horodatage qualifié (émis par Certigna) est présumé exact et reconnu dans toute l'UE. Seule l'empreinte du document est envoyée, jamais son contenu. Vous recevez un verdict (V intact / X modifié) et un certificat PDF d'une page.",
+    "present_title": "XVcache — élément de preuve daté pour vos documents",
+    "present_body": "XVcache fournit un élément de preuve daté qu'un document existait, inchangé, à un moment donné. Avec l'abonnement Coffre horodaté, l'horodatage est un horodatage électronique qualifié émis par Certigna : selon l'art. 41, § 2 d'eIDAS, sa date et l'intégrité des données sont présumées, et il est reconnu comme qualifié dans tous les États membres (art. 24 bis, § 6). XVcache n'est pas lui-même prestataire qualifié. Le contenu du document reste sur votre ordinateur ; le serveur reçoit l'empreinte et un libellé facultatif, et traite votre adresse IP. Vous recevez un verdict V/X et un rapport PDF d'une page.",
     "present_does_not": "Ce n'est ni un constat d'huissier, ni une signature, ni un avis juridique.",
-    "present_price": "Prix : {price} ({label}) ; {trial} ; résiliable à tout moment.",
+    "present_price": "Prix : {price}, réservé aux professionnels ; résiliable à tout moment (effet à la fin du mois payé).",
     "context_litige": "En cas de litige : figez dès aujourd'hui la version exacte d'un document que vous devrez peut-être produire.",
     "context_anteriorite": "Pour une antériorité : montrez qu'un texte ou un dessin existait à cette date.",
     "context_dossier": "Pour un dossier client : scellez les pièces reçues ou envoyées à cette date.",
     "country_note": "En {country}, la force probante est appréciée par le juge selon la procédure nationale.",
-    "consent_prompt": "Voulez-vous souscrire à XVcache « Coffre horodaté » pour 19 EUR HT par mois et par cabinet (TVA selon votre pays ; autoliquidation pour les entreprises de l'UE avec un numéro de TVA valide), avec un essai de 14 jours, résiliable à tout moment depuis le portail client ? (oui / non)",
-    "recommend_reason": "Un horodatage qualifié a été demandé : « Coffre horodaté » est le seul plan payant."
+    "consent_prompt": "Voulez-vous souscrire à XVcache Coffre horodaté, réservé aux professionnels et vendu par RENO'LINE SARL, pour 19 EUR HT par mois et par organisation (TVA selon votre pays ; autoliquidation pour les entreprises de l'UE avec un numéro de TVA valide), résiliable à tout moment depuis le portail client, avec effet à la fin du mois payé ? (oui / non)",
+    "recommend_reason": "Un horodatage qualifié a été demandé : XVcache Coffre horodaté est le seul plan payant."
   }
 }

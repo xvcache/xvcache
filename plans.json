@@ -1,10 +1,10 @@
 {
   "schema_version": "0.3.0",
-  "prices_status": "to_test",
+  "prices_status": "announced",
   "payment_live": false,
   "currency": "EUR",
-  "notice": "One paid plan has a launch price to be tested: coffre-horodate, 19 EUR excl. VAT per month per firm (price_status to_test, not final). Every other amount, quota and fee is a placeholder (TBD); none is invented. Billing is not live yet: no payment is collected until the dedicated XVcache Stripe account exists. Local V/X (verify_journal) is free. Certified proofs (qualified eIDAS timestamps via Certigna, plus OpenTimestamps) are the paid feature.",
-  "updated": "2026-11-22",
+  "notice": "One paid plan: XVcache Coffre horodaté (coffre-horodate), 19 EUR excl. VAT per month per organisation, reserved for professionals, sold by RENO'LINE SARL. Sales opening to be confirmed: payment_live stays false until live billing is confirmed. Qualified eIDAS timestamps are issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. Local version: FreeTSA by default, not qualified. Every other amount, quota and fee is a placeholder (TBD); none is invented.",
+  "updated": "2026-11-23",
   "current_tier_id": "free",
   "plans": [
     {
@@ -43,29 +43,24 @@
     },
     {
       "id": "coffre-horodate",
-      "name": "Coffre horodaté — qualified eIDAS timestamps for law firms",
+      "name": "XVcache Coffre horodaté",
       "kind": "subscription",
-      "status": "launch_to_test",
+      "status": "sales_status_to_confirm",
       "price": {
         "amount": 19,
         "currency": "EUR",
-        "unit": "per_month_per_firm",
-        "status": "to_test",
+        "unit": "per_month_per_organisation",
+        "status": "announced",
         "tax_behavior": "exclusive",
         "placeholder": false,
-        "display": "19 EUR excl. VAT / month / firm",
-        "label": "launch price, to be tested",
-        "note": "Launch price to be tested with the first firms. Final price is Julien's decision. VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number."
-      },
-      "trial": {
-        "days": 14,
-        "card_required": true,
-        "status": "to_test"
+        "display": "19 EUR excl. VAT / month / organisation",
+        "label": "monthly subscription; professional price",
+        "note": "VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number. Cancellation from the customer portal takes effect at the end of the paid month."
       },
       "includes": [
-        "Qualified eIDAS timestamps (Certigna, policy 1.2.250.1.177.2.9.1) over a shared Merkle root, plus an OpenTimestamps anchor",
-        "Hash only: the document content never leaves the lawyer's device",
-        "Verdict V intact / X modified and a one-page PDF certificate in the 24 official EU languages",
+        "Qualified eIDAS timestamps issued by Certigna, a qualified trust service provider: ONE Merkle root shared by all subscribers, stamped once a day (pending until then), plus an OpenTimestamps anchor",
+        "Document content stays on the client's computer; the hosted server receives the SHA-256 fingerprint and an optional label (max 120 characters) and processes the IP address",
+        "V/X verdict and a one-page PDF report in the 24 official EU languages",
         "verify_document stays free and keyless for anyone (including the opposing party)"
       ],
       "limits": {
@@ -77,13 +72,28 @@
         },
         "certifications_per_month": {
           "value": null,
-          "status": "TBD",
-          "placeholder": true,
-          "note": "Monthly certification quota to be decided by Julien; the hosted service enforces the quota stored with each API key."
+          "status": "unlimited",
+          "placeholder": false,
+          "note": "Unlimited proofs per subscription. Usage is counted only when a proof obtains its timestamp token; a pending proof (pending_qualified) is never counted."
         }
       },
       "certified_witness": true,
-      "certified_witness_status": "preview"
+      "certified_witness_status": "preview",
+      "audience": "professionals only (B2B)",
+      "seller": {
+        "name": "RENO'LINE SARL",
+        "legal_form": "SARL au capital de 10 500 EUR",
+        "address": "6 rue du Commerce, 68420 Herrlisheim-près-Colmar, France",
+        "rcs": "832 059 513 RCS Colmar",
+        "vat": "FR48832059513"
+      },
+      "timestamping": {
+        "provider": "Certigna",
+        "qualified": "only tokens actually issued by Certigna (policy OID, chain and signature checked)",
+        "anchor": "daily shared Merkle root",
+        "failure_status": "pending_qualified",
+        "fallback_to_freetsa": false
+      }
     },
     {
       "id": "usage",

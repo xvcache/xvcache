@@ -61,30 +61,11 @@
     "signature_unverified_line": "NÃO verificada (verificação impossível)"
   },
   "offer": {
-    "pitch": "A XVcache fornece às sociedades de advogados selos temporais eletrónicos qualificados nos termos do direito da UE. Segundo o art. 41.º do Regulamento eIDAS (UE) n.º 910/2014, um selo temporal qualificado goza da presunção de exatidão da data e da hora e de integridade dos dados selados, e é reconhecido em todos os Estados-Membros. Só é enviada a impressão digital SHA-256 do documento, nunca o seu conteúdo. Cada resultado é um veredicto (V intacto / X modificado) e um certificado PDF de uma página em 24 línguas da UE. Limites: não é um auto de agente de execução, nem uma assinatura, nem aconselhamento jurídico; o valor probatório cabe ao tribunal.",
-    "price_label": "preço de lançamento, a testar",
-    "price_display": "19 EUR sem IVA / mês / sociedade",
-    "includes": [
-      "Selos temporais qualificados eIDAS emitidos pela Certigna, agrupados numa raiz Merkle",
-      "Só a impressão digital: o documento nunca sai do posto do advogado",
-      "Veredicto V/X e certificado PDF de uma página em 24 línguas da UE; verificação gratuita para todos"
-    ],
-    "legal_limits": [
-      "Não é um auto de agente de execução nem uma assinatura eletrónica qualificada.",
-      "Prova que uma impressão digital existia numa data; não prova nem o autor nem o conteúdo.",
-      "Não é aconselhamento jurídico; o valor probatório concreto é apreciado pelo tribunal segundo o processo nacional.",
-      "A XVcache não é um prestador qualificado de serviços de confiança; o selo qualificado é emitido pela Certigna."
-    ],
-    "trial": "teste gratuito de 14 dias, cartão pedido (a confirmar)",
-    "present_title": "XVcache — selos temporais qualificados para os seus documentos",
-    "present_body": "A XVcache prova que um documento existia, sem alterações, numa dada data. Segundo o art. 41.º do Regulamento eIDAS, o selo temporal qualificado (emitido pela Certigna) presume-se exato e é reconhecido em toda a UE. Só é enviada a impressão digital do documento, nunca o conteúdo. Recebe um veredicto (V intacto / X modificado) e um certificado PDF de uma página.",
     "present_does_not": "Não é um auto de agente de execução, nem uma assinatura, nem aconselhamento jurídico.",
-    "present_price": "Preço: {price} ({label}); {trial}; cancelável a qualquer momento.",
     "context_litige": "Num litígio: fixe hoje a versão exata de um documento que poderá ter de apresentar.",
     "context_anteriorite": "Para a anterioridade: mostre que um texto ou um desenho existia nesta data.",
     "context_dossier": "Para um processo de cliente: sele os documentos recebidos ou enviados nesta data.",
     "country_note": "Em {country}, o valor probatório é apreciado pelo tribunal segundo o processo nacional.",
-    "consent_prompt": "Pretende subscrever a XVcache «Coffre horodaté» por 19 EUR sem IVA por mês e por sociedade (IVA conforme o seu país; autoliquidação para empresas da UE com um número de IVA válido), com um teste de 14 dias, cancelável a qualquer momento no portal do cliente? (sim / não)",
-    "recommend_reason": "Foi pedido um selo temporal qualificado: «Coffre horodaté» é o único plano pago."
+    "_note": "0.3.0: offer claims removed pending native retranslation of the EN/FR texts validated on 2026-11-23; English is used meanwhile (per-key fallback)."
   }
 }
