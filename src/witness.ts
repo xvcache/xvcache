@@ -9,7 +9,7 @@ import type { Proof } from "./certify.js";
 import type { TsaTokenLedger } from "./tsa-tokens.js";
 
 /**
- * Hosted witness (L3, écarts 6 + 10): hash-only certification shared by every firm.
+ * Hosted witness (L3, écarts 6 + 10): hash-only timestamping shared by every firm.
  * - Each fingerprint becomes a leaf { k: "hash", id: proof_id, h: sha256 } — no firm, no label in the leaf.
  * - anchorMode "window" (tests, local): every submission arriving within `batchWindowMs` shares ONE Merkle root,
  *   hence ONE TSA token, and the call waits for it.
@@ -107,7 +107,7 @@ const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
 /**
  * Default daily anchor, in UTC: 21:50 UTC = 22:50 Europe/Paris in winter (UTC+1) and 23:50 in summer (UTC+2).
  * It therefore always falls on the same Paris calendar day as the submissions it covers (22:50 UTC would be
- * 00:50 the next day in Paris in summer). The certified date of a proof is the issue time (genTime) of that
+ * 00:50 the next day in Paris in summer). The timestamp time of a proof is the issue time (genTime) of that
  * day's Certigna token, never the time the fingerprint was submitted.
  */
 export const DEFAULT_DAILY_ANCHOR_UTC = "21:50";
@@ -485,7 +485,7 @@ export class HostedWitness {
 
     const checks: HostedVerification["checks"] = { fingerprint: empty, merkle: empty, tsa_token: empty, tsa_signature: empty, ots: empty };
     checks.fingerprint = sha === p.sha256
-      ? { ok: true, detail: "The document's fingerprint is identical to the certified fingerprint." }
+      ? { ok: true, detail: "The document's fingerprint is identical to the timestamped fingerprint." }
       : { ok: false, detail: "Different fingerprint: the document was MODIFIED (or it is another document)." };
     const lh = leafHash({ k: "hash", id: p.proof_id, h: p.sha256 });
     if (!p.merkle) {

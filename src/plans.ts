@@ -368,7 +368,7 @@ export function recommendPlan(input: RecommendInput): Recommendation {
 
   if (!wantsWitness) {
     reason =
-      "No certified-witness volume was requested. The free local journal (verify_journal, verdicts V and X) is enough for now.";
+      "No independent timestamp volume was requested. The free local journal (verify_journal, verdicts V and X) is enough for now.";
   } else {
     const bundles = catalog.plans
       .filter((p) => p.kind === "bundle")
@@ -386,11 +386,11 @@ export function recommendPlan(input: RecommendInput): Recommendation {
     if (fitting) {
       plan = fitting;
       reason =
-        `Certified witness was requested (or a monthly certification volume was given). Placeholder bundle ${fitting.id} is the smallest illustrative bundle whose TBD quotas cover the stated volume. Quotas and prices are placeholders, not a real offer. Certified proofs run locally via certify_note; billing is not live.`;
+        `An independent timestamp was requested (or a monthly timestamping volume was given). Placeholder bundle ${fitting.id} is the smallest illustrative bundle whose TBD quotas cover the stated volume. Quotas and prices are placeholders, not a real offer. Timestamped proofs run locally via certify_note; billing is not live.`;
     } else {
       plan = catalog.plans.find((p) => p.id === "usage") ?? plan;
       reason =
-        "Certified witness was requested. No placeholder bundle covers the stated volume, so the usage-based plan (price per certification, TBD) is suggested. This is not a real offer. Certified proofs run locally via certify_note; billing is not live.";
+        "An independent timestamp was requested. No placeholder bundle covers the stated volume, so the usage-based plan (price per timestamp, TBD) is suggested. This is not a real offer. Timestamped proofs run locally via certify_note; billing is not live.";
     }
   }
 

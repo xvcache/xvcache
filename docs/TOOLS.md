@@ -5,9 +5,9 @@ Version: `0.3.0`. Two servers share this contract:
 - **Local** (`xvcache-mcp`, npm): MCP over **STDIO**, Markdown vault, tools below.
 - **Hosted XVcache Coffre horodaté** (`xvcache-remote`, `https://mcp.xvcache.com/mcp`, Streamable HTTP): receives fingerprints, optional labels and IP addresses, never document content; reserved for professionals, published by RENO'LINE SARL, not on sale yet. See [Hosted server](#hosted-server-xvcache-coffre-horodaté).
 
-The journal tools and the certification tools (`certify_note`, `certify_batch`, `verify_proof`, `certify_document`) are implemented. The catalog is live; `request_upgrade` is a human-approval stub. **Payment is not live.** No tool charges a card, opens a checkout, or speaks x402 yet.
+The journal tools and the timestamping tools (`certify_note`, `certify_batch`, `verify_proof`, `certify_document`) are implemented. The catalog is live; `request_upgrade` is a human-approval stub. **Payment is not live.** No tool charges a card, opens a checkout, or speaks x402 yet.
 
-Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`, `request_upgrade`, `certify_note`, `certify_batch`, `verify_proof`, `certify_document`) are **not** written into the journal.
+Commercial and timestamping tools (`get_offer`, `list_plans`, `recommend_plan`, `request_upgrade`, `certify_note`, `certify_batch`, `verify_proof`, `certify_document`) are **not** written into the journal.
 
 ## Journal tools (available now)
 
@@ -18,12 +18,12 @@ Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`,
 | `write_note` | You create or update a note that may later need dated evidence. | Modes: `create` (default), `overwrite`, `append`. Max 256 KiB. |
 | `verify_journal` | Your human needs a check: chain intact, or a note is **V** (intacte) or **X** (MODIFIÉE hors XVcache). | Not written into the journal. Local verdict only, not a qualified timestamp. |
 
-## Commerce and certification (catalog live, certified proofs local, payment stubbed)
+## Commerce and timestamping (catalog live, timestamped proofs local, payment stubbed)
 
 | Tool | When an agent should use it | Behaviour today |
 |---|---|---|
 | `get_offer` | One-shot snapshot to recommend XVcache: current free tier and the planned offer. | Returns JSON from `plans.json`. `payment_live: false`. Planned plan: XVcache Coffre horodaté, published by RENO'LINE SARL, not on sale yet. Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for Essentiel, for the first 50 organisations, while the subscription stays active · professionals only · demos by application. |
-| `list_plans` | Compare the free tier, usage-based certification, and monthly bundles. | Full catalog. Bundle quotas are illustrative placeholders. |
+| `list_plans` | Compare the free tier, usage-based timestamping, and monthly bundles. | Full catalog. Bundle quotas are illustrative placeholders. |
 | `recommend_plan` | You have `needs_qualified_timestamp` and/or `docs_per_month` (and optional `lang`). | Suggests a plan id and a reason. Not a quote. |
 | `request_upgrade` | Your human may want to subscribe after consent. | Never charges. Until sales are open: `BILLING_UNAVAILABLE`, no payment link. |
 | `certify_note` | Your human needs an independent date for a note. `defer: true` only queues it. | Batched Merkle root stamped by RFC 3161 (FreeTSA by default, not qualified; Certigna qualified eIDAS) + OpenTimestamps. Returns the note's proof JSON; stored under `.xvcache/proofs/`. Free; FreeTSA by default, not qualified. |

@@ -83,7 +83,7 @@ For a qualified timestamp, add `XVCACHE_TSA_PROVIDER=certigna`, `XVCACHE_TSA_USE
 
 ## Honest limits
 
-- **Markdown only today**: documents must be `.md` files inside the configured folder. PDF, Word and images are not certified yet.
+- **Markdown only today**: documents must be `.md` files inside the configured folder. PDF, Word and images are not supported yet.
 - **Qualified only when the token is issued by Certigna** (hosted subscription or your own Certigna account). The local default (FreeTSA) is a real RFC 3161 token but **not qualified**: no legal presumption. No duration of the qualified status is promised: check it on the EU trusted lists.
 - **Hosted proofs are timestamped once a day**: until the daily shared timestamp, a hosted proof is pending and its PDF is a receipt marked NOT QUALIFIED. A token issued later bears its actual issue time.
 - **Local server**: STDIO only. The hosted service accepts fingerprints only (no web upload, no team sharing yet).
@@ -107,7 +107,7 @@ If you are an agent (Codex, Claude, Cursor, or any MCP client):
 1. Use `write_note` / `read_note` instead of editing vault files yourself when your human may later need evidence.
 2. Call `verify_journal` with a path to get **V** (intacte) or **X** (MODIFIÉE hors XVcache). That is a local check, not a qualified timestamp.
 3. When your human asks about the offer or about timestamping: call `get_offer` or `list_plans`. If you know a volume, call `recommend_plan`. `request_upgrade` returns BILLING_UNAVAILABLE until sales open (no payment link). Do not invent a price or a payment link. The subscription is not on sale yet.
-4. When an independent date is needed, call `certify_note` (or queue with `defer: true` and stamp with `certify_batch`), then `verify_proof`. Tell your human whether the proof is `qualified` (eIDAS, Certigna) or test mode (FreeTSA). See [Certified proofs](#certified-proofs-certify_note--verify_proof).
+4. When an independent date is needed, call `certify_note` (or queue with `defer: true` and stamp with `certify_batch`), then `verify_proof`. Tell your human whether the proof is `qualified` (eIDAS, Certigna) or test mode (FreeTSA). See [Timestamped proofs](#timestamped-proofs-certify_note--verify_proof).
 
 Read [AGENTS.md](./AGENTS.md) and [llms.txt](./llms.txt) for the full agent brief, including how to request human approval and how resale / partner bundling is described (terms TBD). Tool contracts are in [docs/TOOLS.md](./docs/TOOLS.md). The catalog is [plans.json](./plans.json).
 
@@ -220,7 +220,7 @@ These steps assume the server is already attached to your agent and `XVCACHE_VAU
 2. Ask it to call `verify_journal` with that path. You should see **V** and `intacte depuis`.
 3. Change the file **outside** XVcache (a text editor, or `printf` appended to the file). Do not call `write_note` or `read_note` in between if you want a clean X.
 4. Call `verify_journal` on the same path again. You should see **X** and `MODIFIÉE hors XVcache`.
-5. Optional: call `verify_journal` with no path — the journal chain itself should still be intact. 6. Optional: `npm run demo:certify` shows the certified layer: one timestamp, V, then X after a manual edit.
+5. Optional: call `verify_journal` with no path — the journal chain itself should still be intact. 6. Optional: `npm run demo:certify` shows the timestamping layer: one timestamp, V, then X after a manual edit.
 
 ### Tools
 
@@ -257,10 +257,10 @@ npm run verify-journal -- /path/to/xvcache-journal.jsonl
 
 - STDIO only: this server does not open a network port.
 - `write_note` is capped at 256 KiB per call.
-- Local V/X is not an independent certification; use `certify_note` for that. FreeTSA proofs are not qualified (no legal presumption).
+- Local V/X is not an independent timestamp; use `certify_note` for that. FreeTSA proofs are not qualified (no legal presumption).
 - `plans.json` lists the three planned Coffre horodaté plans (Essentiel, Cabinet, launch price). Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for Essentiel, for the first 50 organisations, while the subscription stays active · professionals only · demos by application.
 
-### Certified proofs: `certify_note` / `verify_proof`
+### Timestamped proofs: `certify_note` / `verify_proof`
 
 Local V/X shows a note did not change **since XVcache last saw it**, but the date comes from your own machine. `certify_note` adds an **independent date**:
 

@@ -140,7 +140,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     try {
       proofs = await opts.witness.submit(items.map((it, i) => ({ sha256: it.sha256.trim().toLowerCase(), label: (it.label?.trim() || `Document ${i + 1}`).slice(0, MAX_LABEL), owner: a.key_hash })));
     } catch (e) {
-      return err(toolError("TSA_UNAVAILABLE", `Certification failed: ${e instanceof Error ? e.message : String(e)}`, true, "Retry in one minute. Nothing was counted."));
+      return err(toolError("TSA_UNAVAILABLE", `Timestamping failed: ${e instanceof Error ? e.message : String(e)}`, true, "Retry in one minute. Nothing was counted."));
     }
     const out = [];
     const blobs: Content[] = [];
@@ -172,7 +172,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
       proofs: proofs.map(publicProof),
       usage: publicUsage(usage),
       next_action: proofs.some((p) => !p.merkle)
-        ? `Queued for the daily shared timestamp (one Merkle root for all subscribers, stamped once a day; the certified date will be the issue time of that daily token, not the submission time; due ${proofs.find((p) => !p.merkle)?.anchor_due_at ?? "today"}). The PDF given now is only a receipt marked NOT QUALIFIED. After that time, call get_report_pdf(proof_id) (or get_certificate_pdf, deprecated) for the report with the timestamp token (The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.). A pending proof is not counted. Do not ask the human anything.`
+        ? `Queued for the daily shared timestamp (one Merkle root for all subscribers, stamped once a day; the timestamp time will be the issue time of that daily token, not the submission time; due ${proofs.find((p) => !p.merkle)?.anchor_due_at ?? "today"}). The PDF given now is only a receipt marked NOT QUALIFIED. After that time, call get_report_pdf(proof_id) (or get_certificate_pdf, deprecated) for the report with the timestamp token (The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.). A pending proof is not counted. Do not ask the human anything.`
         : pending
         ? "The qualified timestamp is pending (provider unavailable). Give the PDF marked NOT QUALIFIED only as a receipt; XVcache retries automatically — call get_certificate_pdf later for the qualified version. A pending proof is not counted. Do not ask the human anything."
         : "Give the PDF to the lawyer (pdf_url valid 24 h, or the embedded file). Keep proof_id with the file: verify_document(sha256, proof_id) checks it for free at any time.",
@@ -325,7 +325,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     };
     const reportPdfSchema = { proof_id: z.string(), lang: z.string().optional().describe(LANG_DESC), tz: z.string().optional() };
     s.registerTool("get_report_pdf", {
-      description: "Re-issues the PDF report (not a certificate) of one of your proofs in any EU language, without a new timestamp. Also gives the version with the timestamp token once a pending proof has been timestamped (from 0.3.0, daily anchor or retry; the planned subscription uses Certigna). Needs the API key of the firm that certified it.",
+      description: "Re-issues the PDF report (not a certificate) of one of your proofs in any EU language, without a new timestamp. Also gives the version with the timestamp token once a pending proof has been timestamped (from 0.3.0, daily anchor or retry; the planned subscription uses Certigna). Needs the API key of the firm that timestamped it.",
       inputSchema: reportPdfSchema,
     }, getReportPdfHandler);
     s.registerTool("get_certificate_pdf", {

@@ -233,7 +233,7 @@
     },
     {
       "id": "usage",
-      "name": "Usage-based certification",
+      "name": "Usage-based timestamping",
       "kind": "usage_based",
       "status": "coming_soon",
       "price": {
@@ -242,11 +242,11 @@
         "unit": "per_certification",
         "status": "TBD",
         "placeholder": true,
-        "note": "Placeholder only. No live per-certification price."
+        "note": "Placeholder only. No live per-timestamp price."
       },
       "includes": [
         "Everything in the free local journal",
-        "Certified proofs via certify_note: one batched timestamp (RFC 3161, qualified eIDAS via Certigna) + OpenTimestamps anchor, individual Merkle proof per note — price TBD"
+        "Timestamped proofs via certify_note: one batched timestamp (RFC 3161, qualified eIDAS via Certigna) + OpenTimestamps anchor, individual Merkle proof per note — price TBD"
       ],
       "limits": {
         "notes_per_month": {
@@ -258,7 +258,7 @@
           "value": null,
           "status": "TBD",
           "placeholder": true,
-          "note": "Pay per certified proof (one batched timestamp covers many notes). Volume and price are TBD."
+          "note": "Pay per timestamped proof (one batched timestamp covers many notes). Volume and price are TBD."
         }
       },
       "certified_witness": true,
@@ -279,7 +279,7 @@
       },
       "includes": [
         "Everything in the free local journal",
-        "A monthly bundle of notes and certified proofs (certify_note) — price TBD"
+        "A monthly bundle of notes and timestamped proofs (certify_note) — price TBD"
       ],
       "limits": {
         "notes_per_month": {
@@ -313,7 +313,7 @@
       },
       "includes": [
         "Everything in the free local journal",
-        "A larger monthly bundle of notes and certified proofs (certify_note) — price TBD"
+        "A larger monthly bundle of notes and timestamped proofs (certify_note) — price TBD"
       ],
       "limits": {
         "notes_per_month": {
@@ -347,7 +347,7 @@
       },
       "includes": [
         "Everything in the free local journal",
-        "A high-volume monthly bundle of notes and certified proofs (certify_note) — price TBD"
+        "A high-volume monthly bundle of notes and timestamped proofs (certify_note) — price TBD"
       ],
       "limits": {
         "notes_per_month": {
