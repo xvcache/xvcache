@@ -1,5 +1,5 @@
 XVcache
-TIJDSTEMPELRAPPORT
+Verification report
 V
 Document ongewijzigd
 Uitslag V — de vingerafdruk is sinds het tijdstempel niet veranderd.

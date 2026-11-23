@@ -1,5 +1,5 @@
 XVcache
-POROČILO O ČASOVNEM ŽIGU
+Verification report
 V
 Dokument nespremenjen
 Izid V — prstni odtis se od časovnega žiga ni spremenil.

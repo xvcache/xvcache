@@ -69,13 +69,14 @@
     "subtitle_ots_only": "Ce document a la même empreinte que celle ancrée dans la blockchain Bitcoin au plus tard le {date} (preuve OpenTimestamps). Aucun jeton d'horodatage n'est joint.",
     "verdict_ots_only": "Ce document a la même empreinte que celle ancrée dans la blockchain Bitcoin au plus tard le {date} (preuve OpenTimestamps). Aucun jeton d'horodatage n'est joint.",
     "title_ots_pending": "Preuve en attente de confirmation",
-    "subtitle_ots_pending": "Ce document a la même empreinte. La preuve OpenTimestamps n'est pas encore confirmée sur la blockchain Bitcoin. Aucun jeton d'horodatage n'est joint.",
-    "verdict_ots_pending": "Ce document a la même empreinte. La preuve OpenTimestamps n'est pas encore confirmée sur la blockchain Bitcoin. Aucun jeton d'horodatage n'est joint.",
+    "subtitle_ots_pending": "Ce document a la même empreinte que celle inscrite dans la preuve OpenTimestamps jointe. Cette preuve n'est pas encore confirmée sur la blockchain Bitcoin. Aucun jeton d'horodatage n'est joint.",
+    "verdict_ots_pending": "Ce document a la même empreinte que celle inscrite dans la preuve OpenTimestamps jointe. Cette preuve n'est pas encore confirmée sur la blockchain Bitcoin. Aucun jeton d'horodatage n'est joint.",
     "reverify_3_incomplete": "Le résultat indique si l'empreinte correspond encore, et dans quel état se trouve la preuve.",
     "warn_signature_invalid": "Attention : la signature du jeton d'horodatage n'est pas valide. Cette date n'est pas fiable. Ceci n'est PAS un horodatage qualifié eIDAS.",
     "signature_invalid_line": "Invalide",
     "warn_ots_only": "Attention : aucun jeton d'horodatage n'est joint. L'empreinte est ancrée par une preuve OpenTimestamps, ce qui n'est PAS un horodatage qualifié eIDAS.",
-    "warn_ots_pending": "Attention : la preuve OpenTimestamps n'est pas encore confirmée. Aucun jeton d'horodatage n'est joint. Ceci n'est PAS un horodatage qualifié eIDAS."
+    "warn_ots_pending": "Attention : la preuve OpenTimestamps n'est pas encore confirmée. Aucun jeton d'horodatage n'est joint. Ceci n'est PAS un horodatage qualifié eIDAS.",
+    "document_title": "Rapport de vérification"
   },
   "offer": {
     "pitch": "XVcache fournit aux organisations un élément de preuve daté qu'un document existait, inchangé, à un moment donné. Avec l'abonnement prévu XVcache Coffre horodaté, les horodatages seront des horodatages électroniques qualifiés émis par Certigna, prestataire de services de confiance qualifié : selon l'art. 41, § 2 du règlement eIDAS, leur date et l'intégrité des données sont présumées, et ils sont reconnus comme qualifiés dans tous les États membres (art. 24 bis, § 6). XVcache n'est pas lui-même prestataire qualifié. Le contenu du document reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte SHA-256 et un libellé facultatif, et traite votre adresse IP. Chaque résultat est un verdict V/X et un rapport PDF d'une page dans 24 langues de l'UE. Limites : ni constat de commissaire de justice, ni signature, ni avis juridique ; la force probante relève du juge.",

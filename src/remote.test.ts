@@ -48,7 +48,7 @@ test("remote client: lists tools, get_offer without key, paid tools without key 
   try {
     const c = await connect(srv.url);
     const names = (await c.listTools()).tools.map((t) => t.name).sort();
-    for (const n of ["get_offer", "list_plans", "present_to_client", "request_upgrade", "get_subscription", "get_usage", "certify_document", "certify_hash", "verify_document", "verify_proof", "get_report_pdf", "get_certificate_pdf"]) {
+    for (const n of ["get_offer", "list_plans", "present_to_client", "request_upgrade", "get_subscription", "get_usage", "certify_document", "certify_hash", "verify_document", "verify_proof", "get_report_pdf", "get_certificate_pdf", "get_verification_report"]) {
       assert.ok(names.includes(n), `missing tool ${n}`);
     }
     const offer = body(await c.callTool({ name: "get_offer", arguments: { lang: "de" } }));
@@ -57,7 +57,7 @@ test("remote client: lists tools, get_offer without key, paid tools without key 
     assert.doesNotMatch(JSON.stringify(offer), /sold by/);
     const plans = body(await c.callTool({ name: "list_plans", arguments: {} }));
     assert.equal("reseller" in plans, false);
-    for (const [name, args] of [["certify_document", { sha256: sha("x") }], ["certify_hash", { items: [{ sha256: sha("x") }] }], ["get_usage", {}], ["get_report_pdf", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }], ["get_certificate_pdf", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }]] as const) {
+    for (const [name, args] of [["certify_document", { sha256: sha("x") }], ["certify_hash", { items: [{ sha256: sha("x") }] }], ["get_usage", {}], ["get_report_pdf", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }], ["get_certificate_pdf", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }], ["get_verification_report", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }]] as const) {
       const r = await c.callTool({ name, arguments: args });
       assert.equal(r.isError, true, name);
       const b = body(r);
@@ -148,10 +148,20 @@ test("multi-firm over HTTP: 2 keys × 3 fingerprints → 1 token, 6 proofs, each
     const listed = (await ca.listTools()).tools;
     const reportDesc = listed.find((x) => x.name === "get_report_pdf")?.description ?? "";
     const aliasDesc = listed.find((x) => x.name === "get_certificate_pdf")?.description ?? "";
-    assert.match(reportDesc, /Re-issues the PDF report \(not a certificate\)/);
-    assert.match(aliasDesc, /Deprecated: use get_report_pdf/);
+    const verifDesc = listed.find((x) => x.name === "get_verification_report")?.description ?? "";
+    assert.ok(listed.some((x) => x.name === "get_verification_report"), "get_verification_report missing");
+    assert.match(aliasDesc, /Deprecated/);
+    assert.match(aliasDesc, /get_report_pdf/);
+    for (const [n, d] of [["get_report_pdf", reportDesc], ["get_certificate_pdf", aliasDesc], ["get_verification_report", verifDesc]] as const) {
+      assert.doesNotMatch(d, /\b(certificat|certificats|certificate|certificates)\b/i, n);
+    }
+    const reVerif = await ca.callTool({ name: "get_verification_report", arguments: { proof_id: ba.results[0].proof_id, lang: "sv" } }) as ToolOut;
+    assert.equal(body(re).ok, true);
+    assert.equal(body(reVerif).ok, true);
+    assert.equal(body(reVerif).proof_id, body(re).proof_id);
     assert.equal(body(await ca.callTool({ name: "get_certificate_pdf", arguments: { proof_id: bb.results[0].proof_id } })).code, "PROOF_NOT_FOUND");
     assert.equal(body(await ca.callTool({ name: "get_report_pdf", arguments: { proof_id: bb.results[0].proof_id } })).code, "PROOF_NOT_FOUND");
+    assert.equal(body(await ca.callTool({ name: "get_verification_report", arguments: { proof_id: bb.results[0].proof_id } })).code, "PROOF_NOT_FOUND");
     await ca.close(); await cb.close(); await pub.close();
   } finally { await srv.close(); }
 });

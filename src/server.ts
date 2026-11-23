@@ -658,7 +658,7 @@ server.registerTool(
 server.registerTool(
   "certify_document",
   {
-    description: "Use when a lawyer or a legal team needs dated evidence that a document in the local vault existed unchanged at a date. Timestamps the note if needed (one batched timestamp), then returns the verdict (V: checks passed / X: modified or invalid) and a one-page PDF report in the requested EU language (24 languages, default English; pass the conversation language, never ask). If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent). If the document changed since the timestamp, no new stamp is taken: the verdict is X « modified since <date> » and no PDF report is issued. stamp=false never stamps. Technical files (.tst, .ots, Merkle path) are attached to the PDF. Non-qualified tokens (FreeTSA, or Certigna missing) carry a NOT QUALIFIED banner. Not a bailiff report, not a qualified signature, not legal advice. Next tool: verify_document or get_report_pdf (get_certificate_pdf is a deprecated alias). Not written into the journal.",
+    description: "Use when a lawyer or a legal team needs dated evidence that a document in the local vault existed unchanged at a date. Timestamps the note if needed (one batched timestamp), then returns the verdict (V: checks passed / X: modified or invalid) and a one-page PDF report in the requested EU language (24 languages, default English; pass the conversation language, never ask). If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent). If the document changed since the timestamp, no new stamp is taken: the verdict is X « modified since <date> » and no PDF report is issued. stamp=false never stamps. Technical files (.tst, .ots, Merkle path) are attached to the PDF. Non-qualified tokens (FreeTSA, or Certigna missing) carry a NOT QUALIFIED banner. Not a bailiff report, not a qualified signature, not legal advice. Next tool: verify_document or get_report_pdf (or get_verification_report). get_certificate_pdf remains a deprecated alias. Not written into the journal.",
     inputSchema: {
       path: z.string().min(1).describe("Vault-relative note, e.g. Contrats/Devis-042.md"),
       stamp: z.boolean().optional().describe("true (default) = stamp if no proof exists. false = reuse or report only, never spend a token."),
@@ -710,7 +710,7 @@ const getReportPdfHandler = async ({ proof_id, lang, tz }: { proof_id: string; l
 server.registerTool(
   "get_report_pdf",
   {
-    description: "Use when the lawyer needs the PDF report of an existing proof in another EU language. Re-issues the PDF report (not a certificate) of proof_id (from certify_document) in lang, without a new timestamp. The proof is re-checked first: if the note changed, the verdict is X and no PDF report is issued. Not written into the journal.",
+    description: "Use when the lawyer needs the PDF verification report of an existing proof in another EU language. Re-issues the PDF verification report of proof_id (from certify_document) in lang, without a new timestamp. The proof is re-checked first: if the note changed, the verdict is X and no PDF report is issued. Prefer this tool or get_verification_report. Not written into the journal.",
     inputSchema: reportPdfSchema,
   },
   getReportPdfHandler
@@ -718,7 +718,15 @@ server.registerTool(
 server.registerTool(
   "get_certificate_pdf",
   {
-    description: "Deprecated: use get_report_pdf. Re-issues the PDF report (not a certificate). Same arguments and result as get_report_pdf. Kept for compatibility. Not written into the journal.",
+    description: "Deprecated alias of get_report_pdf (same arguments, result and access checks). Prefer get_report_pdf or get_verification_report. Re-issues the PDF verification report without a new timestamp. Kept for compatibility. Not written into the journal.",
+    inputSchema: reportPdfSchema,
+  },
+  getReportPdfHandler
+);
+server.registerTool(
+  "get_verification_report",
+  {
+    description: "Use when the lawyer needs the PDF verification report of an existing proof in another EU language. Same arguments, result and access checks as get_report_pdf. Re-issues the PDF verification report of proof_id (from certify_document) in lang, without a new timestamp. The proof is re-checked first: if the note changed, the verdict is X and no PDF report is issued. Not written into the journal.",
     inputSchema: reportPdfSchema,
   },
   getReportPdfHandler

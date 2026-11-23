@@ -138,14 +138,14 @@ test("certify_document in German, then get_certificate_pdf in Greek: same proof,
     assert.equal(de.glyph, "V", de.error);
     assert.equal(de.lang, "de");
     assert.match(de.verdict_localized ?? "", /^Unverändert/);
-    assert.ok(de.pdf?.endsWith("certificate-de.pdf"));
+    assert.ok(de.pdf?.endsWith("verification-report-de.pdf"));
     assert.ok(de.proof_id);
     const tokens = fake.requests;
 
     const el = await reissueCertificate(c, { proof_id: de.proof_id!, lang: "el" });
     assert.equal(el.ok, true, el.error);
     assert.equal(el.glyph, "V");
-    assert.ok(el.pdf?.endsWith("certificate-el.pdf") && existsSync(el.pdf));
+    assert.ok(el.pdf?.endsWith("verification-report-el.pdf") && existsSync(el.pdf));
     assert.match(el.verdict_localized ?? "", /Αναλλοίωτο/);
     assert.equal(fake.requests, tokens, "reissuing must not spend a token");
 

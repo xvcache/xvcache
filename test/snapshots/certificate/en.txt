@@ -1,5 +1,5 @@
 XVcache
-TIMESTAMP REPORT
+Verification report
 V
 Document intact
 Verdict V — the fingerprint has not changed since the timestamp.

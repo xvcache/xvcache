@@ -172,9 +172,9 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
       proofs: proofs.map(publicProof),
       usage: publicUsage(usage),
       next_action: proofs.some((p) => !p.merkle)
-        ? `Queued for the daily shared timestamp (one Merkle root for all subscribers, stamped once a day; the timestamp time will be the issue time of that daily token, not the submission time; due ${proofs.find((p) => !p.merkle)?.anchor_due_at ?? "today"}). The PDF given now is only a receipt marked NOT QUALIFIED. After that time, call get_report_pdf(proof_id) (or get_certificate_pdf, deprecated) for the report with the timestamp token (The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.). A pending proof is not counted. Do not ask the human anything.`
+        ? `Queued for the daily shared timestamp (one Merkle root for all subscribers, stamped once a day; the timestamp time will be the issue time of that daily token, not the submission time; due ${proofs.find((p) => !p.merkle)?.anchor_due_at ?? "today"}). The PDF given now is only a receipt marked NOT QUALIFIED. After that time, call get_report_pdf(proof_id) (or get_verification_report; get_certificate_pdf remains a deprecated alias) for the report with the timestamp token (The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.). A pending proof is not counted. Do not ask the human anything.`
         : pending
-        ? "The qualified timestamp is pending (provider unavailable). Give the PDF marked NOT QUALIFIED only as a receipt; XVcache retries automatically — call get_certificate_pdf later for the qualified version. A pending proof is not counted. Do not ask the human anything."
+        ? "The qualified timestamp is pending (provider unavailable). Give the PDF marked NOT QUALIFIED only as a receipt; XVcache retries automatically — call get_report_pdf or get_verification_report later for the qualified version. A pending proof is not counted. Do not ask the human anything."
         : "Give the PDF to the lawyer (pdf_url valid 24 h, or the embedded file). Keep proof_id with the file: verify_document(sha256, proof_id) checks it for free at any time.",
     };
     return { content: [{ type: "text", text: JSON.stringify(body, null, 2) }, ...blobs] };
@@ -280,7 +280,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     });
 
     s.registerTool("certify_document", {
-      description: "Use when a lawyer wants dated evidence that a document existed unchanged at a date. Send the SHA-256 (64 hex) of the file, computed on the client side, plus an optional neutral label (max 120 characters, no client names or confidential facts); the server also processes the caller's IP address. Never send the document. Returns a proof_id at once. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. In the planned Coffre horodaté subscription, from version 0.3.0 of the hosted server, fingerprints will be grouped into one daily Merkle root shared by all customers, timestamped once a day (around 21:50 UTC) by Certigna (qualified eIDAS). The timestamp time is that of the daily token, not the time of submission; until then the proof is pending and the one-page PDF report (embedded + pdf_url valid 24 h) is a receipt marked NOT QUALIFIED. After anchor_due_at, get_report_pdf (preferred) or get_certificate_pdf (deprecated alias) returns the report with the token. If Certigna does not issue a token (service unavailable or supply incident), the request stays pending (pending_qualified), with no fallback to FreeTSA. Pending proofs are not counted. Anything that is not a 64-hex fingerprint is rejected (HASH_INVALID). Needs the API key (PAYMENT_REQUIRED otherwise). Never ask the human questions.",
+      description: "Use when a lawyer wants dated evidence that a document existed unchanged at a date. Send the SHA-256 (64 hex) of the file, computed on the client side, plus an optional neutral label (max 120 characters, no client names or confidential facts); the server also processes the caller's IP address. Never send the document. Returns a proof_id at once. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified. In the planned Coffre horodaté subscription, from version 0.3.0 of the hosted server, fingerprints will be grouped into one daily Merkle root shared by all customers, timestamped once a day (around 21:50 UTC) by Certigna (qualified eIDAS). The timestamp time is that of the daily token, not the time of submission; until then the proof is pending and the one-page PDF report (embedded + pdf_url valid 24 h) is a receipt marked NOT QUALIFIED. After anchor_due_at, get_report_pdf or get_verification_report (get_certificate_pdf remains a deprecated alias) returns the report with the token. If Certigna does not issue a token (service unavailable or supply incident), the request stays pending (pending_qualified), with no fallback to FreeTSA. Pending proofs are not counted. Anything that is not a 64-hex fingerprint is rejected (HASH_INVALID). Needs the API key (PAYMENT_REQUIRED otherwise). Never ask the human questions.",
       inputSchema: {
         sha256: z.string().describe(HASH_DESC),
         label: z.string().optional().describe(LABEL_DESC),
@@ -338,11 +338,15 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     };
     const reportPdfSchema = { proof_id: z.string(), lang: z.string().optional().describe(LANG_DESC), tz: z.string().optional() };
     s.registerTool("get_report_pdf", {
-      description: "Re-issues the PDF report (not a certificate) of one of your proofs in any EU language, without a new timestamp. Also gives the version with the timestamp token once a pending proof has been timestamped (from 0.3.0, daily anchor or retry; the planned subscription uses Certigna). Needs the API key of the firm that timestamped it.",
+      description: "Re-issues the PDF verification report of one of your proofs in any EU language, without a new timestamp. Also gives the version with the timestamp token once a pending proof has been timestamped (from 0.3.0, daily anchor or retry; the planned subscription uses Certigna). Needs the API key of the firm that timestamped it. Prefer this tool or get_verification_report.",
       inputSchema: reportPdfSchema,
     }, getReportPdfHandler);
     s.registerTool("get_certificate_pdf", {
-      description: "Deprecated: use get_report_pdf. Re-issues the PDF report (not a certificate). Same arguments and result as get_report_pdf. Kept for compatibility.",
+      description: "Deprecated alias of get_report_pdf (same arguments, result and access checks). Prefer get_report_pdf or get_verification_report. Re-issues the PDF verification report without a new timestamp. Kept for compatibility.",
+      inputSchema: reportPdfSchema,
+    }, getReportPdfHandler);
+    s.registerTool("get_verification_report", {
+      description: "Re-issues the PDF verification report of one of your proofs in any EU language, without a new timestamp. Same arguments, result and access checks as get_report_pdf. Also gives the version with the timestamp token once a pending proof has been timestamped (from 0.3.0, daily anchor or retry; the planned subscription uses Certigna). Needs the API key of the firm that timestamped it.",
       inputSchema: reportPdfSchema,
     }, getReportPdfHandler);
 
@@ -371,7 +375,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
   async function servePdf(token: string, res: http.ServerResponse): Promise<void> {
     if (!/^[A-Za-z0-9_-]{20,64}$/.test(token)) { res.writeHead(404).end(); return; }
     try {
-      const meta = JSON.parse(await fs.readFile(path.join(pdfDir, `${token}.json`), "utf8")) as { expires_at: string };
+      const meta = JSON.parse(await fs.readFile(path.join(pdfDir, `${token}.json`), "utf8")) as { expires_at: string; lang?: string };
       if (Date.parse(meta.expires_at) < Date.now()) {
         await fs.rm(path.join(pdfDir, `${token}.pdf`), { force: true });
         await fs.rm(path.join(pdfDir, `${token}.json`), { force: true });
@@ -379,7 +383,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
         return;
       }
       const bytes = await fs.readFile(path.join(pdfDir, `${token}.pdf`));
-      res.writeHead(200, { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="xvcache-certificate.pdf"`, "Cache-Control": "private, no-store" }).end(bytes);
+      res.writeHead(200, { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${meta.lang === "fr" ? "rapport-de-verification.pdf" : `verification-report-${meta.lang ?? "en"}.pdf`}"`, "Cache-Control": "private, no-store" }).end(bytes);
     } catch {
       res.writeHead(404).end();
     }

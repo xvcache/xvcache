@@ -11,6 +11,7 @@ export type Lang = (typeof EU_LANGS)[number];
 
 /** V1: these verdict strings exist only in fr.json and en.json; other locales fall back to English. */
 export const FR_EN_ONLY_CERT_KEYS = [
+  "document_title",
   "title_signature_unverified", "subtitle_signature_unverified", "verdict_signature_unverified",
   "title_signature_invalid", "subtitle_signature_invalid", "verdict_signature_invalid",
   "title_ots_only", "subtitle_ots_only", "verdict_ots_only",

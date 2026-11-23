@@ -299,7 +299,7 @@ export async function writeCertificatePack(opts: {
   attachments.push({ name: "chemin-de-preuve.json", path: merklePath, description: "Lien entre ce fichier et le jeton" });
 
   const lang = opts.lang ?? "fr";
-  const pdfPath = path.join(dir, lang === "fr" ? "certificat.pdf" : `certificate-${lang}.pdf`);
+  const pdfPath = path.join(dir, lang === "fr" ? "rapport-de-verification.pdf" : `verification-report-${lang}.pdf`);
   const bytes = await buildCertificatePdf({
     proof,
     qualification: opts.qualification,
@@ -717,7 +717,6 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   // signature was verified. No default OID, no "qualified" without a verified signature.
   const qualified = !!model.tsa?.qualified && !!tokenPolicy && sigVerified && !model.pending_qualified && model.verdict !== "pending";
   const isFreeTsa = model.tsa?.provider === "freetsa";
-  const verification = model.kind === "verification";
   const accent = qualified && model.verdict === "V" ? GREEN : RULE;
 
   // ---- footer (legal notice) is laid out first: content must stay above it ----
@@ -742,7 +741,7 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   // ---- header ----
   page.drawRectangle({ x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: qualified ? GREEN : rgb(0.35, 0.34, 0.32) });
   c.draw("XVcache", MARGIN_X, c.y - 16, 13, fonts.serifBold);
-  const rightTitle = verification ? L.header_verification : L.header;
+  const rightTitle = L.document_title;
   const rw = fonts.sans.widthOfTextAtSize(rightTitle, 7.5);
   c.draw(rightTitle, PAGE_W - MARGIN_X - rw, c.y - 14, 7.5, fonts.sans, MUTED);
   c.y -= 26;
@@ -852,19 +851,9 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
     fy -= legalSize + legalGap;
   }
 
-  doc.setTitle(`XVcache — ${title}`);
+  doc.setTitle(L.document_title);
   doc.setAuthor("XVcache");
-  doc.setSubject(
-    qualified ? "Qualified eIDAS electronic timestamp certificate"
-    : kind === "intact" ? "Timestamp certificate (not qualified)"
-    : kind === "signature_unverified" ? "Timestamp report — signature not verified"
-    : kind === "signature_invalid" ? "Timestamp report — invalid signature"
-    : kind === "ots_only" ? "Timestamp report — OpenTimestamps proof, no timestamp token"
-    : kind === "ots_pending" ? "Timestamp report — proof awaiting confirmation"
-    : kind === "pending" ? "Timestamp report — qualified timestamp pending"
-    : kind === "modifie" ? "Timestamp report — modified"
-    : "Timestamp report",
-  );
+  doc.setSubject(L.document_title);
   doc.setCreator("XVcache");
   doc.setProducer("XVcache");
   doc.setLanguage(lang);

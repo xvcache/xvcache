@@ -1,5 +1,5 @@
 XVcache
-IZVJEŠTAJ O VREMENSKOM ŽIGU
+Verification report
 V
 Dokument nepromijenjen
 Rezultat V — otisak se nije promijenio od vremenskog žiga.

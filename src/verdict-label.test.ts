@@ -5,19 +5,32 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { promises as fs } from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
+import { PDFDocument } from "pdf-lib";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { EU_LANGS, loadLocale, fill, formatLocalDateTime, FR_EN_ONLY_CERT_KEYS } from "./i18n.js";
 import {
   humanVerdict,
   localizedVerdict,
   renderCertificate,
   displayTone,
+  handleDocument,
   type CertificateModel,
 } from "./certificate.js";
 import type { VerifyReport } from "./certify.js";
+import { Certifier, certifyConfigFromEnv } from "./certify.js";
 import type { OtsStatus } from "./ots.js";
+import { startFakeTsa } from "./test-tsa.js";
+import { resolveTsaProvider, type TsaProvider } from "./tsa.js";
+import { HostedWitness } from "./witness.js";
+import { SubscriptionStore } from "./subscriptions.js";
+import { startRemoteServer } from "./remote.js";
 
 const WHEN = "2026-11-22T19:08:39.000Z";
 const OTS_WHEN = "2026-11-22T19:11:00.000Z";
@@ -32,7 +45,7 @@ const FR = {
   ots_only_title: "Empreinte conforme — sans jeton d'horodatage",
   ots_only_sentence: "Ce document a la même empreinte que celle ancrée dans la blockchain Bitcoin au plus tard le {date} (preuve OpenTimestamps). Aucun jeton d'horodatage n'est joint.",
   ots_pending_title: "Preuve en attente de confirmation",
-  ots_pending_sentence: "Ce document a la même empreinte. La preuve OpenTimestamps n'est pas encore confirmée sur la blockchain Bitcoin. Aucun jeton d'horodatage n'est joint.",
+  ots_pending_sentence: "Ce document a la même empreinte que celle inscrite dans la preuve OpenTimestamps jointe. Cette preuve n'est pas encore confirmée sur la blockchain Bitcoin. Aucun jeton d'horodatage n'est joint.",
 };
 const EN = {
   intact_title: "Document intact",
@@ -43,7 +56,7 @@ const EN = {
   ots_only_title: "Fingerprint matches — no timestamp token",
   ots_only_sentence: "This document has the same fingerprint as the one anchored in the Bitcoin blockchain no later than {date} (OpenTimestamps proof). No timestamp token is attached.",
   ots_pending_title: "Proof awaiting confirmation",
-  ots_pending_sentence: "This document has the same fingerprint. The OpenTimestamps proof is not yet confirmed on the Bitcoin blockchain. No timestamp token is attached.",
+  ots_pending_sentence: "This document has the same fingerprint as the one recorded in the attached OpenTimestamps proof. This proof is not yet confirmed on the Bitcoin blockchain. No timestamp token is attached.",
 };
 
 
@@ -103,6 +116,28 @@ function dateFr(iso: string): string {
 function dateEn(iso: string): string {
   const w = formatLocalDateTime(iso, "en", "Europe/Paris");
   return `${w.local} (${w.tz}) — ${w.utc} UTC`;
+}
+
+const DOC_TITLE_FR = "Rapport de vérification";
+const DOC_TITLE_EN = "Verification report";
+const PUBLIC_CERT_WORD = /\b(certificat|certificats|certificate|certificates)\b/i;
+
+async function pdfMeta(bytes: Uint8Array): Promise<{ title: string; subject: string }> {
+  const doc = await PDFDocument.load(bytes);
+  return { title: doc.getTitle() ?? "", subject: doc.getSubject() ?? "" };
+}
+
+function fiveStateModels(lang: "fr" | "en"): { name: string; model: CertificateModel }[] {
+  const tsaOk = { provider: "certigna", label: "Certigna", qualified: true, policy: "1.2.250.1.177.2.9.1", serial: "ab", signature: "verified" as const };
+  const tsaUnavail = { provider: "certigna", label: "Certigna", qualified: false, policy: "1.2.250.1.177.2.9.1", serial: "ab", signature: "unavailable" as const };
+  const tsaFailed = { provider: "certigna", label: "Certigna", qualified: false, policy: "1.2.250.1.177.2.9.1", serial: "ab", signature: "failed" as const };
+  return [
+    { name: "intact", model: model({ lang, tsa: tsaOk }) },
+    { name: "signature_unverified", model: model({ lang, tsa: tsaUnavail }) },
+    { name: "signature_invalid", model: model({ lang, verdict: "X", tsa: tsaFailed }) },
+    { name: "ots_only", model: model({ lang, gen_time: null, tsa: null, ots_status: "confirmed", ots_block_time: OTS_WHEN }) },
+    { name: "ots_pending", model: model({ lang, tsa: null, ots_status: "pending" }) },
+  ];
 }
 
 const otsConfirmed: OtsStatus = {
@@ -306,5 +341,151 @@ test("V1 locales: new verdict strings live in FR and EN only; 22 others fall bac
     for (const k of FR_EN_ONLY_CERT_KEYS) {
       assert.equal(raw.cert[k], undefined, `${lang}.json must omit ${k} so loadLocale falls back to EN`);
     }
+  }
+});
+
+
+test("all 5 states: PDF header, title and subject are Rapport de vérification / Verification report — no certificate word in metadata", async () => {
+  assert.equal(loadLocale("fr").cert.document_title, DOC_TITLE_FR);
+  assert.equal(loadLocale("en").cert.document_title, DOC_TITLE_EN);
+  for (const lang of ["fr", "en"] as const) {
+    const expected = lang === "fr" ? DOC_TITLE_FR : DOC_TITLE_EN;
+    for (const { name, model: m } of fiveStateModels(lang)) {
+      const r = await renderCertificate(m);
+      const joined = flat(r.lines);
+      assert.ok(joined.includes(expected), `${lang} ${name}: visible title missing in: ${joined.slice(0, 200)}`);
+      const meta = await pdfMeta(r.bytes);
+      assert.equal(meta.title, expected, `${lang} ${name} PDF title`);
+      assert.equal(meta.subject, expected, `${lang} ${name} PDF subject`);
+      assert.doesNotMatch(meta.title, PUBLIC_CERT_WORD, `${lang} ${name} title`);
+      assert.doesNotMatch(meta.subject, PUBLIC_CERT_WORD, `${lang} ${name} subject`);
+    }
+  }
+});
+
+test("PDF filename is rapport-de-verification.pdf (FR) or verification-report-{lang}.pdf", async () => {
+  const fake = await startFakeTsa();
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-a6-pdf-name-"));
+  try {
+    const vault = path.join(base, "vault");
+    await fs.mkdir(vault);
+    await fs.writeFile(path.join(vault, "Acte.md"), "# Acte\n");
+    const tsa = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "custom", XVCACHE_TSA_URL: fake.url, XVCACHE_TSA_CA_FILE: fake.caFile }) as TsaProvider;
+    const c = new Certifier(certifyConfigFromEnv({ vaultRoot: await fs.realpath(vault), journalPath: path.join(base, "j.jsonl"), tsa }, { XVCACHE_OTS: "off" }));
+    const fr = await handleDocument(c, { path: "Acte.md", stamp: true, lang: "fr" });
+    assert.equal(fr.glyph, "V", fr.error);
+    assert.ok(fr.pdf?.endsWith("rapport-de-verification.pdf"), `FR pdf: ${fr.pdf}`);
+    const en = await handleDocument(c, { path: "Acte.md", stamp: false, lang: "en" });
+    assert.ok(en.pdf?.endsWith("verification-report-en.pdf"), `EN pdf: ${en.pdf}`);
+    const de = await handleDocument(c, { path: "Acte.md", stamp: false, lang: "de" });
+    assert.ok(de.pdf?.endsWith("verification-report-de.pdf"), `DE pdf: ${de.pdf}`);
+  } finally {
+    await fake.close();
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
+const CERT_IN_PUBLIC_DESC = /\b(certificat|certificats|certificate|certificates)\b/i;
+
+test("hosted: get_verification_report is an alias of get_report_pdf; get_certificate_pdf description has no certificate word", async () => {
+  const fake = await startFakeTsa();
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-a6-alias-"));
+  const store = new SubscriptionStore(path.join(tmp, "subscriptions.json"));
+  const witness = new HostedWitness({
+    dataDir: tmp,
+    tsa: { id: "certigna", label: "Certigna (test)", url: fake.url, qualified: true, qualifiedBasis: "test", caFile: fake.caFile },
+    ots: { enabled: false, calendars: [] },
+    batchWindowMs: 200,
+    fetchImpl: undefined,
+    onAlert: () => {},
+  });
+  const srv = await startRemoteServer({ store, witness, dataDir: tmp, port: 0 });
+  try {
+    const listed = async (apiKey?: string) => {
+      const c = new Client({ name: "a6-alias", version: "0" });
+      const headers: Record<string, string> = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+      await c.connect(new StreamableHTTPClientTransport(new URL(srv.url), { requestInit: { headers } }));
+      return c;
+    };
+    const anon = await listed();
+    const names = (await anon.listTools()).tools.map((t) => t.name);
+    for (const n of ["get_report_pdf", "get_certificate_pdf", "get_verification_report"]) {
+      assert.ok(names.includes(n), `missing tool ${n}`);
+    }
+    const tools = (await anon.listTools()).tools;
+    for (const n of ["get_report_pdf", "get_certificate_pdf", "get_verification_report"]) {
+      const desc = tools.find((x) => x.name === n)?.description ?? "";
+      assert.doesNotMatch(desc, CERT_IN_PUBLIC_DESC, `${n} description: ${desc}`);
+    }
+    const unauth = await anon.callTool({ name: "get_verification_report", arguments: { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" } });
+    assert.equal(unauth.isError, true);
+    const unauthBody = JSON.parse((unauth.content as { type: string; text?: string }[]).find((c) => c.type === "text")?.text ?? "{}");
+    assert.equal(unauthBody.code, "PAYMENT_REQUIRED");
+    await anon.close();
+
+    const { api_key } = await store.createApiKey({ plan_id: "coffre-horodate", quota: null, status: "active", default_lang: "fr" });
+    const c = await listed(api_key);
+    const cert = await c.callTool({ name: "certify_hash", arguments: { items: [{ sha256: "ab".repeat(32), label: "Acte" }] } });
+    const certBody = JSON.parse((cert.content as { type: string; text?: string }[]).find((x) => x.type === "text")?.text ?? "{}");
+    const proofId = certBody.results[0].proof_id as string;
+    const a = await c.callTool({ name: "get_report_pdf", arguments: { proof_id: proofId, lang: "fr" } });
+    const b = await c.callTool({ name: "get_verification_report", arguments: { proof_id: proofId, lang: "fr" } });
+    const cAlias = await c.callTool({ name: "get_certificate_pdf", arguments: { proof_id: proofId, lang: "fr" } });
+    assert.equal(a.isError, undefined);
+    assert.equal(b.isError, undefined);
+    assert.equal(cAlias.isError, undefined);
+    const ba = JSON.parse((a.content as { type: string; text?: string }[]).find((x) => x.type === "text")?.text ?? "{}");
+    const bb = JSON.parse((b.content as { type: string; text?: string }[]).find((x) => x.type === "text")?.text ?? "{}");
+    assert.equal(ba.ok, true);
+    assert.equal(bb.ok, true);
+    assert.equal(bb.proof_id, ba.proof_id);
+    await c.close();
+  } finally {
+    await srv.close();
+    await fake.close();
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("local: get_verification_report is listed and shares the same access as get_report_pdf", async () => {
+  const vault = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "test-vault");
+  const fake = await startFakeTsa();
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-a6-local-"));
+  const logFile = path.join(dataDir, "journal.jsonl");
+  const transport = new StdioClientTransport({
+    command: "node",
+    args: ["dist/server.js"],
+    env: {
+      ...process.env,
+      XVCACHE_VAULT: vault,
+      XVCACHE_LOG: logFile,
+      XVCACHE_DATA: dataDir,
+      XVCACHE_TSA_PROVIDER: "custom",
+      XVCACHE_TSA_URL: fake.url,
+      XVCACHE_TSA_CA_FILE: fake.caFile,
+      XVCACHE_OTS: "off",
+    } as Record<string, string>,
+    cwd: path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
+  });
+  const c = new Client({ name: "a6-local", version: "0.3.0" });
+  try {
+    await c.connect(transport);
+    const tools = (await c.listTools()).tools;
+    const names = tools.map((t) => t.name);
+    for (const n of ["get_report_pdf", "get_certificate_pdf", "get_verification_report"]) {
+      assert.ok(names.includes(n), `local missing ${n}: ${names.join(", ")}`);
+    }
+    for (const n of ["get_report_pdf", "get_certificate_pdf", "get_verification_report"]) {
+      const desc = tools.find((x) => x.name === n)?.description ?? "";
+      assert.doesNotMatch(desc, CERT_IN_PUBLIC_DESC, `local ${n}: ${desc}`);
+    }
+    const missing = await c.callTool({ name: "get_verification_report", arguments: { proof_id: "nope.0" } });
+    const missingReport = await c.callTool({ name: "get_report_pdf", arguments: { proof_id: "nope.0" } });
+    assert.equal(missing.isError, true);
+    assert.equal(missingReport.isError, true);
+  } finally {
+    await c.close().catch(() => {});
+    await fake.close();
+    await fs.rm(dataDir, { recursive: true, force: true });
   }
 });

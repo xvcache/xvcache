@@ -228,7 +228,7 @@ See [docs/TOOLS.md](./docs/TOOLS.md) for the full contract.
 
 Available now: `read_note`, `search_notes`, `write_note`, `verify_journal`.
 
-Also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human consent required; until sales open, returns BILLING_UNAVAILABLE and no payment link), `certify_note`, `certify_batch`, `verify_proof`, `certify_document` (batched RFC 3161 + OpenTimestamps proofs, plus a one-page PDF report; local tools are free; FreeTSA by default, not qualified), `get_report_pdf` (re-issues the PDF report; `get_certificate_pdf` is a deprecated alias kept for compatibility).
+Also: `get_offer`, `list_plans`, `recommend_plan`, `request_upgrade` (human consent required; until sales open, returns BILLING_UNAVAILABLE and no payment link), `certify_note`, `certify_batch`, `verify_proof`, `certify_document` (batched RFC 3161 + OpenTimestamps proofs, plus a one-page PDF report; local tools are free; FreeTSA by default, not qualified), `get_report_pdf` (re-issues the PDF verification report; `get_verification_report` is an alias; `get_certificate_pdf` remains a deprecated alias kept for compatibility).
 
 ### Journal format
 

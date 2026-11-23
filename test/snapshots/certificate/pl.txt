@@ -1,5 +1,5 @@
 XVcache
-RAPORT ZE STEMPLEM CZASOWYM
+Verification report
 V
 Dokument nienaruszony
 Wynik V — skrót nie zmienił się od oznaczenia czasem.

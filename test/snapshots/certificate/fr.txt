@@ -1,5 +1,5 @@
 XVcache
-RAPPORT D'HORODATAGE
+Rapport de vérification
 V
 Document intact
 Verdict V — l'empreinte n'a pas changé depuis l'horodatage.

@@ -1,5 +1,5 @@
 XVcache
-INFORME DE SELLO DE TIEMPO
+Verification report
 V
 Documento intacto
 Veredicto V — la huella no ha cambiado desde el sellado de tiempo.

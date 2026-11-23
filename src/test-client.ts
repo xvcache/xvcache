@@ -190,7 +190,7 @@ try {
   const names = tools.tools.map((t) => t.name);
   const required = [
     "write_note", "read_note", "search_notes", "verify_journal",
-    "get_offer", "list_plans", "recommend_plan", "request_upgrade", "certify_note", "certify_batch", "verify_proof", "certify_document",
+    "get_offer", "list_plans", "recommend_plan", "request_upgrade", "certify_note", "certify_batch", "verify_proof", "certify_document", "get_report_pdf", "get_certificate_pdf", "get_verification_report",
   ];
   const missing = required.filter((n) => !names.includes(n));
   if (missing.length) {

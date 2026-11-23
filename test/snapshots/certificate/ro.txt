@@ -1,5 +1,5 @@
 XVcache
-RAPORT DE MARCAJ TEMPORAL
+Verification report
 V
 Document intact
 Verdict V — amprenta nu s-a schimbat de la marcarea temporală.

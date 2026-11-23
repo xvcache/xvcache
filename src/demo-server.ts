@@ -33,7 +33,7 @@ function page(result: DocumentResult | null, notice?: string): string {
     resultHtml = `<div class="card result miss"><p class="sentence">${escapeHtml(notice)}</p></div>`;
   } else if (has && (kind === "intact" || kind === "signature_unverified" || kind === "ots_only" || kind === "ots_pending" || kind === "pending")) {
     const pdfLink = result!.pdf
-      ? `<a class="btn" href="/certificat?batch=${encodeURIComponent(result!.batch_id ?? "")}&amp;path=${encodeURIComponent(result!.path ?? "")}">Télécharger le Rapport PDF</a>`
+      ? `<a class="btn" href="/rapport?batch=${encodeURIComponent(result!.batch_id ?? "")}&amp;path=${encodeURIComponent(result!.path ?? "")}">Télécharger le Rapport PDF</a>`
       : "";
     const cardClass = kind === "intact" ? "ok" : "partial";
     const badgeClass = kind === "intact" ? "v" : "amber";
@@ -221,18 +221,27 @@ export function startDemoServer(opts: DemoOptions): Promise<{ url: string; close
         send(res, 200, page(result.ok ? result : null, notice), "text/html; charset=utf-8");
         return;
       }
-      if (req.method === "GET" && url.pathname === "/certificat") {
+      if (req.method === "GET" && (url.pathname === "/rapport" || url.pathname === "/certificat")) {
         const pair = safePair(url);
         if (!pair) { send(res, 400, "Requête invalide.", "text/plain; charset=utf-8"); return; }
-        const pdf = path.join(certifier.cfg.dataDir, "certificates", ...pair.rel.split("/"), pair.batch, "certificat.pdf");
+        const dir = path.join(certifier.cfg.dataDir, "certificates", ...pair.rel.split("/"), pair.batch);
         const root = path.join(certifier.cfg.dataDir, "certificates") + path.sep;
-        if (!pdf.startsWith(root)) { send(res, 400, "Requête invalide.", "text/plain; charset=utf-8"); return; }
+        const candidates = ["rapport-de-verification.pdf", "verification-report-fr.pdf", "certificat.pdf"];
+        const pdf = candidates.map((n) => path.join(dir, n)).find((p) => p.startsWith(root));
+        if (!pdf || !pdf.startsWith(root)) { send(res, 400, "Requête invalide.", "text/plain; charset=utf-8"); return; }
         try {
-          const bytes = await fs.readFile(pdf);
-          const name = `XVcache-rapport-${path.basename(pair.rel)}.pdf`;
+          let bytes: Buffer | undefined;
+          let used = pdf;
+          for (const n of candidates) {
+            const pth = path.join(dir, n);
+            if (!pth.startsWith(root)) continue;
+            try { bytes = await fs.readFile(pth); used = pth; break; } catch { /* try next name */ }
+          }
+          if (!bytes) throw new Error("missing");
+          const name = "rapport-de-verification.pdf";
           send(res, 200, bytes, "application/pdf", { "Content-Disposition": `attachment; filename="${name}"` });
         } catch {
-          send(res, 404, "Certificat introuvable.", "text/plain; charset=utf-8");
+          send(res, 404, "Rapport introuvable.", "text/plain; charset=utf-8");
         }
         return;
       }

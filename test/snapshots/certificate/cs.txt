@@ -1,5 +1,5 @@
 XVcache
-ZPRÁVA O ČASOVÉM RAZÍTKU
+Verification report
 V
 Dokument nezměněn
 Výsledek V — otisk se od opatření časovým razítkem nezměnil.
