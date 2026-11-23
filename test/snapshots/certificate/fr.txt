@@ -11,7 +11,7 @@ DATE ET HEURE
 22 novembre 2026 à 20:08:39 (heure locale, Europe/Brussels)
 22 novembre 2026 à 19:08:39 UTC
 PRESTATAIRE
-Certigna
+Un prestataire de services de confiance qualifié inscrit sur la liste de confiance française
 Horodatage électronique qualifié eIDAS
 Référence de politique : 1.2.250.1.177.2.9.1
 NUMÉRO DE SÉRIE DU JETON
@@ -30,17 +30,22 @@ Fichiers techniques joints à ce rapport
 token.tst — RFC 3161
 merkle-path.json — Merkle
 MENTIONS LÉGALES
-Règlement (UE) n° 910/2014 (eIDAS), art. 41 : l'effet juridique d'un horodatage électronique ne peut être refusé au seul motif qu'il se présente sous une
-forme électronique ; un horodatage électronique qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure qu'il indique et d'intégrité des
-données auxquelles il se rapporte. Art. 24 bis, § 6, inséré par le règlement (UE) 2024/1183 : il est reconnu comme qualifié dans tous les États membres.
-XVcache n'est pas un prestataire de services de confiance qualifié. Le jeton qualifié est émis par Certigna. Ce rapport n'est ni un constat de commissaire
-de justice, ni une signature électronique qualifiée, ni un service de confiance qualifié, ni un avis juridique. C'est un élément de preuve qu'une empreinte
-existait à la date de l'horodatage ; il n'établit ni l'auteur ni le contenu. Le contenu du document reste sur votre ordinateur ; le serveur hébergé reçoit
-l'empreinte, le libellé facultatif et l'adresse IP. Sa force probante concrète est appréciée par le juge selon la procédure nationale.
+Ce rapport de vérification n'est pas un certificat : il ne garantit ni le contenu, ni l'auteur, ni la validité du document, seulement la correspondance de son
+empreinte. Règlement (UE) n° 910/2014 (eIDAS), art. 41 : l'effet juridique d'un horodatage électronique ne peut être refusé au seul motif qu'il se
+présente sous une forme électronique ; un horodatage électronique qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure qu'il
+indique et d'intégrité des données auxquelles il se rapporte. Art. 24 bis, § 6, inséré par le règlement (UE) 2024/1183 : il est reconnu comme qualifié dans
+tous les États membres. XVcache n'est pas un prestataire de services de confiance qualifié. L'horodatage qualifié est émis par un prestataire de services
+de confiance qualifié inscrit sur la liste de confiance française. Le nom du prestataire est disponible sur demande à contact@xvcache.com. Ce rapport
+n'est ni un constat de commissaire de justice, ni une signature électronique qualifiée, ni un service de confiance qualifié, ni un avis juridique. C'est un
+élément de preuve qu'une empreinte existait à la date de l'horodatage ; il n'établit ni l'auteur ni le contenu. Le contenu du document reste sur votre
+ordinateur ; le serveur hébergé reçoit l'empreinte, le libellé facultatif et l'adresse IP. Sa force probante concrète est appréciée par le juge selon la
+procédure nationale.
+This verification report is not a certificate: it does not vouch for the content, authorship or validity of the document, only that its fingerprint matches.
 Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
 electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound. Art.
 24a(6), inserted by Regulation (EU) 2024/1183: it is recognised as qualified in all Member States. XVcache is not a qualified trust service provider. The
-qualified token is issued by Certigna. This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust
-service and not legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content. The
-document content stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address. Its concrete evidential
-weight is assessed by the court under national procedure.
+qualified timestamp is issued by a qualified trust service provider listed on the French trusted list. The provider's name is available on request at
+contact@xvcache.com. This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust service and not
+legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content. The document content
+stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address. Its concrete evidential weight is assessed by
+the court under national procedure.

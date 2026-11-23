@@ -7,7 +7,7 @@ import {
 import { leafHash, merkleRoot, merklePath, verifyMerklePath, type LeafData, type MerkleStep, type NoteLeaf } from "./merkle.js";
 import {
   requestTimestamp, parseTimeStampToken, verifyTokenSignature, certsDir, OID_SHA256, assessQualification, certignaTrust,
-  type TsaProvider, type FetchLike, type SignatureCheck, type Qualification, type QualifiedTrust,
+  type TsaProvider, type FetchLike, type SignatureCheck, type Qualification, type QualifiedTrust, isQualifiedTsaId, sameTsaId,
 } from "./tsa.js";
 import { stampDigest, serializeOts, parseOts, upgradeTimestamp, otsStatus, DEFAULT_CALENDARS, type OtsStatus } from "./ots.js";
 
@@ -57,7 +57,7 @@ export type Proof = {
     /** Policy OID read in the token (null = absent). Never a default value. */
     policy: string | null;
     token_base64: string;
-    /** How `qualified` was decided, from the token itself (OID + Certigna chain + verified signature). */
+    /** How `qualified` was decided, from the token itself (qualifying policy + trusted chain + verified signature). */
     qualification?: { status: Qualification["status"]; signature: Qualification["signature"]; signer_issuer: string | null; detail: string };
   };
   ots: null | { status: string; calendars: string[]; ots_base64: string; detail: string };
@@ -114,7 +114,7 @@ export type VerifyReport = {
   root: string | null;
   gen_time: string | null;
   provider: string | null;
-  /** true only if the token itself proves it: Certigna qualified OID + Certigna chain + signature verified. */
+  /** true only if the token itself proves it: qualifying policy + trusted chain + signature verified. */
   qualified: boolean;
   /** Kept for compatibility: same value as `qualified`. */
   qualified_confirmed: boolean;
@@ -201,7 +201,7 @@ export class Certifier {
         try {
           const res = await requestTimestamp(this.cfg.tsa, root, { fetchImpl: this.cfg.fetchImpl as unknown as FetchLike | undefined });
           tokenDer = res.token;
-          // "qualified" comes from the token (OID + Certigna chain + verified signature), not from the config.
+          // "qualified" comes from the token (qualifying policy + trusted chain + verified signature), not from the config.
           const q = await assessQualification(res.token, root, this.trustFor(this.cfg.tsa.id));
           tsa = {
             provider: this.cfg.tsa.id,
@@ -296,15 +296,15 @@ export class Certifier {
   }
 
   private caFor(provider: string): { ca?: string; untrusted?: string } {
-    if (this.cfg.tsa && this.cfg.tsa.id === provider) return { ca: this.cfg.tsa.caFile, untrusted: this.cfg.tsa.untrustedFile };
+    if (this.cfg.tsa && sameTsaId(this.cfg.tsa.id, provider)) return { ca: this.cfg.tsa.caFile, untrusted: this.cfg.tsa.untrustedFile };
     if (provider === "freetsa") return { ca: path.join(certsDir(), "freetsa-cacert.pem") };
-    if (provider === "certigna") { const t = certignaTrust(); return { ca: t.caFile, untrusted: t.untrustedFile }; }
+    if (isQualifiedTsaId(provider)) { const t = certignaTrust(); return { ca: t.caFile, untrusted: t.untrustedFile }; }
     return {};
   }
 
-  /** Chain + policy a token must match to be called qualified (bundled Certigna unless a test injects one). */
+  /** Chain + policy a token must match to be called qualified (bundled anchors unless a test injects one). */
   trustFor(provider: string): QualifiedTrust {
-    if (this.cfg.tsa && this.cfg.tsa.id === provider && this.cfg.tsa.qualifiedTrust) return this.cfg.tsa.qualifiedTrust;
+    if (this.cfg.tsa && sameTsaId(this.cfg.tsa.id, provider) && this.cfg.tsa.qualifiedTrust) return this.cfg.tsa.qualifiedTrust;
     return certignaTrust();
   }
 

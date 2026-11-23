@@ -14,9 +14,9 @@
     "title_signature_unverified": "Fingerprint matches — signature not verified",
     "subtitle_signature_unverified": "This document has the same fingerprint as the one recorded in the token dated {date}. The token's signature could not be verified, so this date is not confirmed.",
     "banner_not_qualified": "NOT QUALIFIED",
-    "warn_freetsa": "This is NOT a qualified eIDAS timestamp. The token comes from FreeTSA, which is not qualified. It carries no legal presumption.",
+    "warn_freetsa": "FreeTSA timestamp tokens are not qualified electronic timestamps under eIDAS (Regulation (EU) No 910/2014, art. 41-42).",
     "warn_other": "This is NOT a qualified eIDAS timestamp. The provider is not a qualified trust service provider.",
-    "warn_pending": "This is NOT a qualified eIDAS timestamp yet. The qualified token from Certigna is missing for now; the report will be reissued once it is obtained.",
+    "warn_pending": "This is NOT a qualified eIDAS timestamp yet. The qualified timestamp is missing for now; the report will be reissued once it is obtained.",
     "field_document": "Document",
     "field_sha256": "SHA-256 fingerprint",
     "field_date": "Date and time",
@@ -31,7 +31,7 @@
     "local_time": "local time",
     "provider_qualified": "Qualified eIDAS electronic timestamp",
     "policy": "Policy reference",
-    "freetsa_line": "FreeTSA — not qualified, no legal presumption.",
+    "freetsa_line": "FreeTSA timestamp tokens are not qualified electronic timestamps under eIDAS (Regulation (EU) No 910/2014, art. 41-42).",
     "not_qualified_line": "This is NOT a qualified eIDAS timestamp.",
     "no_token": "No timestamp token in this proof.",
     "no_provider": "No timestamp provider in this proof.",
@@ -48,7 +48,7 @@
     "attachments_none": "No technical file could be attached.",
     "legal_title": "Legal notice",
     "legal_art41": "Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound. Art. 24a(6), inserted by Regulation (EU) 2024/1183: it is recognised as qualified in all Member States.",
-    "legal_not_qtsp": "XVcache is not a qualified trust service provider. The qualified token is issued by Certigna.",
+    "legal_not_qtsp": "XVcache is not a qualified trust service provider. The qualified timestamp is issued by a qualified trust service provider listed on the French trusted list. The provider's name is available on request at contact@xvcache.com.",
     "legal_not": "This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust service and not legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content.",
     "legal_hash_only": "The document content stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address.",
     "legal_court": "Its concrete evidential weight is assessed by the court under national procedure.",
@@ -76,14 +76,16 @@
     "signature_invalid_line": "Invalid",
     "warn_ots_only": "No timestamp token is attached. The fingerprint is anchored by an OpenTimestamps proof, which is NOT a qualified eIDAS timestamp.",
     "warn_ots_pending": "The OpenTimestamps proof is not yet confirmed. No timestamp token is attached. This is NOT a qualified eIDAS timestamp.",
-    "document_title": "Verification report"
+    "document_title": "Verification report",
+    "legal_not_certificate": "This verification report is not a certificate: it does not vouch for the content, authorship or validity of the document, only that its fingerprint matches.",
+    "provider_qualified_generic": "A qualified trust service provider listed on the French trusted list"
   },
   "offer": {
-    "pitch": "XVcache gives organisations dated evidence that a document existed, unchanged, at a given time. With the planned XVcache Coffre horodaté subscription, timestamps will be qualified electronic timestamps issued by Certigna, a qualified trust service provider: under Art. 41(2) of the eIDAS Regulation their date and the integrity of the data are presumed, and they are recognised as qualified in all Member States (Art. 24a(6)). XVcache itself is not a qualified trust service provider. The document content stays on your computer; the hosted server receives the SHA-256 fingerprint and an optional label, and processes your IP address. Each result is a V/X verdict and a one-page PDF report in 24 EU languages. Limits: not a bailiff report, not a signature, not legal advice; the evidential weight is for the court.",
+    "pitch": "XVcache gives organisations dated evidence that a document existed, unchanged, at a given time. With the planned XVcache Coffre horodaté subscription, timestamps will be qualified electronic timestamps issued by a qualified trust service provider listed on the French trusted list: under Art. 41(2) of the eIDAS Regulation their date and the integrity of the data are presumed, and they are recognised as qualified in all Member States (Art. 24a(6)). XVcache itself is not a qualified trust service provider. The document content stays on your computer; the hosted server receives the SHA-256 fingerprint and an optional label, and processes your IP address. Each result is a V/X verdict and a one-page PDF report in 24 EU languages. Limits: not a bailiff report, not a signature, not legal advice; the evidential weight is for the court.",
     "price_label": "monthly subscription; professional price",
     "price_display": "Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for Essentiel, for the first 50 organisations, while the subscription stays active · professionals only · demos by application.",
     "includes": [
-      "In the planned subscription, qualified eIDAS timestamps issued by Certigna: one Merkle root shared by all subscribers, stamped once a day; proofs are not capped (pending proofs are never counted). The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
+      "In the planned subscription, qualified eIDAS timestamps issued by a qualified trust service provider listed on the French trusted list: one Merkle root shared by all subscribers, stamped once a day; proofs are not capped (pending proofs are never counted). The hosted endpoint, currently in demo, requests the qualified timestamp, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
       "Document content stays on your computer; the hosted server receives the fingerprint and an optional label, and processes the IP address",
       "V/X verdict and a one-page PDF report in 24 EU languages; verification is free for anyone"
     ],
@@ -91,10 +93,10 @@
       "Not a report by a judicial officer (bailiff) and not a qualified electronic signature.",
       "Evidence that a fingerprint existed at a date; establishes neither the author nor the content.",
       "Not legal advice; the concrete evidential weight is assessed by the court under national procedure.",
-      "XVcache is not a qualified trust service provider; the qualified token is issued by Certigna."
+      "XVcache is not a qualified trust service provider; the qualified timestamp is issued by a qualified trust service provider listed on the French trusted list."
     ],
     "present_title": "XVcache — dated evidence for your documents",
-    "present_body": "XVcache gives dated evidence that a document existed unchanged at a date. In the planned Coffre horodaté subscription, Certigna will issue qualified timestamps: eIDAS art. 41(2) presumes their date and the integrity of the data; they are recognised as qualified in all Member States (art. 24a(6)). XVcache is not a qualified provider. A shared daily token bears its issue time, not the time of submission; until then, or if Certigna is unavailable, the proof stays pending, with no fallback to FreeTSA. Document content stays on your computer; the server receives the fingerprint, an optional label, and the IP address. A V/X verdict and a one-page PDF report are issued.",
+    "present_body": "XVcache gives dated evidence that a document existed unchanged at a date. In the planned Coffre horodaté subscription, the qualified provider will issue qualified timestamps: eIDAS art. 41(2) presumes their date and the integrity of the data; they are recognised as qualified in all Member States (art. 24a(6)). XVcache is not a qualified provider. A shared daily token bears its issue time, not the time of submission; until then, or if the qualified provider is unavailable, the proof stays pending, with no fallback to FreeTSA. Document content stays on your computer; the server receives the fingerprint, an optional label, and the IP address. A V/X verdict and a one-page PDF report are issued.",
     "present_does_not": "It is not a bailiff report, not a signature and not legal advice.",
     "present_price": "{price}",
     "context_litige": "In a dispute: fix today the exact version of a document you may have to produce.",

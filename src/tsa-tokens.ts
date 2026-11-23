@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 
 /**
- * Local ledger of qualified TSA tokens consumed by the hosted server (Certigna packs are prepaid).
+ * Local ledger of qualified TSA tokens consumed by the hosted server (qualified timestamp packs are prepaid).
  * - Every token actually obtained from the provider is counted (first stamp or requalification).
  * - `stock` = tokens left on the provider account when the operator last set it (env XVCACHE_TSA_TOKEN_STOCK
  *   seeds it once, `xvcache-remote --tsa-stock <n>` resets it). remaining = stock - consumed_since_stock.

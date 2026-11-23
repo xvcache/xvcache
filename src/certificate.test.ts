@@ -208,7 +208,7 @@ test("Certigna-style certificate: qualified only from the token (Certigna OID + 
     assert.equal(rep.qualified, true);
     const pack = await writeCertificatePack({ proof, dataDir: c.cfg.dataDir, batchesDir: c.batchesDir(), otsStatus: "pending", qualification: rep.qualification });
     const raw = pdfText(await fs.readFile(pack.pdf));
-    assert.match(raw, /Certigna/);
+    assert.match(raw, /qualified trust service provider listed on the French trusted list|prestataire de services de confiance qualifié inscrit sur la liste de confiance française/);
     assert.match(raw, /1\.2\.250\.1\.177\.2\.9\.1/);
     assert.match(raw, /eIDAS/);
     assert.doesNotMatch(raw, /FreeTSA/);

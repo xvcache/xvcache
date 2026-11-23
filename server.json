@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.xvcache/xvcache",
   "title": "XVcache",
-  "description": "Timestamp MCP: V/X checks + PDF report. Planned: qualified timestamps by Certigna, not by XVcache.",
+  "description": "Timestamp MCP: V/X checks + PDF report. Planned: qualified timestamps with the qualified timestamp, not by XVcache.",
   "repository": {
     "url": "https://github.com/xvcache/xvcache",
     "source": "github"
@@ -41,7 +41,7 @@
         },
         {
           "name": "XVCACHE_TSA_PROVIDER",
-          "description": "freetsa (default, not qualified), certigna (qualified eIDAS), custom, or off",
+          "description": "freetsa (default, not qualified), qualified (qualified eIDAS), custom, or off",
           "isRequired": false,
           "isSecret": false,
           "format": "string"
@@ -55,7 +55,7 @@
         },
         {
           "name": "XVCACHE_TSA_USER",
-          "description": "TSA user account for HTTP Basic auth (Certigna Horodatage user account)",
+          "description": "TSA user account for HTTP Basic auth (qualified timestamp user account)",
           "isRequired": false,
           "isSecret": true,
           "format": "string"

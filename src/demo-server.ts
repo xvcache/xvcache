@@ -1,7 +1,7 @@
 /**
  * Local-only demo for lawyers: drop a document, get a V report + PDF
  * or a red "Modifié depuis le …". Binds to 127.0.0.1 only. Never Docker.
- * Does not stamp (and therefore does not spend a Certigna token) unless
+ * Does not stamp (and therefore does not spend a qualified timestamp token) unless
  * XVCACHE_DEMO_STAMP=1 is set.
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
@@ -38,7 +38,7 @@ function page(result: DocumentResult | null, notice?: string): string {
     const cardClass = kind === "intact" ? "ok" : "partial";
     const badgeClass = kind === "intact" ? "v" : "amber";
     const meta = kind === "intact" && result!.qualified
-      ? `<p class="meta">Prestataire : Certigna — horodatage électronique qualifié eIDAS</p>`
+      ? `<p class="meta">Prestataire : un prestataire de services de confiance qualifié inscrit sur la liste de confiance française — horodatage électronique qualifié eIDAS</p>`
       : `<p class="meta warn">Ce jeton n'est pas un horodatage qualifié eIDAS.</p>`;
     resultHtml = `<div class="card result ${cardClass}">
       <div class="badge ${badgeClass}">${kind === "ots_pending" || kind === "pending" ? "…" : "V"}</div>

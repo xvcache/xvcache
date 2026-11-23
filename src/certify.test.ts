@@ -52,6 +52,38 @@ test("provider selection: FreeTSA by default (not qualified), Certigna needs cre
   assert.equal(custom.qualified, false);
 });
 
+
+test("qualified and the legacy env alias resolve to the exact same provider; freetsa, custom and off are unchanged", () => {
+  const creds = { XVCACHE_TSA_USER: "u", XVCACHE_TSA_PASSWORD: "p" };
+  const viaQualified = resolveTsaProvider({ ...creds, XVCACHE_TSA_PROVIDER: "qualified" });
+  const viaLegacy = resolveTsaProvider({ ...creds, XVCACHE_TSA_PROVIDER: "certigna" });
+  assert.deepEqual(viaQualified, viaLegacy);
+  assert.ok(viaQualified && !("error" in viaQualified));
+  assert.equal(viaQualified.id, "certigna");
+  assert.equal(viaQualified.qualified, true);
+  assert.equal(viaQualified.url, "https://timestamp.dhimyotis.com/api/v1/");
+  assert.deepEqual(resolveTsaProvider({ ...creds }), viaQualified);
+
+  const missingQualified = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "qualified" });
+  const missingLegacy = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "certigna" });
+  assert.ok(missingQualified && "error" in missingQualified);
+  assert.ok(missingLegacy && "error" in missingLegacy);
+
+  const def = resolveTsaProvider({}) as TsaProvider;
+  const freetsa = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "freetsa" }) as TsaProvider;
+  assert.deepEqual(freetsa, def);
+  assert.equal(freetsa.id, "freetsa");
+  assert.equal(freetsa.qualified, false);
+
+  assert.equal(resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "off" }), null);
+  assert.equal(resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "none" }), null);
+
+  const custom = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: "custom", XVCACHE_TSA_URL: "http://x" }) as TsaProvider;
+  assert.equal(custom.id, "custom");
+  assert.equal(custom.qualified, false);
+  assert.equal(custom.url, "http://x");
+});
+
 test("certify 3 notes with ONE timestamp, verify V, tamper -> X; no content in proofs", async () => {
   const { c, vault, journal } = await setup("batch");
   const jw = new JournalWriter(journal);

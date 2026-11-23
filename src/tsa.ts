@@ -15,8 +15,9 @@ export const OID_SHA256 = "2.16.840.1.101.3.4.2.1";
 const OID_SIGNED_DATA = "1.2.840.113549.1.7.2";
 const OID_TST_INFO = "1.2.840.113549.1.9.16.1.4";
 
-/** OID of Certigna's qualified eIDAS timestamping policy (as carried in TSTInfo.policy). */
+/** Policy OID a qualified token must carry (as read in TSTInfo.policy). Technical identifier, not public copy. */
 export const CERTIGNA_QUALIFIED_POLICY_OID = "1.2.250.1.177.2.9.1";
+export const QUALIFIED_POLICY_OID = CERTIGNA_QUALIFIED_POLICY_OID;
 
 /**
  * What a token must prove to be called "qualified": a qualifying policy OID inside the token AND a
@@ -31,7 +32,7 @@ export type QualifiedTrust = {
   untrustedFile?: string;
 };
 
-/** The bundled Certigna chain (certs/certigna-*.pem). Not overridable from the environment. */
+/** Bundled trust anchors for the qualified TSA (PEMs under certs/). Not overridable from the environment. */
 export function certignaTrust(): QualifiedTrust {
   return {
     name: "Certigna",
@@ -55,7 +56,7 @@ export type TsaProvider = {
   password?: string;
   caFile?: string;
   untrustedFile?: string;
-  /** Chain + policy a token must match to be qualified. Default: certignaTrust(). Tests inject their own. */
+  /** Chain + policy a token must match to be qualified. Default: certignaTrust() (bundled anchors). Tests inject their own. */
   qualifiedTrust?: QualifiedTrust;
 };
 
@@ -67,17 +68,29 @@ export function certsDir(): string {
 
 export const FREETSA_URL = "https://freetsa.org/tsr";
 export const CERTIGNA_URL = "https://timestamp.dhimyotis.com/api/v1/";
+export const QUALIFIED_TSA_URL = CERTIGNA_URL;
 
 /**
  * Provider selection (env):
- * - XVCACHE_TSA_PROVIDER = freetsa | certigna | custom | off
- *   default: certigna when XVCACHE_TSA_USER is set, otherwise freetsa (non qualifié, sans présomption légale).
+ * - XVCACHE_TSA_PROVIDER = freetsa | qualified | custom | off
+ *   The historical env value is a legacy alias of `qualified` (same provider object, including stored id).
+ *   default: qualified when XVCACHE_TSA_USER is set, otherwise freetsa (not a qualified eIDAS timestamp).
  * - XVCACHE_TSA_URL, XVCACHE_TSA_USER, XVCACHE_TSA_PASSWORD (HTTP Basic), XVCACHE_TSA_CA_FILE,
  *   XVCACHE_TSA_UNTRUSTED_FILE (intermediate certs, optional), XVCACHE_TSA_QUALIFIED (custom only).
  * Secrets are read from the environment only and are never written to proofs or logs.
  */
+/** Env/proof ids that select the bundled qualified TSA. The historical id is a legacy alias of `qualified`. */
+export function isQualifiedTsaId(id: string): boolean {
+  return id === "qualified" || id === "certigna";
+}
+
+/** True when two stored/config ids refer to the same TSA (legacy alias included). */
+export function sameTsaId(a: string, b: string): boolean {
+  return a === b || (isQualifiedTsaId(a) && isQualifiedTsaId(b));
+}
+
 export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaProvider | null | TsaConfigError {
-  const wanted = (env.XVCACHE_TSA_PROVIDER || (env.XVCACHE_TSA_USER ? "certigna" : "freetsa")).toLowerCase();
+  const wanted = (env.XVCACHE_TSA_PROVIDER || (env.XVCACHE_TSA_USER ? "qualified" : "freetsa")).toLowerCase();
   const caOverride = env.XVCACHE_TSA_CA_FILE || undefined;
   const untrusted = env.XVCACHE_TSA_UNTRUSTED_FILE || undefined;
   if (wanted === "off" || wanted === "none") return null;
@@ -92,20 +105,20 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
       untrustedFile: untrusted,
     };
   }
-  if (wanted === "certigna") {
+  if (isQualifiedTsaId(wanted)) {
     if (!env.XVCACHE_TSA_USER || !env.XVCACHE_TSA_PASSWORD) {
-      return { error: "Certigna : XVCACHE_TSA_USER et XVCACHE_TSA_PASSWORD sont requis (compte utilisateur Horodatage)." };
+      return { error: "XVCACHE_TSA_PROVIDER=qualified : XVCACHE_TSA_USER et XVCACHE_TSA_PASSWORD sont requis (compte utilisateur Horodatage)." };
     }
     return {
+      // Stored in proofs and the token ledger. Kept stable so existing proofs and installations stay valid.
       id: "certigna",
-      label: "Certigna (horodatage qualifié eIDAS)",
+      label: "Prestataire de services de confiance qualifié (horodatage qualifié eIDAS)",
       url: env.XVCACHE_TSA_URL || CERTIGNA_URL,
       qualified: true,
-      qualifiedBasis: "Certigna est prestataire de services de confiance qualifié (ANSSI) pour l'horodatage électronique : présomption d'exactitude de la date et d'intégrité (eIDAS, art. 41).",
+      qualifiedBasis: "Horodatages électroniques qualifiés au sens du règlement eIDAS (art. 41 et 42), émis par un prestataire de services de confiance qualifié inscrit sur la liste de confiance française. XVcache n'est pas un prestataire de services de confiance qualifié et n'émet pas l'horodatage.",
       user: env.XVCACHE_TSA_USER,
       password: env.XVCACHE_TSA_PASSWORD,
-      // Bundled public chain from https://www.certigna.com/autorites-de-certification/
-      // (fingerprints checked against that page). Override with XVCACHE_TSA_CA_FILE /
+      // Bundled public trust-anchor PEMs under certs/. Override with XVCACHE_TSA_CA_FILE /
       // XVCACHE_TSA_UNTRUSTED_FILE if needed.
       caFile: caOverride ?? path.join(certsDir(), "certigna-chain.pem"),
       untrustedFile: untrusted ?? path.join(certsDir(), "certigna-untrusted.pem"),
@@ -113,7 +126,7 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
   }
   if (wanted === "custom") {
     if (!env.XVCACHE_TSA_URL) return { error: "Fournisseur custom : XVCACHE_TSA_URL est requis." };
-    // Declared qualification is only an expectation: the token must still prove it (Certigna OID + chain).
+    // Declared qualification is only an expectation: the token must still prove it (qualifying policy + chain).
     const declared = env.XVCACHE_TSA_QUALIFIED === "true" || env.XVCACHE_TSA_QUALIFIED === "1";
     return {
       id: "custom",
@@ -129,7 +142,7 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
       untrustedFile: untrusted,
     };
   }
-  return { error: `XVCACHE_TSA_PROVIDER inconnu : ${wanted} (freetsa, certigna, custom, off).` };
+  return { error: `XVCACHE_TSA_PROVIDER inconnu : ${wanted} (freetsa, qualified, custom, off).` };
 }
 
 export function buildTimeStampReq(digest: Buffer, nonce: Buffer): Buffer {
@@ -242,7 +255,7 @@ export async function requestTimestamp(provider: TsaProvider, digestHex: string,
   const f: FetchLike = opts.fetchImpl ?? (fetch as unknown as FetchLike);
   const res = await f(provider.url, { method: "POST", headers, body, signal: AbortSignal.timeout(opts.timeoutMs ?? 20000) });
   if (!res.ok) {
-    // Certigna guide: 401/403 = bad credentials or forbidden; 402 = credits exhausted.
+    // Provider guide: 401/403 = bad credentials or forbidden; 402 = credits exhausted.
     const hint = res.status === 401 || res.status === 403 ? " (identifiants refusés)"
       : res.status === 402 ? " (pack de jetons épuisé)"
       : "";
@@ -378,7 +391,7 @@ export type Qualification = {
 
 /**
  * qualified = true only when ALL hold:
- *  1. the token carries a qualifying policy OID (Certigna: 1.2.250.1.177.2.9.1);
+ *  1. the token carries a qualifying policy OID (the bundled policy constant);
  *  2. the signer certificate is issued by a CA of the qualified chain (issuer Name = a chain subject);
  *  3. `openssl ts -verify` validates signature + chain against that chain ONLY ("verified").
  * openssl missing → "signature_unverified", never qualified.

@@ -2,7 +2,7 @@
 // Demo: vault, notes, one batched timestamp, verify V, tamper one note, verify X.
 // Loads XVCACHE_TSA_USER / XVCACHE_TSA_PROVIDER from .env.local (repo or cwd).
 // XVCACHE_TSA_PASSWORD is read from the environment only, never from a file.
-// Default witness: FreeTSA (test, non qualifié) + OpenTimestamps when Certigna is not configured.
+// Default witness: FreeTSA (test, non qualifié) + OpenTimestamps when the qualified provider is not configured.
 // Only hashes leave the machine.
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -29,8 +29,10 @@ if (keepDir) {
 const vault = path.join(base, "vault");
 await fs.mkdir(vault);
 
-if ((process.env.XVCACHE_TSA_PROVIDER || "").toLowerCase() === "certigna" && !process.env.XVCACHE_TSA_PASSWORD) {
-  console.error("Certigna : XVCACHE_TSA_PASSWORD manquant dans l'environnement (ne pas le mettre dans .env.local).");
+const tsaWanted = (process.env.XVCACHE_TSA_PROVIDER || "").toLowerCase();
+const wantsQualified = tsaWanted === "qualified" || tsaWanted === "certigna";
+if (wantsQualified && !process.env.XVCACHE_TSA_PASSWORD) {
+  console.error("XVCACHE_TSA_PROVIDER=qualified : XVCACHE_TSA_PASSWORD manquant dans l'environnement (ne pas le mettre dans .env.local).");
   process.exit(1);
 }
 

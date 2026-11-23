@@ -56,7 +56,7 @@ test("get_offer(lang=de): contested claims fall back to the validated English te
   assert.equal(o.lang, "de");
   assert.match(o.pitch, /eIDAS/);
   assert.match(o.pitch, /Art\. 41/);
-  assert.match(o.pitch, /issued by Certigna/);
+  assert.match(o.pitch, /qualified trust service provider listed on the French trusted list/);
   assert.match(o.pitch, /not a qualified trust service provider/);
   assert.doesNotMatch(o.pitch, /\bprove/i);
   assert.ok(Array.isArray(o.legal_limits) && o.legal_limits.length >= 3);

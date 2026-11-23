@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Local lawyer demo: drop a file, get Intact + PDF or "Modifié depuis le …".
-// Listens on 127.0.0.1 only. Does not spend a Certigna token (stamp is off
+// Listens on 127.0.0.1 only. Does not spend a qualified timestamp token (stamp is off
 // unless XVCACHE_DEMO_STAMP=1). Password is never read from a file.
 import { promises as fs } from "node:fs";
 import path from "node:path";

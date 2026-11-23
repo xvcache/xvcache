@@ -14,9 +14,9 @@
     "title_signature_unverified": "Empreinte conforme — signature non vérifiée",
     "subtitle_signature_unverified": "Ce document a la même empreinte que celle inscrite dans le jeton daté du {date}. La signature de ce jeton n'a pas pu être vérifiée : cette date n'est donc pas confirmée.",
     "banner_not_qualified": "NON QUALIFIÉ",
-    "warn_freetsa": "Attention : ceci n'est PAS un horodatage qualifié eIDAS. Le jeton provient de FreeTSA, non qualifié. Il n'a pas de présomption légale.",
+    "warn_freetsa": "Les jetons d'horodatage FreeTSA ne sont pas des horodatages électroniques qualifiés au sens du règlement eIDAS (règlement (UE) n° 910/2014, art. 41-42).",
     "warn_other": "Attention : ceci n'est PAS un horodatage qualifié eIDAS. Le prestataire n'est pas un service de confiance qualifié.",
-    "warn_pending": "Attention : ceci n'est PAS encore un horodatage qualifié eIDAS. Le jeton qualifié de Certigna manque pour l'instant ; le rapport sera réédité dès qu'il sera obtenu.",
+    "warn_pending": "Attention : ceci n'est PAS encore un horodatage qualifié eIDAS. L'horodatage qualifié manque pour l'instant ; le rapport sera réédité dès qu'il sera obtenu.",
     "field_document": "Fichier",
     "field_sha256": "Empreinte SHA-256",
     "field_date": "Date et heure",
@@ -31,7 +31,7 @@
     "local_time": "heure locale",
     "provider_qualified": "Horodatage électronique qualifié eIDAS",
     "policy": "Référence de politique",
-    "freetsa_line": "FreeTSA — non qualifié, sans présomption légale.",
+    "freetsa_line": "Les jetons d'horodatage FreeTSA ne sont pas des horodatages électroniques qualifiés au sens du règlement eIDAS (règlement (UE) n° 910/2014, art. 41-42).",
     "not_qualified_line": "Ceci n'est PAS un horodatage qualifié eIDAS.",
     "no_token": "Aucun jeton d'horodatage dans cette preuve.",
     "no_provider": "Aucun prestataire d'horodatage dans cette preuve.",
@@ -48,7 +48,7 @@
     "attachments_none": "Aucun fichier technique n'a pu être joint.",
     "legal_title": "Mentions légales",
     "legal_art41": "Règlement (UE) n° 910/2014 (eIDAS), art. 41 : l'effet juridique d'un horodatage électronique ne peut être refusé au seul motif qu'il se présente sous une forme électronique ; un horodatage électronique qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure qu'il indique et d'intégrité des données auxquelles il se rapporte. Art. 24 bis, § 6, inséré par le règlement (UE) 2024/1183 : il est reconnu comme qualifié dans tous les États membres.",
-    "legal_not_qtsp": "XVcache n'est pas un prestataire de services de confiance qualifié. Le jeton qualifié est émis par Certigna.",
+    "legal_not_qtsp": "XVcache n'est pas un prestataire de services de confiance qualifié. L'horodatage qualifié est émis par un prestataire de services de confiance qualifié inscrit sur la liste de confiance française. Le nom du prestataire est disponible sur demande à contact@xvcache.com.",
     "legal_not": "Ce rapport n'est ni un constat de commissaire de justice, ni une signature électronique qualifiée, ni un service de confiance qualifié, ni un avis juridique. C'est un élément de preuve qu'une empreinte existait à la date de l'horodatage ; il n'établit ni l'auteur ni le contenu.",
     "legal_hash_only": "Le contenu du document reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte, le libellé facultatif et l'adresse IP.",
     "legal_court": "Sa force probante concrète est appréciée par le juge selon la procédure nationale.",
@@ -76,14 +76,16 @@
     "signature_invalid_line": "Invalide",
     "warn_ots_only": "Attention : aucun jeton d'horodatage n'est joint. L'empreinte est ancrée par une preuve OpenTimestamps, ce qui n'est PAS un horodatage qualifié eIDAS.",
     "warn_ots_pending": "Attention : la preuve OpenTimestamps n'est pas encore confirmée. Aucun jeton d'horodatage n'est joint. Ceci n'est PAS un horodatage qualifié eIDAS.",
-    "document_title": "Rapport de vérification"
+    "document_title": "Rapport de vérification",
+    "legal_not_certificate": "Ce rapport de vérification n'est pas un certificat : il ne garantit ni le contenu, ni l'auteur, ni la validité du document, seulement la correspondance de son empreinte.",
+    "provider_qualified_generic": "Un prestataire de services de confiance qualifié inscrit sur la liste de confiance française"
   },
   "offer": {
-    "pitch": "XVcache fournit aux organisations un élément de preuve daté qu'un document existait, inchangé, à un moment donné. Avec l'abonnement prévu XVcache Coffre horodaté, les horodatages seront des horodatages électroniques qualifiés émis par Certigna, prestataire de services de confiance qualifié : selon l'art. 41, § 2 du règlement eIDAS, leur date et l'intégrité des données sont présumées, et ils sont reconnus comme qualifiés dans tous les États membres (art. 24 bis, § 6). XVcache n'est pas lui-même prestataire qualifié. Le contenu du document reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte SHA-256 et un libellé facultatif, et traite votre adresse IP. Chaque résultat est un verdict V/X et un rapport PDF d'une page dans 24 langues de l'UE. Limites : ni constat de commissaire de justice, ni signature, ni avis juridique ; la force probante relève du juge.",
+    "pitch": "XVcache fournit aux organisations un élément de preuve daté qu'un document existait, inchangé, à un moment donné. Avec l'abonnement prévu XVcache Coffre horodaté, les horodatages seront des horodatages électroniques qualifiés émis par un prestataire de services de confiance qualifié inscrit sur la liste de confiance française : selon l'art. 41, § 2 du règlement eIDAS, leur date et l'intégrité des données sont présumées, et ils sont reconnus comme qualifiés dans tous les États membres (art. 24 bis, § 6). XVcache n'est pas lui-même prestataire qualifié. Le contenu du document reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte SHA-256 et un libellé facultatif, et traite votre adresse IP. Chaque résultat est un verdict V/X et un rapport PDF d'une page dans 24 langues de l'UE. Limites : ni constat de commissaire de justice, ni signature, ni avis juridique ; la force probante relève du juge.",
     "price_label": "abonnement mensuel ; tarif professionnel",
     "price_display": "Tarifs prévus, pas encore en vente : Essentiel 29 € HT / mois · Cabinet 59 € HT / mois · prix de lancement 19 € HT / mois pour l'Essentiel, réservé aux 50 premières organisations, tant que l'abonnement reste actif · professionnels · démos sur candidature.",
     "includes": [
-      "Dans l'abonnement prévu, horodatages qualifiés eIDAS émis par Certigna : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; les preuves ne sont pas plafonnées (une preuve en attente n'est jamais décomptée). Le point d'accès hébergé, aujourd'hui en démonstration, demande ses jetons à Certigna, sans repli vers FreeTSA. L'abonnement Coffre horodaté n'est pas encore en vente. Version locale : FreeTSA par défaut, non qualifié.",
+      "Dans l'abonnement prévu, horodatages qualifiés eIDAS émis par un prestataire de services de confiance qualifié inscrit sur la liste de confiance française : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; les preuves ne sont pas plafonnées (une preuve en attente n'est jamais décomptée). Le point d'accès hébergé, aujourd'hui en démonstration, demande l'horodatage qualifié, sans repli vers FreeTSA. L'abonnement Coffre horodaté n'est pas encore en vente. Version locale : FreeTSA par défaut, non qualifié.",
       "Le contenu des documents reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte et un libellé facultatif, et traite l'adresse IP",
       "Verdict V/X et rapport PDF d'une page en 24 langues de l'UE ; vérification gratuite pour tous"
     ],
@@ -91,10 +93,10 @@
       "Ni constat de commissaire de justice (huissier), ni signature électronique qualifiée.",
       "Élément de preuve qu'une empreinte existait à une date ; n'établit ni l'auteur ni le contenu.",
       "Pas un avis juridique ; la force probante concrète est appréciée par le juge selon la procédure nationale.",
-      "XVcache n'est pas un prestataire de services de confiance qualifié ; le jeton qualifié est émis par Certigna."
+      "XVcache n'est pas un prestataire de services de confiance qualifié ; l'horodatage qualifié est émis par un prestataire de services de confiance qualifié inscrit sur la liste de confiance française."
     ],
     "present_title": "XVcache — élément de preuve daté pour vos documents",
-    "present_body": "XVcache fournit un élément de preuve daté qu'un document existait, inchangé, à une date donnée. Dans l'abonnement prévu Coffre horodaté, Certigna émettra des horodatages qualifiés : l'art. 41, § 2 d'eIDAS présume leur date et l'intégrité des données ; ils sont reconnus comme qualifiés dans tous les États membres (art. 24 bis, § 6). XVcache n'est pas prestataire qualifié. Un jeton quotidien partagé porte sa date d'émission, pas celle de l'envoi ; d'ici là, ou si Certigna est indisponible, la preuve reste en attente, sans bascule sur FreeTSA. Le contenu reste sur votre ordinateur ; le serveur reçoit l'empreinte, un libellé facultatif et l'adresse IP. Un verdict V/X et un rapport PDF d'une page sont établis.",
+    "present_body": "XVcache fournit un élément de preuve daté qu'un document existait, inchangé, à une date donnée. Dans l'abonnement prévu Coffre horodaté, le prestataire qualifié émettra des horodatages qualifiés : l'art. 41, § 2 d'eIDAS présume leur date et l'intégrité des données ; ils sont reconnus comme qualifiés dans tous les États membres (art. 24 bis, § 6). XVcache n'est pas prestataire qualifié. Un jeton quotidien partagé porte sa date d'émission, pas celle de l'envoi ; d'ici là, ou si le prestataire qualifié est indisponible, la preuve reste en attente, sans bascule sur FreeTSA. Le contenu reste sur votre ordinateur ; le serveur reçoit l'empreinte, un libellé facultatif et l'adresse IP. Un verdict V/X et un rapport PDF d'une page sont établis.",
     "present_does_not": "Ce n'est ni un constat d'huissier, ni une signature, ni un avis juridique.",
     "present_price": "{price}",
     "context_litige": "En cas de litige : figez dès aujourd'hui la version exacte d'un document que vous devrez peut-être produire.",

@@ -102,9 +102,20 @@ function pdfRaw(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString("latin1");
 }
 
+/** Sophie 23/11: the only authorized "certificate/certificat" wording in public texts. */
+const DISCLAIMER_EN = "This verification report is not a certificate: it does not vouch for the content, authorship or validity of the document, only that its fingerprint matches.";
+const DISCLAIMER_FR = "Ce rapport de vérification n'est pas un certificat : il ne garantit ni le contenu, ni l'auteur, ni la validité du document, seulement la correspondance de son empreinte.";
+
+function stripAuthorizedDisclaimer(t: string): string {
+  const compact = (s: string) => s.replace(/['\u2019]/g, "'").replace(/\s+/g, " ");
+  let s = compact(t);
+  for (const d of [DISCLAIMER_EN, DISCLAIMER_FR]) s = s.split(compact(d)).join(" ");
+  return s;
+}
+
 function assertNoForbidden(label: string, ...texts: string[]): void {
   for (const t of texts) {
-    const m = t.match(FORBIDDEN);
+    const m = stripAuthorizedDisclaimer(t).match(FORBIDDEN);
     assert.equal(m, null, `${label}: forbidden word ${m?.[0]} in: ${t.slice(0, 280)}`);
   }
 }

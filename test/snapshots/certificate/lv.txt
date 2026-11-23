@@ -11,7 +11,7 @@ DATUMS UN LAIKS
 2026. gada 22. novembris 20:08:39 (vietējais laiks, Europe/Brussels)
 2026. gada 22. novembris 19:08:39 UTC
 PAKALPOJUMU SNIEDZĒJS
-Certigna
+A qualified trust service provider listed on the French trusted list
 Kvalificēts elektronisks laika zīmogs (eIDAS)
 Politikas atsauce: 1.2.250.1.177.2.9.1
 ZĪMOGA SĒRIJAS NUMURS
@@ -25,24 +25,29 @@ PIERĀDĪJUMA IDENTIFIKATORS
 Kā pārbaudīt vēlreiz
 1. Iesniedziet to pašu failu vēlreiz (verify_document) vai pārbaudiet pievienoto zīmogu ar openssl ts
 -verify.
-2. Tā nospiedumu salīdzina ar šajā apliecinājumā norādīto.
+2. Its fingerprint is compared with the one printed on this report.
 3. Rezultāts ir “Nav mainīts” vai “Mainīts kopš 2026. gada 22. novembris 20:08:39”.
 Šim apliecinājumam pievienotie tehniskie faili
 token.tst — RFC 3161
 merkle-path.json — Merkle
-JURIDISKĀ INFORMĀCIJA
-Regula (ES) Nr. 910/2014 (eIDAS), 41. pants: elektroniskam laika zīmogam nevar liegt juridisku spēku tikai tāpēc, ka tas ir elektroniskā formā; attiecībā
-uz kvalificētu elektronisku laika zīmogu ir prezumpcija par tajā norādītā datuma un laika precizitāti un to datu integritāti, ar kuriem datums un laiks ir
-saistīti, un to atzīst visās dalībvalstīs. XVcache nav kvalificēts uzticamības pakalpojumu sniedzējs. Kvalificēto zīmogu izsniedz Certigna. Šis apliecinājums
-nav tiesu izpildītāja akts, kvalificēts elektroniskais paraksts vai juridiska konsultācija. Tas pierāda, ka nospiedums pastāvēja noteiktā datumā; tas
-nepierāda ne autoru, ne saturu. Dokumenta saturs nekad netika nosūtīts, tikai tā nospiedums. Tā konkrēto pierādījuma spēku izvērtē tiesa saskaņā ar
-valsts procesu.
-Tulkojumu vēl nav pārskatījis jurists; noteicošā ir angļu valodas versija. — Translation not yet reviewed by a legal professional; the
-English version prevails.
+LEGAL NOTICE
+This verification report is not a certificate: it does not vouch for the content, authorship or validity of the document, only that its fingerprint matches.
 Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
 electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound. Art.
 24a(6), inserted by Regulation (EU) 2024/1183: it is recognised as qualified in all Member States. XVcache is not a qualified trust service provider. The
-qualified token is issued by Certigna. This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust
-service and not legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content. The
-document content stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address. Its concrete evidential
-weight is assessed by the court under national procedure.
+qualified timestamp is issued by a qualified trust service provider listed on the French trusted list. The provider's name is available on request at
+contact@xvcache.com. This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust service and not
+legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content. The document content
+stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address. Its concrete evidential weight is assessed by
+the court under national procedure.
+Tulkojumu vēl nav pārskatījis jurists; noteicošā ir angļu valodas versija. — Translation not yet reviewed by a legal professional; the
+English version prevails.
+This verification report is not a certificate: it does not vouch for the content, authorship or validity of the document, only that its fingerprint matches.
+Regulation (EU) No 910/2014 (eIDAS), Art. 41: an electronic time stamp shall not be denied legal effect solely because it is in electronic form; a qualified
+electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which it is bound. Art.
+24a(6), inserted by Regulation (EU) 2024/1183: it is recognised as qualified in all Member States. XVcache is not a qualified trust service provider. The
+qualified timestamp is issued by a qualified trust service provider listed on the French trusted list. The provider's name is available on request at
+contact@xvcache.com. This report is not a constat by a judicial officer (bailiff), not a qualified electronic signature, not a qualified trust service and not
+legal advice. It is evidence that a fingerprint existed at the timestamp date; it establishes neither the author nor the content. The document content
+stays on your computer; the hosted server receives the fingerprint, the optional label and the IP address. Its concrete evidential weight is assessed by
+the court under national procedure.

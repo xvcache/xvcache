@@ -259,7 +259,7 @@ export async function writeCertificatePack(opts: {
   otsBlockTime?: string | null;
   lang?: string;
   tz?: string;
-  /** Qualification recomputed from the token (certifier.verify). Omitted → recomputed here (bundled Certigna chain). */
+  /** Qualification recomputed from the token (certifier.verify). Omitted → recomputed here (bundled qualified trust chain). */
   qualification?: Qualification | null;
 }): Promise<CertificatePack> {
   const { proof } = opts;
@@ -613,7 +613,7 @@ export type CertificateModel = {
    * (null/undefined = absent, then never qualified). `signature` must be "verified" for a qualified PDF.
    */
   tsa: null | { provider: string; label: string; qualified: boolean; policy?: string | null; serial?: string; signature?: "verified" | "failed" | "unavailable" | "not_checked" | null };
-  /** true when a qualified (Certigna) token is expected but still missing (pending_qualified). */
+  /** true when a qualified timestamp token is expected but still missing (pending_qualified). */
   pending_qualified?: boolean;
   ots_status?: string | null;
   ots_detail?: string | null;
@@ -722,7 +722,7 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   // ---- footer (legal notice) is laid out first: content must stay above it ----
   const legalSize = 6.4 * scale;
   const legalGap = 1.6 * scale;
-  const legalOwn = [L.legal_art41, L.legal_not_qtsp, L.legal_not, L.legal_hash_only, L.legal_court].join(" ");
+  const legalOwn = [L.legal_not_certificate, L.legal_art41, L.legal_not_qtsp, L.legal_not, L.legal_hash_only, L.legal_court].join(" ");
   const footerBlocks: { text: string; font: PDFFont; color: RGB }[] = [
     { text: L.legal_title.toUpperCase(), font: fonts.sansBold, color: MUTED },
     { text: legalOwn, font: fonts.sans, color: MUTED },
@@ -730,7 +730,7 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   if (lang !== "en" || !locale.reviewed) {
     if (!locale.reviewed) footerBlocks.push({ text: L.mt_notice + (lang !== "en" ? ` — ${EN.mt_notice}` : ""), font: fonts.sansBold, color: WARN_INK });
     if (lang !== "en") {
-      footerBlocks.push({ text: [EN.legal_art41, EN.legal_not_qtsp, EN.legal_not, EN.legal_hash_only, EN.legal_court].join(" "), font: fonts.sans, color: MUTED });
+      footerBlocks.push({ text: [EN.legal_not_certificate, EN.legal_art41, EN.legal_not_qtsp, EN.legal_not, EN.legal_hash_only, EN.legal_court].join(" "), font: fonts.sans, color: MUTED });
     }
   }
   const footerLines: { line: string; font: PDFFont; color: RGB }[] = [];
@@ -808,18 +808,19 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
     c.field(L.field_date, L.no_token);
   }
   if (model.tsa) {
-    const providerName = (model.tsa.label || "Certigna").replace(/\s*\([^)]*\)\s*$/, "").trim() || "Certigna";
+    // Sophie 23/11: never default to or display the token issuer name; use the i18n generic label.
+    const providerGeneric = L.provider_qualified_generic || EN.provider_qualified_generic;
     const sep = lang === "fr" ? " : " : ": ";
     const policyLine = `${L.policy}${sep}${tokenPolicy ?? L.policy_absent}`;
     const lines = qualified
-      ? `${providerName}\n${L.provider_qualified}\n${policyLine}`
-      : isFreeTsa ? `${L.freetsa_line}\n${L.not_qualified_line}` : `${providerName}\n${L.not_qualified_line}\n${policyLine}`;
+      ? `${providerGeneric}\n${L.provider_qualified}\n${policyLine}`
+      : isFreeTsa ? `${L.freetsa_line}\n${L.not_qualified_line}` : `${L.not_qualified_line}\n${policyLine}`;
     c.field(L.field_provider, lines);
     if (kind === "signature_unverified") c.field(L.field_signature, L.signature_unverified_line);
     if (kind === "signature_invalid") c.field(L.field_signature, L.signature_invalid_line);
     if (model.tsa.serial) c.field(L.field_serial, formatGroupedHex(model.tsa.serial));
   } else {
-    c.field(L.field_provider, model.pending_qualified ? `Certigna — ${L.verdict_pending}` : L.no_provider);
+    c.field(L.field_provider, model.pending_qualified ? `${L.provider_qualified_generic || EN.provider_qualified_generic} — ${L.verdict_pending}` : L.no_provider);
   }
   c.field(L.field_qualified, qualified ? L.yes : L.no);
   c.field(L.field_ots, model.ots_text ?? localizedOts(lang, model.ots_status, model.ots_detail));
@@ -927,7 +928,7 @@ export async function buildCertificatePdf(opts: {
   attachments: Attachment[];
   lang?: string;
   tz?: string;
-  /** Token assessment; omitted → recomputed from the token against the bundled Certigna chain. */
+  /** Token assessment; omitted → recomputed from the token against the bundled qualified trust chain. */
   qualification?: Qualification | null;
 }): Promise<Uint8Array> {
   const lang = opts.lang ?? "fr";

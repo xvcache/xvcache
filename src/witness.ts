@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { leafHash, merklePath, merkleRoot, verifyMerklePath, type HashLeaf, type MerkleStep } from "./merkle.js";
-import { requestTimestamp, parseTimeStampToken, verifyTokenSignature, resolveTsaProvider, OID_SHA256, assessQualification, certignaTrust, type Qualification, type QualifiedTrust, type TsaProvider, type FetchLike } from "./tsa.js";
+import { requestTimestamp, parseTimeStampToken, verifyTokenSignature, resolveTsaProvider, OID_SHA256, assessQualification, certignaTrust, type Qualification, type QualifiedTrust, type TsaProvider, type FetchLike, isQualifiedTsaId, sameTsaId } from "./tsa.js";
 import { stampDigest, serializeOts, parseOts, otsStatus } from "./ots.js";
 import { renderCertificate, earliestOtsBlockTime, type CertificateModel } from "./certificate.js";
 import type { Proof } from "./certify.js";
@@ -14,11 +14,11 @@ import type { TsaTokenLedger } from "./tsa-tokens.js";
  * - anchorMode "window" (tests, local): every submission arriving within `batchWindowMs` shares ONE Merkle root,
  *   hence ONE TSA token, and the call waits for it.
  * - anchorMode "daily" (hosted default, decision of 23/11/2026): submissions are queued on disk and answered at once
- *   as pending; ONE Merkle root common to every subscriber is stamped once a day (≈ one Certigna token per day),
+ *   as pending; ONE Merkle root common to every subscriber is stamped once a day (≈ one qualified timestamp token per day),
  *   at `dailyAnchorUtc` (HH:MM, UTC). An empty day consumes no token.
  * - Usage is counted only when a proof obtains its token (onTimestamped); a pending proof is never counted.
  * - Every token obtained is recorded in the local token ledger (stock estimate + low-stock alert).
- * - If the qualified TSA (Certigna) fails (402 credits exhausted, 5xx, network), the batch is kept as
+ * - If the qualified TSA fails (402 credits exhausted, 5xx, network), the batch is kept as
  *   `pending_qualified`: anchored with OpenTimestamps when enabled, NEVER silently stamped by another TSA,
  *   the operator is alerted, and requalifyPending() retries later. A pending proof never says "qualified".
  */
@@ -110,7 +110,7 @@ const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
  * Default daily anchor, in UTC: 21:50 UTC = 22:50 Europe/Paris in winter (UTC+1) and 23:50 in summer (UTC+2).
  * It therefore always falls on the same Paris calendar day as the submissions it covers (22:50 UTC would be
  * 00:50 the next day in Paris in summer). The timestamp time of a proof is the issue time (genTime) of that
- * day's Certigna token, never the time the fingerprint was submitted.
+ * day's qualified timestamp token, never the time the fingerprint was submitted.
  */
 export const DEFAULT_DAILY_ANCHOR_UTC = "21:50";
 const MERKLE_SCHEME = "sha256, leaf=H(0x00||canonical_json(leaf)), node=H(0x01||L||R), odd node promoted";
@@ -467,13 +467,13 @@ export class HostedWitness {
   private caFor(provider: string): { ca?: string; untrusted?: string } {
     const t = this.opts.tsa;
     if (t && t.id === provider) return { ca: t.caFile, untrusted: t.untrustedFile };
-    const p = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: provider === "certigna" ? "certigna" : "freetsa", XVCACHE_TSA_USER: "x", XVCACHE_TSA_PASSWORD: "x" });
+    const p = resolveTsaProvider({ XVCACHE_TSA_PROVIDER: isQualifiedTsaId(provider) ? "qualified" : "freetsa", XVCACHE_TSA_USER: "x", XVCACHE_TSA_PASSWORD: "x" });
     return p && !("error" in p) ? { ca: p.caFile, untrusted: p.untrustedFile } : {};
   }
 
   private trustFor(provider: string): QualifiedTrust {
     const t = this.opts.tsa;
-    return t && t.id === provider && t.qualifiedTrust ? t.qualifiedTrust : certignaTrust();
+    return t && sameTsaId(t.id, provider) && t.qualifiedTrust ? t.qualifiedTrust : certignaTrust();
   }
 
   /** Free verification: fingerprint + proof_id → V / X / pending. Never reveals the owner. */
