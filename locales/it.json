@@ -11,8 +11,6 @@
     "subtitle_modified": "Esito X — questa impronta non corrisponde a quella validata.",
     "title_pending": "Validazione temporale qualificata in attesa",
     "subtitle_pending": "La marca qualificata non è ancora stata emessa.",
-    "title_signature_unverified": "L'impronta corrisponde — firma non verificata",
-    "subtitle_signature_unverified": "Esito V — l'impronta corrisponde, ma la firma del gettone non è stata verificata.",
     "banner_not_qualified": "NON QUALIFICATA",
     "warn_freetsa": "Questa NON è una validazione temporale qualificata eIDAS. La marca proviene da FreeTSA e serve solo per i test. Non gode di alcuna presunzione legale.",
     "warn_other": "Questa NON è una validazione temporale qualificata eIDAS. Il fornitore non è un prestatore di servizi fiduciari qualificato.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Modificato dal {date}.",
     "verdict_invalid": "Questa prova non può essere convalidata: il file, la data o la marca non corrispondono più.",
     "verdict_pending": "In attesa — la validazione temporale qualificata non è ancora stata emessa.",
-    "verdict_signature_unverified": "L'impronta corrisponde — firma non verificata. Questo documento ha la stessa impronta di quello validato il {date}, ma la firma del gettone non è stata verificata.",
-    "warn_signature_unverified": "Questa NON è dichiarata una validazione temporale qualificata eIDAS: la firma del token non ha potuto essere verificata qui (verifica impossibile). Data e controllo dell'impronta (V/X) sono indicati, senza stato qualificato.",
     "policy_absent": "assente",
-    "field_signature": "Firma del token",
-    "signature_unverified_line": "NON verificata (verifica impossibile)"
+    "field_signature": "Firma del token"
   },
   "offer": {
     "present_does_not": "Non è un verbale di ufficiale giudiziario, né una firma, né una consulenza legale.",

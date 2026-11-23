@@ -31,28 +31,26 @@ function page(result: DocumentResult | null, notice?: string): string {
   let resultHtml = "";
   if (notice && !has) {
     resultHtml = `<div class="card result miss"><p class="sentence">${escapeHtml(notice)}</p></div>`;
-  } else if (has && (kind === "intact" || kind === "signature_unverified")) {
+  } else if (has && (kind === "intact" || kind === "signature_unverified" || kind === "ots_only" || kind === "ots_pending" || kind === "pending")) {
     const pdfLink = result!.pdf
       ? `<a class="btn" href="/certificat?batch=${encodeURIComponent(result!.batch_id ?? "")}&amp;path=${encodeURIComponent(result!.path ?? "")}">Télécharger le Rapport PDF</a>`
       : "";
     const cardClass = kind === "intact" ? "ok" : "partial";
+    const badgeClass = kind === "intact" ? "v" : "amber";
+    const meta = kind === "intact" && result!.qualified
+      ? `<p class="meta">Prestataire : Certigna — horodatage électronique qualifié eIDAS</p>`
+      : `<p class="meta warn">Ce jeton n'est pas un horodatage qualifié eIDAS.</p>`;
     resultHtml = `<div class="card result ${cardClass}">
-      <div class="badge v">V</div>
+      <div class="badge ${badgeClass}">${kind === "ots_pending" || kind === "pending" ? "…" : "V"}</div>
       <h2>${escapeHtml(v!.title)}</h2>
       <p class="sentence">${escapeHtml(v!.sentence)}</p>
-      ${result!.qualified ? `<p class="meta">Prestataire : Certigna — horodatage électronique qualifié eIDAS</p>` : `<p class="meta warn">Ce jeton n'est pas un horodatage qualifié eIDAS.</p>`}
+      ${meta}
       ${pdfLink}
     </div>`;
-  } else if (has && kind === "modifie") {
+  } else if (has && (kind === "modifie" || kind === "invalide" || kind === "signature_invalid")) {
     resultHtml = `<div class="card result ko">
       <div class="badge x">X</div>
-      <h2>Modifié</h2>
-      <p class="sentence">${escapeHtml(v!.sentence)}</p>
-    </div>`;
-  } else if (has && kind === "invalide") {
-    resultHtml = `<div class="card result ko">
-      <div class="badge x">X</div>
-      <h2>Preuve invalide</h2>
+      <h2>${escapeHtml(v!.title)}</h2>
       <p class="sentence">${escapeHtml(v!.sentence)}</p>
     </div>`;
   }
@@ -64,7 +62,7 @@ function page(result: DocumentResult | null, notice?: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(title)} — XVcache</title>
   <style>
-    :root { --ink:#1b1b18; --muted:#5c5a55; --paper:#f6f4ef; --card:#fff; --line:#ddd9d1; --green:#0f7a4a; --green-soft:#e8f6ef; --red:#b42318; --red-soft:#fdecea; --warn:#8a5a10; }
+    :root { --ink:#1b1b18; --muted:#5c5a55; --paper:#f6f4ef; --card:#fff; --line:#ddd9d1; --green:#0f7a4a; --green-soft:#e8f6ef; --amber:#9a6b12; --amber-soft:#f8f1e0; --red:#b42318; --red-soft:#fdecea; --warn:#8a5a10; }
     * { box-sizing: border-box; }
     body { margin:0; min-height:100vh; background:var(--paper); color:var(--ink);
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
@@ -86,6 +84,7 @@ function page(result: DocumentResult | null, notice?: string): string {
     .badge { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-family: Georgia, serif; font-size: 18px; color: #fff; margin-bottom: 14px; }
     .badge.v { background: var(--green); }
+    .badge.amber { background: var(--amber); }
     .badge.x { background: var(--red); }
     .card.result h2 { font-family: Georgia, "Times New Roman", serif; font-weight: normal; font-size: 32px; margin: 0 0 8px; }
     .sentence { font-size: 17px; line-height: 1.45; margin: 0 0 16px; }
@@ -101,7 +100,7 @@ function page(result: DocumentResult | null, notice?: string): string {
 <body>
   <header>
     <div class="brand">XVcache</div>
-    <p>Déposez un document. Vous obtenez une coche verte et un rapport PDF, ou la date de la modification.</p>
+    <p>Déposez un document. Vous obtenez un rapport PDF, ou la date d'une modification.</p>
   </header>
   <main>
     <form class="drop" id="drop" action="/verifier" method="post" enctype="multipart/form-data">

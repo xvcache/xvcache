@@ -11,8 +11,6 @@
     "subtitle_modified": "Tulemus X — see räsi ei vasta ajatempliga kinnitatud räsile.",
     "title_pending": "Kvalifitseeritud ajatempel ootel",
     "subtitle_pending": "Kvalifitseeritud ajatemplit pole veel väljastatud.",
-    "title_signature_unverified": "Sõrmejälg ühtib — allkiri pole kontrollitud",
-    "subtitle_signature_unverified": "Tulemus V — sõrmejälg ühtib, kuid loa allkirja ei õnnestunud kontrollida.",
     "banner_not_qualified": "MITTEKVALIFITSEERITUD",
     "warn_freetsa": "See EI OLE kvalifitseeritud eIDAS-ajatempel. Ajatempel pärineb teenusest FreeTSA ja on mõeldud ainult katsetamiseks. Sellel puudub õiguslik eeldus.",
     "warn_other": "See EI OLE kvalifitseeritud eIDAS-ajatempel. Teenuseosutaja ei ole kvalifitseeritud usaldusteenuse osutaja.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Muudetud alates {date}.",
     "verdict_invalid": "Seda tõendit ei saa kinnitada: fail, kuupäev või ajatempel ei vasta enam.",
     "verdict_pending": "Ootel — kvalifitseeritud ajatemplit pole veel väljastatud.",
-    "verdict_signature_unverified": "Sõrmejälg ühtib — allkiri pole kontrollitud. Sellel dokumendil on sama sõrmejälg nagu {date} ajatembeldatul, kuid loa allkirja ei õnnestunud kontrollida.",
-    "warn_signature_unverified": "Seda EI ole märgitud kvalifitseeritud eIDAS-ajatempliks: tõendi allkirja ei saanud siin kontrollida (kontroll võimatu). Kuupäev ja sõrmejälje kontroll (V/X) on näidatud ilma kvalifitseeritud staatuseta.",
     "policy_absent": "puudub",
-    "field_signature": "Tõendi allkiri",
-    "signature_unverified_line": "EI ole kontrollitud (kontroll võimatu)"
+    "field_signature": "Tõendi allkiri"
   },
   "offer": {
     "present_does_not": "See ei ole kohtutäituri protokoll, allkiri ega õigusnõuanne.",

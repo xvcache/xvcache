@@ -8,6 +8,19 @@ export const EU_LANGS = [
   "hu", "it", "lt", "lv", "mt", "nl", "pl", "pt", "ro", "sk", "sl", "sv",
 ] as const;
 export type Lang = (typeof EU_LANGS)[number];
+
+/** V1: these verdict strings exist only in fr.json and en.json; other locales fall back to English. */
+export const FR_EN_ONLY_CERT_KEYS = [
+  "title_signature_unverified", "subtitle_signature_unverified", "verdict_signature_unverified",
+  "title_signature_invalid", "subtitle_signature_invalid", "verdict_signature_invalid",
+  "title_ots_only", "subtitle_ots_only", "verdict_ots_only",
+  "title_ots_pending", "subtitle_ots_pending", "verdict_ots_pending",
+  "reverify_3_incomplete",
+  "warn_signature_invalid", "signature_invalid_line",
+  "warn_ots_only", "warn_ots_pending",
+  "warn_signature_unverified", "signature_unverified_line",
+] as const;
+
 export const DEFAULT_LANG: Lang = "en";
 export const DEFAULT_TZ = "Europe/Brussels";
 

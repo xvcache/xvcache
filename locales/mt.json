@@ -11,8 +11,6 @@
     "subtitle_modified": "Verdett X — din il-marka diġitali ma taqbilx ma' dik ittimbrata.",
     "title_pending": "Timbru tal-ħin kwalifikat pendenti",
     "subtitle_pending": "It-timbru kwalifikat għadu ma nħariġx.",
-    "title_signature_unverified": "Il-marka taqbel — il-firma mhix verifikata",
-    "subtitle_signature_unverified": "Riżultat V — il-marka taqbel, iżda l-firma tat-token ma setgħetx tiġi vverifikata.",
     "banner_not_qualified": "MHUX KWALIFIKAT",
     "warn_freetsa": "Dan MHUWIEX timbru tal-ħin kwalifikat eIDAS. It-timbru ġej minn FreeTSA u huwa għall-ittestjar biss. M'għandu l-ebda preżunzjoni legali.",
     "warn_other": "Dan MHUWIEX timbru tal-ħin kwalifikat eIDAS. Il-fornitur mhuwiex fornitur kwalifikat ta' servizzi fiduċjarji.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Modifikat mill-{date}.",
     "verdict_invalid": "Din il-prova ma tistax tiġi vvalidata: il-fajl, id-data jew it-timbru ma jaqblux aktar.",
     "verdict_pending": "Pendenti — it-timbru tal-ħin kwalifikat għadu ma nħariġx.",
-    "verdict_signature_unverified": "Il-marka taqbel — il-firma mhix verifikata. Dan id-dokument għandu l-istess marka bħal dak timbrat fi {date}, iżda l-firma tat-token ma setgħetx tiġi vverifikata.",
-    "warn_signature_unverified": "Dan MHUWIEX iddikjarat bħala timbru tal-ħin kwalifikat eIDAS: il-firma tat-token ma setgħetx tiġi vverifikata hawn (verifika impossibbli). Id-data u l-kontroll tal-marka (V/X) jintwerew, mingħajr status kwalifikat.",
     "policy_absent": "nieqes",
-    "field_signature": "Firma tat-token",
-    "signature_unverified_line": "MHUX ivverifikata (verifika impossibbli)"
+    "field_signature": "Firma tat-token"
   },
   "offer": {
     "present_does_not": "Mhuwiex rapport ta' marixxall, firma jew parir legali.",

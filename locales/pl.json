@@ -11,8 +11,6 @@
     "subtitle_modified": "Wynik X — ten skrót nie odpowiada skrótowi oznaczonemu czasem.",
     "title_pending": "Kwalifikowany znacznik czasu w toku",
     "subtitle_pending": "Kwalifikowany znacznik czasu nie został jeszcze wydany.",
-    "title_signature_unverified": "Skrót jest zgodny — podpis niezweryfikowany",
-    "subtitle_signature_unverified": "Wynik V — skrót jest zgodny, ale podpisu znacznika czasu nie udało się zweryfikować.",
     "banner_not_qualified": "NIEKWALIFIKOWANY",
     "warn_freetsa": "To NIE jest kwalifikowany znacznik czasu eIDAS. Znacznik pochodzi z FreeTSA i służy wyłącznie do testów. Nie korzysta z domniemania prawnego.",
     "warn_other": "To NIE jest kwalifikowany znacznik czasu eIDAS. Dostawca nie jest kwalifikowanym dostawcą usług zaufania.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Zmieniony od {date}.",
     "verdict_invalid": "Tego dowodu nie można zweryfikować: plik, data lub znacznik już się nie zgadzają.",
     "verdict_pending": "W toku — kwalifikowany znacznik czasu nie został jeszcze wydany.",
-    "verdict_signature_unverified": "Skrót jest zgodny — podpis niezweryfikowany. Ten dokument ma ten sam skrót co dokument oznaczony czasem {date}, ale podpisu znacznika czasu nie udało się zweryfikować.",
-    "warn_signature_unverified": "To NIE jest deklarowane jako kwalifikowany znacznik czasu eIDAS: podpisu tokenu nie można było tu zweryfikować (weryfikacja niemożliwa). Data i kontrola odcisku (V/X) są podane, bez statusu kwalifikowanego.",
     "policy_absent": "brak",
-    "field_signature": "Podpis tokenu",
-    "signature_unverified_line": "NIEZWERYFIKOWANY (weryfikacja niemożliwa)"
+    "field_signature": "Podpis tokenu"
   },
   "offer": {
     "present_does_not": "To nie jest protokół komornika, podpis ani porada prawna.",

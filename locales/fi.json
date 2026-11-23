@@ -11,8 +11,6 @@
     "subtitle_modified": "Tulos X — tämä tiiviste ei vastaa aikaleimattua.",
     "title_pending": "Hyväksytty aikaleima odottaa",
     "subtitle_pending": "Hyväksyttyä aikaleimaa ei ole vielä myönnetty.",
-    "title_signature_unverified": "Sormenjälki täsmää — allekirjoitusta ei ole varmennettu",
-    "subtitle_signature_unverified": "Tulos V — sormenjälki täsmää, mutta tunnisteen allekirjoitusta ei voitu varmentaa.",
     "banner_not_qualified": "EI HYVÄKSYTTY",
     "warn_freetsa": "Tämä EI ole eIDAS-asetuksen mukainen hyväksytty aikaleima. Aikaleima on peräisin FreeTSA-palvelusta ja tarkoitettu vain testaukseen. Siihen ei liity oikeudellista olettamaa.",
     "warn_other": "Tämä EI ole eIDAS-asetuksen mukainen hyväksytty aikaleima. Palveluntarjoaja ei ole hyväksytty luottamuspalvelun tarjoaja.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Muutettu {date} jälkeen.",
     "verdict_invalid": "Tätä todistetta ei voida vahvistaa: tiedosto, päivämäärä tai aikaleima eivät enää täsmää.",
     "verdict_pending": "Odottaa — hyväksyttyä aikaleimaa ei ole vielä myönnetty.",
-    "verdict_signature_unverified": "Sormenjälki täsmää — allekirjoitusta ei ole varmennettu. Tällä asiakirjalla on sama sormenjälki kuin {date} leimatulla, mutta tunnisteen allekirjoitusta ei voitu varmentaa.",
-    "warn_signature_unverified": "Tätä EI ilmoiteta hyväksytyksi eIDAS-aikaleimaksi: tunnisteen allekirjoitusta ei voitu tarkistaa täällä (tarkistus mahdoton). Päivämäärä ja sormenjäljen tarkistus (V/X) näytetään ilman hyväksyttyä asemaa.",
     "policy_absent": "puuttuu",
-    "field_signature": "Tunnisteen allekirjoitus",
-    "signature_unverified_line": "EI tarkistettu (tarkistus mahdoton)"
+    "field_signature": "Tunnisteen allekirjoitus"
   },
   "offer": {
     "present_does_not": "Se ei ole ulosottomiehen pöytäkirja, allekirjoitus eikä oikeudellinen neuvo.",

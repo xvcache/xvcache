@@ -4,7 +4,7 @@ import { promises as fs, existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PDFDocument } from "pdf-lib";
-import { EU_LANGS, loadLocale, resolveLang, formatLocalDateTime } from "./i18n.js";
+import { EU_LANGS, loadLocale, resolveLang, formatLocalDateTime, FR_EN_ONLY_CERT_KEYS } from "./i18n.js";
 import { renderCertificate, localizedVerdict, type CertificateModel } from "./certificate.js";
 
 const SNAP_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "test", "snapshots", "certificate");
@@ -40,7 +40,14 @@ test("i18n: 24 EU languages, every locale has every English key, unknown → en"
     const file = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "locales", `${code}.json`);
     assert.ok(existsSync(file), `locales/${code}.json missing`);
     const own = JSON.parse(readFileSync(file, "utf8")) as { cert: Record<string, string> };
-    for (const k of Object.keys(en.cert)) assert.ok(typeof own.cert[k] === "string" && own.cert[k].length > 0, `${code}: cert.${k} missing`);
+    const frEnOnly = new Set<string>(FR_EN_ONLY_CERT_KEYS);
+    for (const k of Object.keys(en.cert)) {
+      if (frEnOnly.has(k) && code !== "en" && code !== "fr") {
+        assert.equal(own.cert[k], undefined, `${code}: cert.${k} must be omitted (V1 falls back to English)`);
+        continue;
+      }
+      assert.ok(typeof own.cert[k] === "string" && own.cert[k].length > 0, `${code}: cert.${k} missing`);
+    }
   }
   assert.deepEqual(resolveLang("de-AT"), { lang: "de", requested: "de-AT", fallback: false });
   assert.deepEqual(resolveLang("ja"), { lang: "en", requested: "ja", fallback: true });

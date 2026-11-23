@@ -9,7 +9,7 @@ import { getOffer, listPlans, presentToClient, recommendPlan, requestUpgradeFlow
 import { toolError, type ToolError } from "./errors.js";
 import { SubscriptionStore, type SubscriptionRecord } from "./subscriptions.js";
 import { HostedWitness, type HostedProof, type HostedVerification } from "./witness.js";
-import { localizedVerdict, kindWhenFingerprintMatches } from "./certificate.js";
+import { localizedVerdict, kindWhenFingerprintMatches, type DisplayKind } from "./certificate.js";
 import { EU_LANGS, resolveLang, DEFAULT_TZ } from "./i18n.js";
 import { STRIPE_WEBHOOK_PATH, handleStripeWebhook, type WebhookLog } from "./stripe-webhook.js";
 import { KEY_PAGE_PREFIX, handleKeyPage, type KeyDeliveryService } from "./key-delivery.js";
@@ -105,7 +105,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     return rec;
   }
 
-  function verdictText(kind: "intact" | "modifie" | "invalide" | "pending" | "signature_unverified", lang: string, genTime: string | null, tz?: string): string {
+  function verdictText(kind: DisplayKind, lang: string, genTime: string | null, tz?: string): string {
     return localizedVerdict(kind, lang, genTime, tz);
   }
 
@@ -157,7 +157,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
         qualified: pdf ? pdf.qualified : false,
         gen_time: p.tsa?.gen_time ?? null,
         ...(p.merkle ? {} : { anchor_due_at: p.anchor_due_at ?? null }),
-        verdict_localized: verdictText(p.tsa ? kindWhenFingerprintMatches(pdf?.proof.tsa?.qualification?.signature ?? (pdf ? "unavailable" : "not_checked")) : "pending", L.lang, p.tsa?.gen_time ?? null, tz),
+        verdict_localized: verdictText(p.tsa ? kindWhenFingerprintMatches(pdf?.proof.tsa?.qualification?.signature ?? (pdf ? "unavailable" : "not_checked")) : (p.status === "ots_only" ? (p.ots?.status === "confirmed" ? "ots_only" : "ots_pending") : "pending"), L.lang, p.tsa?.gen_time ?? null, tz),
         ...link,
       });
     }
@@ -180,15 +180,25 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     return { content: [{ type: "text", text: JSON.stringify(body, null, 2) }, ...blobs] };
   }
 
+  function kindFromHosted(v: HostedVerification): DisplayKind {
+    if (v.verdict === "not_found" || v.verdict === "invalid") return "invalide";
+    if (v.verdict === "X") {
+      if (v.signature === "failed" && v.checks.fingerprint.ok !== false) return "signature_invalid";
+      if (v.checks.fingerprint.ok === false) return "modifie";
+      return "invalide";
+    }
+    if (v.verdict === "pending") return "pending";
+    if (!v.proof?.tsa) return v.checks.ots.ok === true ? "ots_only" : "ots_pending";
+    return kindWhenFingerprintMatches(v.signature);
+  }
+
   function verificationBody(v: HostedVerification, lang: string, tz?: string): Record<string, unknown> {
-    const kind = v.verdict === "V" ? kindWhenFingerprintMatches(v.signature)
-      : v.verdict === "X" ? "modifie"
-      : v.verdict === "pending" ? "pending"
-      : "invalide";
+    const kind = kindFromHosted(v);
+    const date = kind === "ots_only" ? (v.ots_block_time ?? null) : kind === "ots_pending" || kind === "signature_invalid" ? null : v.gen_time;
     return {
       ok: true,
       verdict: v.verdict,
-      verdict_localized: v.verdict === "not_found" ? "Unknown proof_id." : verdictText(kind, lang, v.gen_time, tz),
+      verdict_localized: v.verdict === "not_found" ? "Unknown proof_id." : verdictText(kind, lang, date, tz),
       qualified: v.qualified,
       status: v.status,
       signature: v.signature,

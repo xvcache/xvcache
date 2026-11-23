@@ -11,8 +11,6 @@
     "subtitle_modified": "Rezultat X — ovaj se otisak ne podudara s otiskom sa žigom.",
     "title_pending": "Kvalificirani vremenski žig na čekanju",
     "subtitle_pending": "Kvalificirani žig još nije izdan.",
-    "title_signature_unverified": "Otisak se podudara — potpis nije provjeren",
-    "subtitle_signature_unverified": "Ishod V — otisak se podudara, ali potpis tokena nije bilo moguće provjeriti.",
     "banner_not_qualified": "NIJE KVALIFICIRAN",
     "warn_freetsa": "Ovo NIJE kvalificirani vremenski žig eIDAS. Žig potječe od FreeTSA i služi samo za testiranje. Ne uživa nikakvu pravnu pretpostavku.",
     "warn_other": "Ovo NIJE kvalificirani vremenski žig eIDAS. Pružatelj nije kvalificirani pružatelj usluga povjerenja.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Promijenjen od {date}.",
     "verdict_invalid": "Ovaj dokaz nije moguće potvrditi: datoteka, datum ili žig više se ne podudaraju.",
     "verdict_pending": "Na čekanju — kvalificirani vremenski žig još nije izdan.",
-    "verdict_signature_unverified": "Otisak se podudara — potpis nije provjeren. Ovaj dokument ima isti otisak kao onaj vremenski označen {date}, ali potpis tokena nije bilo moguće provjeriti.",
-    "warn_signature_unverified": "Ovo NIJE navedeno kao kvalificirani vremenski žig eIDAS: potpis tokena ovdje nije bilo moguće provjeriti (provjera nemoguća). Datum i provjera otiska (V/X) prikazani su bez kvalificiranog statusa.",
     "policy_absent": "nedostaje",
-    "field_signature": "Potpis tokena",
-    "signature_unverified_line": "NIJE provjeren (provjera nemoguća)"
+    "field_signature": "Potpis tokena"
   },
   "offer": {
     "present_does_not": "To nije zapisnik ovršitelja, potpis ni pravni savjet.",

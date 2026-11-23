@@ -11,8 +11,6 @@
     "subtitle_modified": "Ergebnis X — dieser Fingerabdruck stimmt nicht mit dem gestempelten überein.",
     "title_pending": "Qualifizierter Zeitstempel ausstehend",
     "subtitle_pending": "Der qualifizierte Zeitstempel wurde noch nicht ausgestellt.",
-    "title_signature_unverified": "Fingerabdruck stimmt überein — Signatur nicht geprüft",
-    "subtitle_signature_unverified": "Ergebnis V — der Fingerabdruck stimmt überein, aber die Signatur des Zeitstempels konnte nicht geprüft werden.",
     "banner_not_qualified": "NICHT QUALIFIZIERT",
     "warn_freetsa": "Dies ist KEIN qualifizierter eIDAS-Zeitstempel. Der Zeitstempel stammt von FreeTSA und dient nur zu Testzwecken. Er begründet keine gesetzliche Vermutung.",
     "warn_other": "Dies ist KEIN qualifizierter eIDAS-Zeitstempel. Der Anbieter ist kein qualifizierter Vertrauensdiensteanbieter.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Geändert seit {date}.",
     "verdict_invalid": "Dieser Nachweis kann nicht bestätigt werden: Datei, Datum oder Zeitstempel stimmen nicht mehr überein.",
     "verdict_pending": "Ausstehend — der qualifizierte Zeitstempel wurde noch nicht ausgestellt.",
-    "verdict_signature_unverified": "Fingerabdruck stimmt überein — Signatur nicht geprüft. Dieses Dokument hat denselben Fingerabdruck wie das am {date} gestempelte, aber die Signatur des Zeitstempels konnte nicht geprüft werden.",
-    "warn_signature_unverified": "Dies ist NICHT als qualifizierter eIDAS-Zeitstempel ausgewiesen: Die Signatur des Tokens konnte hier nicht geprüft werden (Prüfung nicht möglich). Datum und Fingerabdruckprüfung (V/X) werden angezeigt, ohne qualifizierten Status.",
     "policy_absent": "fehlt",
-    "field_signature": "Signatur des Tokens",
-    "signature_unverified_line": "NICHT geprüft (Prüfung nicht möglich)"
+    "field_signature": "Signatur des Tokens"
   },
   "offer": {
     "present_does_not": "Es ist kein Protokoll eines Gerichtsvollziehers, keine Signatur und keine Rechtsberatung.",

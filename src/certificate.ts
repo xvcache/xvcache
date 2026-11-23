@@ -73,61 +73,108 @@ export function otsHuman(status?: string | null, detail?: string | null): string
   }
 }
 
+export type DisplayKind =
+  | "intact"
+  | "signature_unverified"
+  | "signature_invalid"
+  | "ots_only"
+  | "ots_pending"
+  | "modifie"
+  | "invalide"
+  | "pending";
+
+export function displayTone(kind: DisplayKind): "green" | "amber" | "red" {
+  if (kind === "intact") return "green";
+  if (kind === "signature_invalid" || kind === "modifie" || kind === "invalide") return "red";
+  return "amber";
+}
+
 export type HumanVerdict = {
   glyph: "V" | "X";
-  kind: "intact" | "modifie" | "invalide" | "signature_unverified";
+  kind: DisplayKind;
   title: string;
   sentence: string;
   since: string | null;
 };
 
-/** Intact only when the fingerprint matches (V) and the token signature is verified. */
+/** Earliest confirming Bitcoin block time in an OpenTimestamps proof, if any. */
+export function earliestOtsBlockTime(ots: { status?: string; bitcoin?: { ok: boolean; block_time?: string }[] } | null | undefined): string | null {
+  if (!ots?.bitcoin?.length) return null;
+  const times = ots.bitcoin.filter((b) => b.ok && b.block_time).map((b) => b.block_time as string);
+  if (!times.length) return null;
+  times.sort();
+  return times[0] ?? null;
+}
+
+/** Date shown in a verdict sentence: OTS confirmed uses the Bitcoin block time; OTS pending and invalid signature show none. */
+export function verdictDateIso(kind: DisplayKind, genTime: string | null, otsBlockTime?: string | null): string | null {
+  if (kind === "ots_only") return otsBlockTime ?? null;
+  if (kind === "ots_pending" || kind === "signature_invalid") return null;
+  return genTime;
+}
+
+/**
+ * Intact only when the fingerprint matches (V) and the token signature is verified.
+ * Reserved for TSA-present cases: a missing token is ots_only / ots_pending, not this helper.
+ */
 export function kindWhenFingerprintMatches(signature: string | null | undefined): "intact" | "signature_unverified" {
   return signature === "verified" ? "intact" : "signature_unverified";
 }
 
-export function humanVerdict(report: VerifyReport): HumanVerdict {
-  const when = report.gen_time ? formatParisDateTime(report.gen_time) : null;
-  const since = when ? when.short : null;
+/**
+ * "signature_unverified" is reserved for a technical inability to check the signature
+ * (openssl missing, trust chain unavailable). A signature that was checked and is false
+ * is "signature_invalid". No TSA token is ots_only (OTS confirmed) or ots_pending.
+ */
+export function displayKindFromReport(report: VerifyReport): DisplayKind {
   const noteChanged = report.checks.note?.ok === false;
+  const noToken = report.signature == null && !report.provider;
+  if (report.signature === "failed" && !noteChanged) return "signature_invalid";
   if (report.glyph === "V") {
-    if (kindWhenFingerprintMatches(report.signature) === "intact") {
-      return {
-        glyph: "V",
-        kind: "intact",
-        title: "Intact",
-        sentence: when
-          ? `Intact — ce document est identique à celui horodaté le ${when.short} (${when.tz}).`
-          : "Intact — ce document est identique à la version certifiée.",
-        since,
-      };
-    }
-    return {
-      glyph: "V",
-      kind: "signature_unverified",
-      title: "Empreinte conforme — signature non vérifiée",
-      sentence: when
-        ? `Empreinte conforme — signature non vérifiée. Ce document a la même empreinte que celui horodaté le ${when.short} (${when.tz}), mais la signature du jeton n'a pas pu être vérifiée.`
-        : "Empreinte conforme — signature non vérifiée.",
-      since,
-    };
+    if (report.signature === "verified") return "intact";
+    if (noToken) return report.ots?.status === "confirmed" ? "ots_only" : "ots_pending";
+    return "signature_unverified";
   }
-  if (noteChanged && when) {
-    return {
-      glyph: "X",
-      kind: "modifie",
-      title: "Modifié",
-      sentence: `Modifié depuis le ${when.short} (${when.tz}).`,
-      since,
-    };
+  if (noteChanged && report.gen_time) return "modifie";
+  return "invalide";
+}
+
+export function displayKindFromModel(model: CertificateModel): DisplayKind {
+  if (model.verdict === "X") {
+    if (model.tsa?.signature === "failed") return "signature_invalid";
+    return "modifie";
   }
-  return {
-    glyph: "X",
-    kind: "invalide",
-    title: "Preuve invalide",
-    sentence: "Cette preuve ne peut pas être validée. Le fichier, la date ou le jeton ne correspondent plus.",
-    since,
-  };
+  if (model.verdict === "pending" || model.pending_qualified) return "pending";
+  if (!model.tsa) return model.ots_status === "confirmed" ? "ots_only" : "ots_pending";
+  if (model.tsa.signature === "verified") return "intact";
+  if (model.tsa.signature === "failed") return "signature_invalid";
+  return "signature_unverified";
+}
+
+export function humanVerdict(report: VerifyReport): HumanVerdict {
+  const kind = displayKindFromReport(report);
+  const dateIso = verdictDateIso(kind, report.gen_time, earliestOtsBlockTime(report.ots));
+  const when = report.gen_time ? formatParisDateTime(report.gen_time) : null;
+  const otsWhen = dateIso && kind === "ots_only" ? formatParisDateTime(dateIso) : null;
+  const since = kind === "ots_pending" || kind === "signature_invalid" ? null
+    : kind === "ots_only" ? (otsWhen ? otsWhen.short : null)
+    : (when ? when.short : null);
+  const title = kind === "intact" ? "Intact"
+    : kind === "signature_unverified" ? "Empreinte conforme — signature non vérifiée"
+    : kind === "signature_invalid" ? "Signature invalide"
+    : kind === "ots_only" ? "Empreinte conforme — sans jeton d'horodatage"
+    : kind === "ots_pending" ? "Preuve en attente de confirmation"
+    : kind === "modifie" ? "Modifié"
+    : kind === "pending" ? "Horodatage qualifié en attente"
+    : "Preuve invalide";
+  const sentence = kind === "intact" && when
+    ? `Intact — ce document est identique à celui horodaté le ${when.short} (${when.tz}).`
+    : kind === "intact"
+    ? "Intact — ce document est identique à la version certifiée."
+    : kind === "modifie" && when
+    ? `Modifié depuis le ${when.short} (${when.tz}).`
+    : localizedVerdict(kind, "fr", dateIso, "Europe/Paris");
+  return { glyph: report.glyph, kind, title, sentence, since };
 }
 
 export type StoredProof = { file: string; proof: Proof };
@@ -209,6 +256,7 @@ export async function writeCertificatePack(opts: {
   proofFile?: string | null;
   otsStatus?: string | null;
   otsDetail?: string | null;
+  otsBlockTime?: string | null;
   lang?: string;
   tz?: string;
   /** Qualification recomputed from the token (certifier.verify). Omitted → recomputed here (bundled Certigna chain). */
@@ -256,6 +304,7 @@ export async function writeCertificatePack(opts: {
     proof,
     qualification: opts.qualification,
     otsText: otsHuman(opts.otsStatus ?? proof.ots?.status, opts.otsDetail ?? proof.ots?.detail),
+    otsBlockTime: opts.otsBlockTime,
     attachments,
     lang,
     tz: opts.tz,
@@ -361,7 +410,7 @@ export async function handleDocument(
 
   const localized = (r: VerifyReport): string => {
     const k = humanVerdict(r).kind;
-    return localizedVerdict(k, lang, r.gen_time, input.tz);
+    return localizedVerdict(k, lang, verdictDateIso(k, r.gen_time, earliestOtsBlockTime(r.ots)), input.tz);
   };
   if (report.glyph !== "V") {
     return fromReport(report, { stamped, path: found.proof.path, proof_id: localProofId(found.proof), lang, verdict_localized: localized(report) });
@@ -374,6 +423,7 @@ export async function handleDocument(
     proofFile: found.file,
     otsStatus: report.ots?.status ?? found.proof.ots?.status,
     otsDetail: report.ots?.detail ?? found.proof.ots?.detail,
+    otsBlockTime: earliestOtsBlockTime(report.ots),
     lang,
     tz: input.tz,
     qualification: report.qualified ? report.qualification : report.qualification ? { ...report.qualification, qualified: false } : null,
@@ -403,7 +453,8 @@ export async function reissueCertificate(
   const found = proofs.find((p) => localProofId(p.proof) === input.proof_id);
   if (!found) return { ok: false, stamped: false, error: `PROOF_NOT_FOUND: ${input.proof_id}` };
   const report = await certifier.verify({ proof: found.proof, path: found.proof.path, online: input.online === true });
-  const verdict_localized = localizedVerdict(humanVerdict(report).kind, lang, report.gen_time, input.tz);
+  const k = humanVerdict(report).kind;
+  const verdict_localized = localizedVerdict(k, lang, verdictDateIso(k, report.gen_time, earliestOtsBlockTime(report.ots)), input.tz);
   if (report.glyph !== "V") return fromReport(report, { path: found.proof.path, proof_id: input.proof_id, lang, verdict_localized });
   const pack = await writeCertificatePack({
     proof: found.proof,
@@ -412,6 +463,7 @@ export async function reissueCertificate(
     proofFile: found.file,
     otsStatus: report.ots?.status ?? found.proof.ots?.status,
     otsDetail: report.ots?.detail ?? found.proof.ots?.detail,
+    otsBlockTime: earliestOtsBlockTime(report.ots),
     lang,
     tz: input.tz,
     qualification: report.qualified ? report.qualification : report.qualification ? { ...report.qualification, qualified: false } : null,
@@ -434,7 +486,9 @@ const RULE = rgb(0.78, 0.76, 0.72);
 const GREEN = rgb(0.06, 0.42, 0.28);
 const GREEN_SOFT = rgb(0.93, 0.96, 0.94);
 const RED = rgb(0.62, 0.12, 0.1);
+const RED_SOFT = rgb(0.98, 0.92, 0.91);
 const AMBER = rgb(0.6, 0.38, 0.05);
+const AMBER_SOFT = rgb(0.97, 0.94, 0.86);
 const WARN_BG = rgb(0.99, 0.95, 0.88);
 const WARN_INK = rgb(0.42, 0.25, 0.05);
 const CONTENT_W = PAGE_W - 2 * MARGIN_X;
@@ -563,6 +617,8 @@ export type CertificateModel = {
   pending_qualified?: boolean;
   ots_status?: string | null;
   ots_detail?: string | null;
+  /** Bitcoin block time (ISO) when the OpenTimestamps proof is confirmed. */
+  ots_block_time?: string | null;
   /** Overrides the localized OpenTimestamps sentence (legacy French callers). */
   ots_text?: string | null;
   proof_id?: string | null;
@@ -593,22 +649,27 @@ export function localizedOts(lang: string, status?: string | null, detail?: stri
 }
 
 /** Localized one-line verdict for the AI to show (no question, no advice). */
-export function localizedVerdict(kind: "intact" | "modifie" | "invalide" | "pending" | "signature_unverified", lang: string, genTime: string | null, tz?: string): string {
+export function localizedVerdict(kind: DisplayKind, lang: string, genTime: string | null, tz?: string): string {
   const L = loadLocale(lang).cert;
   const when = genTime ? formatLocalDateTime(genTime, loadLocale(lang).lang, tz) : null;
   const date = when ? `${when.local} (${when.tz}) — ${when.utc} UTC` : "?";
   if (kind === "intact") return fill(L.verdict_intact, { date });
   if (kind === "signature_unverified") return fill(L.verdict_signature_unverified, { date });
+  if (kind === "signature_invalid") return L.verdict_signature_invalid;
+  if (kind === "ots_only") return fill(L.verdict_ots_only, { date });
+  if (kind === "ots_pending") return L.verdict_ots_pending;
   if (kind === "modifie") return fill(L.verdict_modified, { date });
   if (kind === "pending") return L.verdict_pending;
   return L.verdict_invalid;
 }
 
-function drawBadge(c: Canvas, cx: number, cy: number, r: number, verdict: CertificateVerdict): void {
-  const color = verdict === "V" ? GREEN : verdict === "X" ? RED : AMBER;
-  c.page.drawCircle({ x: cx, y: cy, size: r + 4, color: GREEN_SOFT });
+function drawBadge(c: Canvas, cx: number, cy: number, r: number, kind: DisplayKind): void {
+  const tone = displayTone(kind);
+  const color = tone === "green" ? GREEN : tone === "red" ? RED : AMBER;
+  const halo = tone === "green" ? GREEN_SOFT : tone === "red" ? RED_SOFT : AMBER_SOFT;
+  c.page.drawCircle({ x: cx, y: cy, size: r + 4, color: halo });
   c.page.drawCircle({ x: cx, y: cy, size: r, color });
-  const g = verdict === "pending" ? "…" : verdict;
+  const g = kind === "pending" ? "…" : (tone === "red" ? "X" : "V");
   const size = 13;
   const w = c.fonts.serifBold.widthOfTextAtSize(g, size);
   c.draw(g, cx - w / 2, cy - 4.5, size, c.fonts.serifBold, rgb(1, 1, 1));
@@ -655,7 +716,6 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   // Qualified only if the caller derived it from the token AND the token's OID is present AND the
   // signature was verified. No default OID, no "qualified" without a verified signature.
   const qualified = !!model.tsa?.qualified && !!tokenPolicy && sigVerified && !model.pending_qualified && model.verdict !== "pending";
-  const sigUnverified = !!model.tsa && !sigVerified;
   const isFreeTsa = model.tsa?.provider === "freetsa";
   const verification = model.kind === "verification";
   const accent = qualified && model.verdict === "V" ? GREEN : RULE;
@@ -690,17 +750,27 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   c.gap(6);
 
   // ---- verdict ----
-  const unverifiedV = model.verdict === "V" && model.tsa?.signature !== "verified";
-  const title = model.verdict === "X" ? L.title_modified
-    : model.verdict === "pending" ? L.title_pending
-    : unverifiedV ? L.title_signature_unverified
-    : L.title_intact;
-  const subtitle = model.verdict === "X" ? L.subtitle_modified
-    : model.verdict === "pending" ? L.subtitle_pending
-    : unverifiedV ? L.subtitle_signature_unverified
-    : L.subtitle_intact;
+  const kind = displayKindFromModel(model);
+  const dateIso = verdictDateIso(kind, model.gen_time, model.ots_block_time);
+  const whenKind = dateIso ? formatLocalDateTime(dateIso, lang, model.tz) : null;
+  const date = whenKind ? `${whenKind.local} (${whenKind.tz}) — ${whenKind.utc} UTC` : "?";
+  const title = kind === "intact" ? L.title_intact
+    : kind === "signature_unverified" ? L.title_signature_unverified
+    : kind === "signature_invalid" ? L.title_signature_invalid
+    : kind === "ots_only" ? L.title_ots_only
+    : kind === "ots_pending" ? L.title_ots_pending
+    : kind === "pending" ? L.title_pending
+    : L.title_modified;
+  const subtitle = kind === "intact" ? L.subtitle_intact
+    : kind === "signature_unverified" ? fill(L.subtitle_signature_unverified, { date })
+    : kind === "signature_invalid" ? L.subtitle_signature_invalid
+    : kind === "ots_only" ? fill(L.subtitle_ots_only, { date })
+    : kind === "ots_pending" ? L.subtitle_ots_pending
+    : kind === "pending" ? L.subtitle_pending
+    : kind === "invalide" ? L.verdict_invalid
+    : L.subtitle_modified;
   const badgeY = c.y - 16;
-  drawBadge(c, MARGIN_X + 16, badgeY, 14, model.verdict);
+  drawBadge(c, MARGIN_X + 16, badgeY, 14, kind);
   const titleX = MARGIN_X + 42;
   const titleSize = 18 * scale;
   c.y = badgeY + 2 + titleSize;
@@ -711,9 +781,12 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
 
   // ---- NOT QUALIFIED banner ----
   if (!qualified) {
-    const warn = model.pending_qualified || (model.verdict === "pending") ? L.warn_pending
+    const warn = kind === "pending" || model.pending_qualified ? L.warn_pending
+      : kind === "signature_invalid" ? L.warn_signature_invalid
+      : kind === "ots_only" ? L.warn_ots_only
+      : kind === "ots_pending" ? L.warn_ots_pending
       : isFreeTsa ? L.warn_freetsa
-      : sigUnverified ? L.warn_signature_unverified
+      : kind === "signature_unverified" ? L.warn_signature_unverified
       : L.warn_other;
     const head = L.banner_not_qualified;
     const warnLines = wrapText(warn, fonts.sans, 8.4 * scale, CONTENT_W - 20);
@@ -743,7 +816,8 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
       ? `${providerName}\n${L.provider_qualified}\n${policyLine}`
       : isFreeTsa ? `${L.freetsa_line}\n${L.not_qualified_line}` : `${providerName}\n${L.not_qualified_line}\n${policyLine}`;
     c.field(L.field_provider, lines);
-    if (sigUnverified) c.field(L.field_signature, L.signature_unverified_line);
+    if (kind === "signature_unverified") c.field(L.field_signature, L.signature_unverified_line);
+    if (kind === "signature_invalid") c.field(L.field_signature, L.signature_invalid_line);
     if (model.tsa.serial) c.field(L.field_serial, formatGroupedHex(model.tsa.serial));
   } else {
     c.field(L.field_provider, model.pending_qualified ? `Certigna — ${L.verdict_pending}` : L.no_provider);
@@ -756,7 +830,8 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   // ---- how to verify again ----
   c.text(L.reverify_title, { font: fonts.serifBold, size: 10.5, lineGap: 4 });
   const since = model.gen_time ? formatLocalDateTime(model.gen_time, lang, model.tz).local : "…";
-  for (const [i, step] of [L.reverify_1, L.reverify_2, fill(L.reverify_3, { date: since })].entries()) {
+  const step3 = kind === "intact" ? fill(L.reverify_3, { date: since }) : L.reverify_3_incomplete;
+  for (const [i, step] of [L.reverify_1, L.reverify_2, step3].entries()) {
     c.text(`${i + 1}.  ${step}`, { font: fonts.serif, size: 9.2, lineGap: 2.4 });
   }
   c.gap(4);
@@ -777,9 +852,19 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
     fy -= legalSize + legalGap;
   }
 
-  doc.setTitle(`XVcache — ${model.label}`);
+  doc.setTitle(`XVcache — ${title}`);
   doc.setAuthor("XVcache");
-  doc.setSubject(qualified ? "Qualified eIDAS electronic timestamp certificate" : "Timestamp certificate (not qualified)");
+  doc.setSubject(
+    qualified ? "Qualified eIDAS electronic timestamp certificate"
+    : kind === "intact" ? "Timestamp certificate (not qualified)"
+    : kind === "signature_unverified" ? "Timestamp report — signature not verified"
+    : kind === "signature_invalid" ? "Timestamp report — invalid signature"
+    : kind === "ots_only" ? "Timestamp report — OpenTimestamps proof, no timestamp token"
+    : kind === "ots_pending" ? "Timestamp report — proof awaiting confirmation"
+    : kind === "pending" ? "Timestamp report — qualified timestamp pending"
+    : kind === "modifie" ? "Timestamp report — modified"
+    : "Timestamp report",
+  );
   doc.setCreator("XVcache");
   doc.setProducer("XVcache");
   doc.setLanguage(lang);
@@ -824,7 +909,7 @@ export function localProofId(proof: Proof): string {
   return `${proof.batch_id}.${proof.merkle.leaf_index}`;
 }
 
-export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string; otsText?: string | null; otsStatus?: string | null; otsDetail?: string | null; attachments: Attachment[]; qualification?: Qualification | null }): CertificateModel {
+export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string; otsText?: string | null; otsStatus?: string | null; otsDetail?: string | null; otsBlockTime?: string | null; attachments: Attachment[]; qualification?: Qualification | null }): CertificateModel {
   const q = opts.qualification ?? null;
   return {
     lang: opts.lang,
@@ -838,6 +923,7 @@ export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string;
     tsa: proof.tsa ? { provider: proof.tsa.provider, label: proof.tsa.label, qualified: !!q?.qualified, policy: q ? q.policy : null, serial: proof.tsa.serial, signature: q ? q.signature : "not_checked" } : null,
     ots_status: opts.otsStatus ?? proof.ots?.status ?? null,
     ots_detail: opts.otsDetail ?? proof.ots?.detail ?? null,
+    ots_block_time: opts.otsBlockTime ?? null,
     ots_text: opts.otsText ?? null,
     proof_id: localProofId(proof),
     attachments: opts.attachments,
@@ -848,6 +934,7 @@ export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string;
 export async function buildCertificatePdf(opts: {
   proof: Proof;
   otsText?: string;
+  otsBlockTime?: string | null;
   attachments: Attachment[];
   lang?: string;
   tz?: string;
@@ -859,6 +946,6 @@ export async function buildCertificatePdf(opts: {
   if (qualification === undefined) {
     qualification = opts.proof.tsa ? await assessQualification(Buffer.from(opts.proof.tsa.token_base64, "base64"), opts.proof.merkle.root) : null;
   }
-  const r = await renderCertificate(modelFromProof(opts.proof, { lang, tz: opts.tz, otsText: lang === "fr" ? opts.otsText : null, attachments: opts.attachments, qualification }));
+  const r = await renderCertificate(modelFromProof(opts.proof, { lang, tz: opts.tz, otsText: lang === "fr" ? opts.otsText : null, otsBlockTime: opts.otsBlockTime, attachments: opts.attachments, qualification }));
   return r.bytes;
 }

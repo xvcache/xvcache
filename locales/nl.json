@@ -11,8 +11,6 @@
     "subtitle_modified": "Uitslag X — deze vingerafdruk komt niet overeen met de gestempelde.",
     "title_pending": "Gekwalificeerd tijdstempel in afwachting",
     "subtitle_pending": "Het gekwalificeerde tijdstempel is nog niet uitgegeven.",
-    "title_signature_unverified": "Vingerafdruk komt overeen — handtekening niet geverifieerd",
-    "subtitle_signature_unverified": "Uitslag V — de vingerafdruk komt overeen, maar de handtekening van het token kon niet worden geverifieerd.",
     "banner_not_qualified": "NIET GEKWALIFICEERD",
     "warn_freetsa": "Dit is GEEN gekwalificeerd eIDAS-tijdstempel. Het tijdstempel komt van FreeTSA en is alleen voor tests bedoeld. Het geniet geen wettelijk vermoeden.",
     "warn_other": "Dit is GEEN gekwalificeerd eIDAS-tijdstempel. De aanbieder is geen gekwalificeerde verlener van vertrouwensdiensten.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Gewijzigd sinds {date}.",
     "verdict_invalid": "Dit bewijs kan niet worden gevalideerd: het bestand, de datum of het tijdstempel komen niet meer overeen.",
     "verdict_pending": "In afwachting — het gekwalificeerde tijdstempel is nog niet uitgegeven.",
-    "verdict_signature_unverified": "Vingerafdruk komt overeen — handtekening niet geverifieerd. Dit document heeft dezelfde vingerafdruk als het document dat op {date} is gestempeld, maar de handtekening van het token kon niet worden geverifieerd.",
-    "warn_signature_unverified": "Dit wordt NIET als gekwalificeerd eIDAS-tijdstempel aangemerkt: de handtekening van het token kon hier niet worden gecontroleerd (controle onmogelijk). Datum en vingerafdrukcontrole (V/X) worden getoond, zonder gekwalificeerde status.",
     "policy_absent": "ontbreekt",
-    "field_signature": "Handtekening van het token",
-    "signature_unverified_line": "NIET gecontroleerd (controle onmogelijk)"
+    "field_signature": "Handtekening van het token"
   },
   "offer": {
     "present_does_not": "Het is geen proces-verbaal van een deurwaarder, geen handtekening en geen juridisch advies.",

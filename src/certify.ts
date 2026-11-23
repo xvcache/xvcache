@@ -318,20 +318,29 @@ export class Certifier {
       const qualified_confirmed = qualified;
       const shown = p?.path ?? input.path ?? "?";
       const when = p?.tsa?.gen_time ? ` le ${p.tsa.gen_time}` : "";
-      const sigUnverified = !!p?.tsa && checks.tsa_signature?.ok !== true;
+      const sigFailed = !!p?.tsa && checks.tsa_signature?.ok === false;
+      const sigUnverified = !!p?.tsa && checks.tsa_signature?.ok !== true && !sigFailed;
       const providerName = p?.tsa ? p.tsa.label.replace(/\s*\([^)]*\)\s*$/, "").trim() || p.tsa.provider : "";
+      const otsStatus = extra.ots?.status ?? p?.ots?.status;
       const level = !p?.tsa ? "ancrage OpenTimestamps seul"
         : qualified ? `horodatage qualifié eIDAS, ${providerName}, OID ${qual!.policy}`
+        : sigFailed ? `${providerName}, signature du jeton INVALIDE — cette date n'est pas fiable`
         : sigUnverified ? `${providerName}, signature du jeton NON VÉRIFIÉE (vérification impossible : ${(checks.tsa_signature?.detail ?? "non vérifiée").replace(/\.$/, "")}) — horodatage non déclaré qualifié`
         : `${providerName}, non qualifié : ${(qual?.detail ?? "jeton non qualifié").replace(/\.$/, "")}`;
       const failed = Object.entries(checks).filter(([, c]) => c.ok === false).map(([k, c]) => `${k} : ${c.detail.replace(/\.$/, "")}`);
+      const vMessage = checks.tsa_signature?.ok === true
+        ? `V  certifiée — Note ${shown} existait telle quelle${when} (${level}).`
+        : !p?.tsa
+          ? (otsStatus === "confirmed"
+            ? `V  empreinte conforme, sans jeton d'horodatage — Note ${shown} existait telle quelle (${level}).`
+            : `V  preuve en attente de confirmation — Note ${shown} existait telle quelle (${level}).`)
+          : `V  empreinte conforme, signature non vérifiée — Note ${shown} existait telle quelle${when} (${level}).`;
+      const xMessage = sigFailed
+        ? `X  signature invalide — Note ${shown} : ${failed.join(" ; ") || "preuve illisible"}.`
+        : `X  preuve invalide — Note ${shown} : ${failed.join(" ; ") || "preuve illisible"}.`;
       return {
         glyph: glyphOk ? "V" : "X",
-        message: glyphOk
-          ? (checks.tsa_signature?.ok === true
-            ? `V  certifiée — Note ${shown} existait telle quelle${when} (${level}).`
-            : `V  empreinte conforme, signature non vérifiée — Note ${shown} existait telle quelle${when} (${level}).`)
-          : `X  preuve invalide — Note ${shown} : ${failed.join(" ; ") || "preuve illisible"}.`,
+        message: glyphOk ? vMessage : xMessage,
         path: p?.path ?? input.path ?? null,
         batch_id: p?.batch_id ?? null,
         root: p?.merkle?.root ?? null,

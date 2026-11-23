@@ -11,8 +11,6 @@
     "subtitle_modified": "Breith X — ní hionann an méarlorg seo agus an ceann stampáilte.",
     "title_pending": "Stampa ama cáilithe ar feitheamh",
     "subtitle_pending": "Níor eisíodh an stampa cáilithe go fóill.",
-    "title_signature_unverified": "Tagann an méarlorg le chéile — níl an síniú deimhnithe",
-    "subtitle_signature_unverified": "Toradh V — tagann an méarlorg le chéile, ach níorbh fhéidir síniú an chomhartha a fhíorú.",
     "banner_not_qualified": "NEAMHCHÁILITHE",
     "warn_freetsa": "NÍ stampa ama cáilithe eIDAS é seo. Is ó FreeTSA a thagann an stampa agus is le haghaidh tástála amháin é. Níl aon toimhde dhlíthiúil ag baint leis.",
     "warn_other": "NÍ stampa ama cáilithe eIDAS é seo. Ní soláthraí cáilithe seirbhísí iontaoibhe é an soláthraí.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Athraithe ó {date}.",
     "verdict_invalid": "Ní féidir an cruthúnas seo a bhailíochtú: ní réitíonn an comhad, an dáta ná an stampa a thuilleadh.",
     "verdict_pending": "Ar feitheamh — níor eisíodh an stampa ama cáilithe go fóill.",
-    "verdict_signature_unverified": "Tagann an méarlorg le chéile — níl an síniú deimhnithe. Tá an méarlorg céanna ag an doiciméad seo is atá ag an gceann a stampaíodh ar {date}, ach níorbh fhéidir síniú an chomhartha a fhíorú.",
-    "warn_signature_unverified": "NÍ fhógraítear é seo mar stampa ama cáilithe eIDAS: níorbh fhéidir síniú an chomhartha a fhíorú anseo (fíorú dodhéanta). Taispeántar an dáta agus seiceáil na méarloirge (V/X), gan stádas cáilithe.",
     "policy_absent": "as láthair",
-    "field_signature": "Síniú an chomhartha",
-    "signature_unverified_line": "NÍ fíoraithe (fíorú dodhéanta)"
+    "field_signature": "Síniú an chomhartha"
   },
   "offer": {
     "present_does_not": "Ní tuarascáil báille, ní síniú ná comhairle dhlíthiúil é.",

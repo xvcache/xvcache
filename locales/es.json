@@ -11,8 +11,6 @@
     "subtitle_modified": "Veredicto X — esta huella no coincide con la sellada.",
     "title_pending": "Sello de tiempo cualificado pendiente",
     "subtitle_pending": "El sello cualificado aún no se ha emitido.",
-    "title_signature_unverified": "La huella coincide — firma no verificada",
-    "subtitle_signature_unverified": "Veredicto V — la huella coincide, pero no se ha podido verificar la firma del sello.",
     "banner_not_qualified": "NO CUALIFICADO",
     "warn_freetsa": "Esto NO es un sello de tiempo cualificado eIDAS. El sello procede de FreeTSA y solo sirve para pruebas. No goza de presunción legal.",
     "warn_other": "Esto NO es un sello de tiempo cualificado eIDAS. El proveedor no es un prestador cualificado de servicios de confianza.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Modificado desde el {date}.",
     "verdict_invalid": "Esta prueba no puede validarse: el archivo, la fecha o el sello ya no coinciden.",
     "verdict_pending": "Pendiente — el sello de tiempo cualificado aún no se ha emitido.",
-    "verdict_signature_unverified": "La huella coincide — firma no verificada. Este documento tiene la misma huella que el sellado el {date}, pero no se ha podido verificar la firma del sello.",
-    "warn_signature_unverified": "Esto NO se declara como sello de tiempo cualificado eIDAS: la firma del token no ha podido verificarse aquí (verificación imposible). Se indican la fecha y el control de la huella (V/X), sin estatus cualificado.",
     "policy_absent": "ausente",
-    "field_signature": "Firma del token",
-    "signature_unverified_line": "NO verificada (verificación imposible)"
+    "field_signature": "Firma del token"
   },
   "offer": {
     "present_does_not": "No es un acta notarial, ni una firma, ni asesoramiento jurídico.",

@@ -11,8 +11,6 @@
     "subtitle_modified": "Rezultatas X — ši santrauka neatitinka pažymėtosios.",
     "title_pending": "Kvalifikuota laiko žyma laukiama",
     "subtitle_pending": "Kvalifikuota laiko žyma dar neišduota.",
-    "title_signature_unverified": "Kontrolinė suma sutampa — parašas nepatikrintas",
-    "subtitle_signature_unverified": "Rezultatas V — kontrolinė suma sutampa, bet žetono parašo patikrinti nepavyko.",
     "banner_not_qualified": "NEKVALIFIKUOTA",
     "warn_freetsa": "Tai NĖRA kvalifikuota eIDAS laiko žyma. Žyma gauta iš FreeTSA ir skirta tik bandymams. Jai netaikoma teisinė prezumpcija.",
     "warn_other": "Tai NĖRA kvalifikuota eIDAS laiko žyma. Teikėjas nėra kvalifikuotas patikimumo užtikrinimo paslaugų teikėjas.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Pakeistas nuo {date}.",
     "verdict_invalid": "Šio įrodymo negalima patvirtinti: failas, data ar žyma nebeatitinka.",
     "verdict_pending": "Laukiama — kvalifikuota laiko žyma dar neišduota.",
-    "verdict_signature_unverified": "Kontrolinė suma sutampa — parašas nepatikrintas. Šis dokumentas turi tą pačią kontrolinę sumą kaip ir paženklintasis {date}, bet žetono parašo patikrinti nepavyko.",
-    "warn_signature_unverified": "Tai NĖRA nurodyta kaip kvalifikuota eIDAS laiko žyma: žetono parašo čia patikrinti nepavyko (patikra neįmanoma). Data ir kontrolinės sumos patikra (V/X) nurodytos be kvalifikuoto statuso.",
     "policy_absent": "nėra",
-    "field_signature": "Žetono parašas",
-    "signature_unverified_line": "NEPATIKRINTAS (patikra neįmanoma)"
+    "field_signature": "Žetono parašas"
   },
   "offer": {
     "present_does_not": "Tai nėra antstolio protokolas, parašas ar teisinė konsultacija.",

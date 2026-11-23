@@ -11,8 +11,6 @@
     "subtitle_modified": "Rezultāts X — šis nospiedums neatbilst apzīmogotajam.",
     "title_pending": "Kvalificēts laika zīmogs gaida",
     "subtitle_pending": "Kvalificētais laika zīmogs vēl nav izsniegts.",
-    "title_signature_unverified": "Pirksta nospiedums sakrīt — paraksts nav pārbaudīts",
-    "subtitle_signature_unverified": "Rezultāts V — nospiedums sakrīt, bet pilnvaras parakstu neizdevās pārbaudīt.",
     "banner_not_qualified": "NAV KVALIFICĒTS",
     "warn_freetsa": "Tas NAV kvalificēts eIDAS laika zīmogs. Zīmogs ir no FreeTSA un paredzēts tikai testēšanai. Tam nav juridiskas prezumpcijas.",
     "warn_other": "Tas NAV kvalificēts eIDAS laika zīmogs. Pakalpojumu sniedzējs nav kvalificēts uzticamības pakalpojumu sniedzējs.",
@@ -57,11 +55,8 @@
     "verdict_modified": "Mainīts kopš {date}.",
     "verdict_invalid": "Šo pierādījumu nevar apstiprināt: fails, datums vai zīmogs vairs neatbilst.",
     "verdict_pending": "Gaida — kvalificētais laika zīmogs vēl nav izsniegts.",
-    "verdict_signature_unverified": "Pirksta nospiedums sakrīt — paraksts nav pārbaudīts. Šim dokumentam ir tāds pats nospiedums kā {date} laika zīmogotajam, bet pilnvaras parakstu neizdevās pārbaudīt.",
-    "warn_signature_unverified": "Tas NAV norādīts kā kvalificēts eIDAS laika zīmogs: marķiera parakstu šeit nevarēja pārbaudīt (pārbaude nav iespējama). Datums un nospieduma pārbaude (V/X) ir norādīti bez kvalificēta statusa.",
     "policy_absent": "nav",
-    "field_signature": "Marķiera paraksts",
-    "signature_unverified_line": "NAV pārbaudīts (pārbaude nav iespējama)"
+    "field_signature": "Marķiera paraksts"
   },
   "offer": {
     "present_does_not": "Tas nav tiesu izpildītāja akts, paraksts vai juridiska konsultācija.",

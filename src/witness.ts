@@ -4,7 +4,7 @@ import path from "node:path";
 import { leafHash, merklePath, merkleRoot, verifyMerklePath, type HashLeaf, type MerkleStep } from "./merkle.js";
 import { requestTimestamp, parseTimeStampToken, verifyTokenSignature, resolveTsaProvider, OID_SHA256, assessQualification, certignaTrust, type Qualification, type QualifiedTrust, type TsaProvider, type FetchLike } from "./tsa.js";
 import { stampDigest, serializeOts, parseOts, otsStatus } from "./ots.js";
-import { renderCertificate, type CertificateModel } from "./certificate.js";
+import { renderCertificate, earliestOtsBlockTime, type CertificateModel } from "./certificate.js";
 import type { Proof } from "./certify.js";
 import type { TsaTokenLedger } from "./tsa-tokens.js";
 
@@ -98,6 +98,8 @@ export type HostedVerification = {
   signature: "verified" | "failed" | "unavailable" | null;
   checks: { fingerprint: HostedCheck; merkle: HostedCheck; tsa_token: HostedCheck; tsa_signature: HostedCheck; ots: HostedCheck };
   proof: HostedProof | null;
+  ots_status?: string | null;
+  ots_block_time?: string | null;
 };
 
 const NOTICE = "Document content stays on your computer. The hosted server receives the SHA-256 fingerprint and an optional label (up to 120 characters); the infrastructure also processes the IP address. A Merkle root is sent to the timestamping and OpenTimestamps services. The Merkle path links this fingerprint to that root. The eIDAS art. 41(2) presumption of accuracy of the date and time and of integrity applies only if status is 'qualified'; evidential weight is for the court to assess.";
@@ -515,10 +517,11 @@ export class HostedWitness {
     } else {
       checks.tsa_token = { ok: null, detail: p.status === "pending_qualified" ? "Qualified token not issued yet (provider unavailable); automatic retry in progress." : "No TSA token." };
     }
+    let otsLive: Awaited<ReturnType<typeof otsStatus>> | null = null;
     if (p.ots?.ots_base64) {
       try {
-        const s = await otsStatus(parseOts(Buffer.from(p.ots.ots_base64, "base64")), { online: !!q.online });
-        checks.ots = { ok: s.status === "failed" ? false : s.status === "confirmed" ? true : null, detail: s.detail };
+        otsLive = await otsStatus(parseOts(Buffer.from(p.ots.ots_base64, "base64")), { online: !!q.online });
+        checks.ots = { ok: otsLive.status === "failed" ? false : otsLive.status === "confirmed" ? true : null, detail: otsLive.detail };
       } catch (e) {
         checks.ots = { ok: false, detail: `Unreadable .ots: ${errMsg(e)}` };
       }
@@ -527,6 +530,7 @@ export class HostedWitness {
     let verdict: HostedVerdict;
     if (checks.fingerprint.ok === false || checks.merkle.ok === false || checks.tsa_token.ok === false || checks.tsa_signature.ok === false || checks.ots.ok === false) verdict = "X";
     else if (checks.tsa_token.ok === true) verdict = "V";
+    else if (!p.tsa && p.status === "ots_only" && checks.fingerprint.ok === true && checks.merkle.ok === true) verdict = "V";
     else verdict = "pending";
     const qualified = verdict === "V" && checks.tsa_signature.ok === true && !!qualification?.qualified;
     // Do not return stale/forged stored "qualified" fields (including when openssl is absent).
@@ -538,6 +542,8 @@ export class HostedWitness {
     return {
       verdict, qualified, status, gen_time: p.tsa?.gen_time ?? null, checks, proof, qualification,
       signature: p.tsa ? (checks.tsa_signature.ok === true ? "verified" : checks.tsa_signature.ok === false ? "failed" : "unavailable") : null,
+      ots_status: otsLive?.status ?? p.ots?.status ?? null,
+      ots_block_time: earliestOtsBlockTime(otsLive),
     };
   }
 
@@ -566,8 +572,9 @@ export class HostedWitness {
       gen_time: p.tsa?.gen_time ?? null,
       tsa: p.tsa ? { provider: p.tsa.provider, label: p.tsa.label, qualified: v.qualified, policy: v.qualification?.policy ?? null, serial: p.tsa.serial, signature: v.signature ?? "unavailable" } : null,
       pending_qualified: p.status === "pending_qualified",
-      ots_status: p.ots?.status ?? null,
+      ots_status: v.ots_status ?? p.ots?.status ?? null,
       ots_detail: p.ots?.detail ?? null,
+      ots_block_time: v.ots_block_time ?? null,
       proof_id: p.proof_id,
       attachments,
     };
