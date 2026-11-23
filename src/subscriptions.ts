@@ -31,6 +31,8 @@ export type SubscriptionRecord = {
   disputed_at?: string;
   /** 0.3.0: email of the payer (Stripe checkout customer_details.email), used only for the key-delivery link. */
   email?: string;
+  /** When the subscription first became past_due or canceled. Window for existing-proof PDFs starts here. */
+  ended_at?: string;
 };
 
 /**
@@ -132,6 +134,28 @@ export function checkoutRef(pairing_code: string): string {
 
 export const PAIRING_TTL_MS = 24 * 3600 * 1000;
 
+/** Days after termination (past_due or canceled) during which PDFs of existing proofs can still be re-issued. Flip to 90 if Julien so decides. */
+export const POST_TERMINATION_ACCESS_DAYS = 365;
+const MS_PER_DAY = 24 * 3600 * 1000;
+
+export function terminationStartedAt(rec: Pick<SubscriptionRecord, "ended_at" | "period_start" | "created_at">): string {
+  return rec.ended_at ?? rec.period_start ?? rec.created_at;
+}
+
+export function postTerminationAccessUntil(rec: Pick<SubscriptionRecord, "ended_at" | "period_start" | "created_at">): Date {
+  return new Date(Date.parse(terminationStartedAt(rec)) + POST_TERMINATION_ACCESS_DAYS * MS_PER_DAY);
+}
+
+/** Access to existing-proof PDFs: full (active/trialing), grace (past_due/canceled within the window), or expired. */
+export function existingProofAccess(rec: SubscriptionRecord, now: Date = new Date()): "full" | "grace" | "expired" {
+  if (rec.status === "active" || rec.status === "trialing") return "full";
+  if (rec.status === "past_due" || rec.status === "canceled") {
+    return now.getTime() <= postTerminationAccessUntil(rec).getTime() ? "grace" : "expired";
+  }
+  return "expired";
+}
+
+
 export function hashSecret(secret: string): string {
   return createHash("sha256").update(secret, "utf8").digest("hex");
 }
@@ -170,6 +194,10 @@ export class SubscriptionStore {
    *   carries an email also gets a one-time link (see KeyDeliveryRecord). Unset = feature off (default).
    */
   constructor(private file: string, private now: () => Date = () => new Date(), private o: { keyDeliveryTtlMs?: number } = {}) {}
+
+  currentTime(): Date {
+    return this.now();
+  }
 
   get keyDeliveryEnabled(): boolean {
     return typeof this.o.keyDeliveryTtlMs === "number" && this.o.keyDeliveryTtlMs > 0;
@@ -276,19 +304,42 @@ export class SubscriptionStore {
   }
 
   /** Operator / tests: mint an API key directly (no billing). The plain key is returned once. */
-  createApiKey(o: { plan_id: string; quota: number | null; status: SubscriptionStatus; default_lang?: string }): Promise<{ api_key: string; key_hash: string }> {
+  createApiKey(o: { plan_id: string; quota: number | null; status: SubscriptionStatus; default_lang?: string; ended_at?: string }): Promise<{ api_key: string; key_hash: string }> {
     return this.tx((data) => {
       const api_key = newSecret("xvc_", 32);
       const rec = this.newRecord(api_key, o);
+      if (o.ended_at) rec.ended_at = o.ended_at;
       data.subscriptions.push(rec);
       return { api_key, key_hash: rec.key_hash };
+    });
+  }
+
+  /** Tests / operator: change status and optional ended_at of an existing record. */
+  setSubscriptionState(key_hash: string, patch: { status?: SubscriptionStatus; ended_at?: string | null }): Promise<SubscriptionRecord | null> {
+    return this.tx((data) => {
+      const rec = data.subscriptions.find((s) => s.key_hash === key_hash);
+      if (!rec) return null;
+      if (patch.status !== undefined) rec.status = patch.status;
+      if (patch.ended_at === null) delete rec.ended_at;
+      else if (patch.ended_at !== undefined) rec.ended_at = patch.ended_at;
+      if ((rec.status === "past_due" || rec.status === "canceled") && !rec.ended_at) rec.ended_at = this.now().toISOString();
+      if (rec.status === "active" || rec.status === "trialing") delete rec.ended_at;
+      return rec;
     });
   }
 
   authenticate(api_key: string | undefined | null): Promise<SubscriptionRecord | null> {
     if (!api_key) return Promise.resolve(null);
     const h = hashSecret(api_key.trim());
-    return this.tx((data) => data.subscriptions.find((s) => s.key_hash === h) ?? null, false);
+    return this.tx((data) => {
+      const rec = data.subscriptions.find((s) => s.key_hash === h);
+      if (!rec) return null;
+      // Retrocompatible: a past_due/canceled record stored without ended_at starts its window now (persisted once).
+      if ((rec.status === "past_due" || rec.status === "canceled") && !rec.ended_at) {
+        rec.ended_at = this.now().toISOString();
+      }
+      return rec;
+    });
   }
 
   /** Count `n` certifications against the monthly quota; refuses the whole call if it would exceed. */
@@ -411,7 +462,15 @@ export class SubscriptionStore {
         if (cur && cur.status === "canceled" && status !== "canceled" && !force) return false; // canceled is final
         subs[subId] = { status, at, customer: customer ?? cur?.customer };
         const rec = bySub(subId);
-        if (rec) rec.status = status;
+        if (rec) {
+          const wasLive = rec.status === "active" || rec.status === "trialing";
+          rec.status = status;
+          if (status === "past_due" || status === "canceled") {
+            if (wasLive || !rec.ended_at) rec.ended_at = new Date(at * 1000).toISOString();
+          } else {
+            delete rec.ended_at;
+          }
+        }
         return true;
       };
       switch (ev.kind) {

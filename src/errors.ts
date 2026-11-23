@@ -8,6 +8,7 @@ export type ToolErrorCode =
   | "PLAN_UNKNOWN"
   | "BILLING_UNAVAILABLE"
   | "PAYMENT_REQUIRED"
+  | "ACCESS_ENDED"
   | "QUOTA_EXCEEDED"
   | "INVALID_KEY"
   | "PAIRING_EXPIRED"

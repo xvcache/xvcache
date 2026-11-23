@@ -7,7 +7,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { getOffer, listPlans, presentToClient, recommendPlan, requestUpgradeFlow, PAID_PLAN_ID, type Billing } from "./plans.js";
 import { toolError, type ToolError } from "./errors.js";
-import { SubscriptionStore, type SubscriptionRecord } from "./subscriptions.js";
+import { SubscriptionStore, existingProofAccess, postTerminationAccessUntil, POST_TERMINATION_ACCESS_DAYS, type SubscriptionRecord } from "./subscriptions.js";
 import { HostedWitness, type HostedProof, type HostedVerification } from "./witness.js";
 import { localizedVerdict, kindWhenFingerprintMatches, type DisplayKind } from "./certificate.js";
 import { EU_LANGS, resolveLang, DEFAULT_TZ } from "./i18n.js";
@@ -40,6 +40,8 @@ export type RemoteOptions = {
   billingLog?: WebhookLog;
   /** 0.3.0: email delivery of a one-time link to the key after payment (off unless given). */
   keyDelivery?: KeyDeliveryService;
+  /** Clock for post-termination PDF access (tests inject it). Default: the store clock, else now. */
+  now?: () => Date;
 };
 
 export const HASH_RE = /^[0-9a-fA-F]{64}$/;
@@ -95,6 +97,10 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     return { pdf_url: `${baseUrl}/pdf/${token}.pdf`, pdf_expires_at: new Date(Date.now() + ttl).toISOString() };
   }
 
+  function clock(): Date {
+    return (opts.now ?? (() => opts.store.currentTime()))();
+  }
+
   async function auth(apiKey: string | null): Promise<SubscriptionRecord | ToolError> {
     if (!apiKey) return paymentRequired();
     const rec = await opts.store.authenticate(apiKey);
@@ -102,6 +108,27 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     if (rec.status !== "active" && rec.status !== "trialing") {
       return toolError("PAYMENT_REQUIRED", `The subscription is ${rec.status}.`, false, "Tell the human in one sentence that the subscription must be renewed; call present_to_client.", { next_tool: "present_to_client" });
     }
+    return rec;
+  }
+
+  function accessEnded(rec: SubscriptionRecord): ToolError {
+    const until = postTerminationAccessUntil(rec).toISOString();
+    return toolError(
+      "ACCESS_ENDED",
+      `The ${POST_TERMINATION_ACCESS_DAYS}-day window to download PDF reports of existing proofs has ended.`,
+      false,
+      "Tell the human that reports of existing proofs are no longer available after the post-termination window; call present_to_client to renew.",
+      { next_tool: "present_to_client", ended_at: rec.ended_at ?? rec.period_start, access_until: until },
+    );
+  }
+
+  /** PDF of existing proofs: allowed while the subscription is live, or during the post-termination window. */
+  async function authExistingProofPdf(apiKey: string | null): Promise<SubscriptionRecord | ToolError> {
+    if (!apiKey) return paymentRequired();
+    const rec = await opts.store.authenticate(apiKey);
+    if (!rec) return toolError("INVALID_KEY", "This API key is not recognised.", false, "Check the key (it starts with xvc_). Lost key: call present_to_client to subscribe again, or contact the operator.", { next_tool: "present_to_client" });
+    const access = existingProofAccess(rec, clock());
+    if (access === "expired") return accessEnded(rec);
     return rec;
   }
 
@@ -321,7 +348,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     }, verifyHandler);
 
     const getReportPdfHandler = async ({ proof_id, lang, tz }: { proof_id: string; lang?: string; tz?: string }) => {
-      const a = await auth(apiKey);
+      const a = await authExistingProofPdf(apiKey);
       if ("code" in a) return err(a);
       const owner = await opts.witness.ownerOf(proof_id);
       if (owner !== a.key_hash) return err(toolError("PROOF_NOT_FOUND", "No proof with this id for this subscription.", false, "Check the proof_id printed on the PDF report."));
