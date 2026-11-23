@@ -177,7 +177,7 @@
         "status": "announced",
         "tax_behavior": "exclusive",
         "placeholder": false,
-        "display": "€19 excl. VAT / month",
+        "display": "€19 excl. VAT / month for Essentiel, first 50 organisations, while the subscription stays active",
         "label": "monthly subscription; professional price",
         "note": "VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number. Cancellation from the customer portal takes effect at the end of the paid month.",
         "tax": "HT",
@@ -229,6 +229,7 @@
       "max_organisations": 50,
       "seats_reassignable": false,
       "price_locked": true,
+      "conditions_url": "https://xvcache.com/terms/#b4-bis",
       "price_eur_ht_month": 19
     },
     {
@@ -405,6 +406,6 @@
   "demo_applications_only": true,
   "price_line": "Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for Essentiel, for the first 50 organisations, while the subscription stays active · professionals only · demos by application.",
   "price_line_fr": "Tarifs prévus, pas encore en vente : Essentiel 29 € HT / mois · Cabinet 59 € HT / mois · prix de lancement 19 € HT / mois pour l'Essentiel, réservé aux 50 premières organisations, tant que l'abonnement reste actif · professionnels · démos sur candidature.",
-  "price_details": "XVcache is not on sale yet. Planned pricing is as follows. Essentiel: €29 excl. VAT per month, 1 user, uncapped proofs within the reasonable use defined in the Terms. Cabinet: €59 excl. VAT per month, up to 5 users, with a PDF report with your branding. Launch price: €19 excl. VAT per month for the Essentiel plan, for the first 50 subscribing organisations, guaranteed for as long as the subscription stays active without interruption (conditions: [Terms, Article B4 bis](https://xvcache.com/terms/#b4-bis)). Professionals only; demos by application.",
+  "price_details": "XVcache is not on sale yet. Planned pricing is as follows. Essentiel: €29 excl. VAT per month, 1 user, uncapped proofs within the reasonable use defined in the Terms. Cabinet: €59 excl. VAT per month, up to 5 users, with a PDF report bearing your branding. Launch price: €19 excl. VAT per month for the Essentiel plan, for the first 50 subscribing organisations, guaranteed for as long as the subscription stays active without interruption (conditions: [Terms, Article B4 bis](https://xvcache.com/terms/#b4-bis)). Professionals only; demos by application.",
   "price_details_fr": "XVcache n'est pas encore en vente. Les tarifs prévus sont les suivants. Essentiel : 29 € HT par mois, 1 utilisateur, preuves non plafonnées dans le cadre d'un usage raisonnable défini par les CGV. Cabinet : 59 € HT par mois, jusqu'à 5 utilisateurs, avec un Rapport PDF à vos couleurs. Prix de lancement : 19 € HT par mois pour l'offre Essentiel, réservé aux 50 premières organisations abonnées et garanti tant que l'abonnement reste actif sans interruption (conditions : [CGV, article B4 bis](https://xvcache.com/fr/conditions-utilisation/#b4-bis)). L'offre est réservée aux professionnels ; les démos se font sur candidature."
 }
