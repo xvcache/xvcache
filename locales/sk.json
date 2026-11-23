@@ -54,7 +54,11 @@
     "verdict_intact": "Nezmenený — tento dokument je totožný s dokumentom opatreným pečiatkou {date}.",
     "verdict_modified": "Zmenený od {date}.",
     "verdict_invalid": "Tento dôkaz nemožno overiť: súbor, dátum alebo pečiatka si už nezodpovedajú.",
-    "verdict_pending": "Čaká — kvalifikovaná časová pečiatka ešte nebola vydaná."
+    "verdict_pending": "Čaká — kvalifikovaná časová pečiatka ešte nebola vydaná.",
+    "warn_signature_unverified": "Toto NIE JE uvedené ako kvalifikovaná časová pečiatka eIDAS: podpis tokenu sa tu nepodarilo overiť (overenie nemožné). Dátum a kontrola odtlačku (V/X) sú uvedené bez kvalifikovaného statusu.",
+    "policy_absent": "chýba",
+    "field_signature": "Podpis tokenu",
+    "signature_unverified_line": "NEOVERENÝ (overenie nemožné)"
   },
   "offer": {
     "pitch": "XVcache poskytuje advokátskym kanceláriám kvalifikované elektronické časové pečiatky podľa práva EÚ. Podľa čl. 41 nariadenia eIDAS (EÚ) č. 910/2014 platí pri kvalifikovanej časovej pečiatke domnienka presnosti dátumu a času a integrity opečiatkovaných údajov a uznáva sa vo všetkých členských štátoch. Odosiela sa iba odtlačok SHA-256 dokumentu, nikdy jeho obsah. Každý výsledok je verdikt (V nezmenený / X zmenený) a jednostranový certifikát PDF v 24 jazykoch EÚ. Obmedzenia: nejde o zápisnicu exekútora, podpis ani právnu radu; o dôkaznej hodnote rozhoduje súd.",

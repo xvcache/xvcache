@@ -54,7 +54,11 @@
     "verdict_intact": "Unverändert — dieses Dokument ist identisch mit dem am {date} gestempelten.",
     "verdict_modified": "Geändert seit {date}.",
     "verdict_invalid": "Dieser Nachweis kann nicht bestätigt werden: Datei, Datum oder Zeitstempel stimmen nicht mehr überein.",
-    "verdict_pending": "Ausstehend — der qualifizierte Zeitstempel wurde noch nicht ausgestellt."
+    "verdict_pending": "Ausstehend — der qualifizierte Zeitstempel wurde noch nicht ausgestellt.",
+    "warn_signature_unverified": "Dies ist NICHT als qualifizierter eIDAS-Zeitstempel ausgewiesen: Die Signatur des Tokens konnte hier nicht geprüft werden (Prüfung nicht möglich). Datum und Fingerabdruckprüfung (V/X) werden angezeigt, ohne qualifizierten Status.",
+    "policy_absent": "fehlt",
+    "field_signature": "Signatur des Tokens",
+    "signature_unverified_line": "NICHT geprüft (Prüfung nicht möglich)"
   },
   "offer": {
     "pitch": "XVcache bietet Kanzleien qualifizierte elektronische Zeitstempel nach EU-Recht. Nach Art. 41 der eIDAS-Verordnung (EU) Nr. 910/2014 gilt für einen qualifizierten Zeitstempel die Vermutung der Richtigkeit von Datum und Uhrzeit sowie der Unversehrtheit der gestempelten Daten, und er wird in allen Mitgliedstaaten anerkannt. Übermittelt wird nur der SHA-256-Fingerabdruck des Dokuments, nie sein Inhalt. Jedes Ergebnis ist ein Befund (V unverändert / X geändert) und ein einseitiges PDF-Zertifikat in 24 EU-Sprachen. Grenzen: kein Protokoll eines Gerichtsvollziehers, keine Signatur, keine Rechtsberatung; über den Beweiswert entscheidet das Gericht.",

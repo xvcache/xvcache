@@ -54,7 +54,11 @@
     "verdict_intact": "Nepakeistas — šis dokumentas yra tapatus dokumentui, pažymėtam {date}.",
     "verdict_modified": "Pakeistas nuo {date}.",
     "verdict_invalid": "Šio įrodymo negalima patvirtinti: failas, data ar žyma nebeatitinka.",
-    "verdict_pending": "Laukiama — kvalifikuota laiko žyma dar neišduota."
+    "verdict_pending": "Laukiama — kvalifikuota laiko žyma dar neišduota.",
+    "warn_signature_unverified": "Tai NĖRA nurodyta kaip kvalifikuota eIDAS laiko žyma: žetono parašo čia patikrinti nepavyko (patikra neįmanoma). Data ir kontrolinės sumos patikra (V/X) nurodytos be kvalifikuoto statuso.",
+    "policy_absent": "nėra",
+    "field_signature": "Žetono parašas",
+    "signature_unverified_line": "NEPATIKRINTAS (patikra neįmanoma)"
   },
   "offer": {
     "pitch": "XVcache advokatų kontoroms teikia kvalifikuotas elektronines laiko žymas pagal ES teisę. Pagal eIDAS reglamento (ES) Nr. 910/2014 41 straipsnį kvalifikuotai laiko žymai taikoma datos ir laiko tikslumo bei pažymėtų duomenų vientisumo prezumpcija, ir ji pripažįstama visose valstybėse narėse. Siunčiama tik dokumento SHA-256 santrauka, niekada turinys. Kiekvienas rezultatas yra išvada (V nepakeistas / X pakeistas) ir vieno puslapio PDF pažyma 24 ES kalbomis. Ribos: tai ne antstolio protokolas, ne parašas ir ne teisinė konsultacija; įrodomąją galią vertina teismas.",

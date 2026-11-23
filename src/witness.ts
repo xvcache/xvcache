@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { leafHash, merklePath, merkleRoot, verifyMerklePath, type HashLeaf, type MerkleStep } from "./merkle.js";
-import { requestTimestamp, parseTimeStampToken, verifyTokenSignature, resolveTsaProvider, OID_SHA256, type TsaProvider, type FetchLike } from "./tsa.js";
+import { requestTimestamp, parseTimeStampToken, verifyTokenSignature, resolveTsaProvider, OID_SHA256, assessQualification, certignaTrust, type Qualification, type QualifiedTrust, type TsaProvider, type FetchLike } from "./tsa.js";
 import { stampDigest, serializeOts, parseOts, otsStatus } from "./ots.js";
 import { renderCertificate, type CertificateModel } from "./certificate.js";
 import type { Proof } from "./certify.js";
@@ -71,6 +71,9 @@ export type HostedVerification = {
   qualified: boolean;
   status: HostedStatus | null;
   gen_time: string | null;
+  /** Recomputed from the token, never trusted from stored JSON. */
+  qualification: Qualification | null;
+  signature: "verified" | "failed" | "unavailable" | null;
   checks: { fingerprint: HostedCheck; merkle: HostedCheck; tsa_token: HostedCheck; tsa_signature: HostedCheck; ots: HostedCheck };
   proof: HostedProof | null;
 };
@@ -137,11 +140,13 @@ export class HostedWitness {
     if (!t) return { tsa: null, tokenDer: null, error: null };
     try {
       const res = await requestTimestamp(t, root, { fetchImpl: this.opts.fetchImpl });
+      const q = await assessQualification(res.token, root, this.trustFor(t.id));
       return {
         tokenDer: res.token,
         error: null,
         tsa: {
-          provider: t.id, label: t.label, url: t.url, qualified: t.qualified, qualified_basis: t.qualifiedBasis,
+          provider: t.id, label: t.label, url: t.url, qualified: q.qualified, qualified_basis: q.qualified ? t.qualifiedBasis : `Non qualifié : ${q.detail}`,
+          qualification: { status: q.status, signature: q.signature, signer_issuer: q.signer_issuer, detail: q.detail },
           hash_algorithm: "sha256", message_imprint: res.info.messageImprint, gen_time: res.info.genTime,
           serial: res.info.serial, policy: res.info.policy, token_base64: res.token.toString("base64"),
         },
@@ -282,10 +287,15 @@ export class HostedWitness {
     return p && !("error" in p) ? { ca: p.caFile, untrusted: p.untrustedFile } : {};
   }
 
+  private trustFor(provider: string): QualifiedTrust {
+    const t = this.opts.tsa;
+    return t && t.id === provider && t.qualifiedTrust ? t.qualifiedTrust : certignaTrust();
+  }
+
   /** Free verification: fingerprint + proof_id → V / X / pending. Never reveals the owner. */
   async verify(q: { sha256: string; proof_id: string; online?: boolean }): Promise<HostedVerification> {
     const empty: HostedCheck = { ok: null, detail: "not checked" };
-    const base = { qualified: false, status: null, gen_time: null, proof: null };
+    const base = { qualified: false, status: null, gen_time: null, proof: null, qualification: null, signature: null };
     const sha = q.sha256.trim().toLowerCase();
     if (!HEX64.test(sha)) return { ...base, verdict: "invalid", checks: { fingerprint: { ok: false, detail: "Not a SHA-256 fingerprint (64 hex characters)." }, merkle: empty, tsa_token: empty, tsa_signature: empty, ots: empty } };
     const p = await this.getProof(q.proof_id.trim());
@@ -299,6 +309,7 @@ export class HostedWitness {
     checks.merkle = lh !== p.leaf_hash ? { ok: false, detail: "Recomputed leaf differs." }
       : verifyMerklePath(lh, p.merkle.path, p.merkle.root) ? { ok: true, detail: `Valid Merkle path (${p.merkle.path.length} step(s), ${p.merkle.leaf_count} fingerprint(s) under the same root).` }
       : { ok: false, detail: "Merkle path does not lead to the root." };
+    let qualification: Qualification | null = null;
     if (p.tsa) {
       try {
         const token = Buffer.from(p.tsa.token_base64, "base64");
@@ -309,6 +320,7 @@ export class HostedWitness {
         const ca = this.caFor(p.tsa.provider);
         const sig = await verifyTokenSignature(token, p.merkle.root, ca.ca, ca.untrusted);
         checks.tsa_signature = { ok: sig.status === "verified" ? true : sig.status === "failed" ? false : null, detail: sig.detail };
+        qualification = await assessQualification(token, p.merkle.root, this.trustFor(p.tsa.provider));
       } catch (e) {
         checks.tsa_token = { ok: false, detail: `Unreadable TSA token: ${errMsg(e)}` };
       }
@@ -328,7 +340,17 @@ export class HostedWitness {
     if (checks.fingerprint.ok === false || checks.merkle.ok === false || checks.tsa_token.ok === false || checks.tsa_signature.ok === false || checks.ots.ok === false) verdict = "X";
     else if (checks.tsa_token.ok === true) verdict = "V";
     else verdict = "pending";
-    return { verdict, qualified: verdict === "V" && p.qualified, status: p.status, gen_time: p.tsa?.gen_time ?? null, checks, proof: p };
+    const qualified = verdict === "V" && checks.tsa_signature.ok === true && !!qualification?.qualified;
+    // Do not return stale/forged stored "qualified" fields (including when openssl is absent).
+    const status = p.tsa ? (qualified ? "qualified" : "timestamped") : p.status;
+    const proof: HostedProof = { ...p, qualified, status, tsa: p.tsa ? {
+      ...p.tsa, qualified, policy: qualification?.policy ?? null,
+      qualification: qualification ? { status: qualification.status, signature: qualification.signature, signer_issuer: qualification.signer_issuer, detail: qualification.detail } : undefined,
+    } : null };
+    return {
+      verdict, qualified, status, gen_time: p.tsa?.gen_time ?? null, checks, proof, qualification,
+      signature: p.tsa ? (checks.tsa_signature.ok === true ? "verified" : checks.tsa_signature.ok === false ? "failed" : "unavailable") : null,
+    };
   }
 
   /**
@@ -336,9 +358,10 @@ export class HostedWitness {
    * given does not match (verdict X) or the proof is unknown. Pending proofs carry the NOT QUALIFIED banner.
    */
   async certificatePdf(q: { proof_id: string; lang: string; tz?: string; sha256?: string }): Promise<null | { bytes: Uint8Array; lines: string[]; qualified: boolean; verdict: HostedVerdict; lang: string; proof: HostedProof }> {
-    const p = await this.getProof(q.proof_id);
-    if (!p) return null;
-    const v = await this.verify({ sha256: q.sha256 ?? p.sha256, proof_id: p.proof_id });
+    const stored = await this.getProof(q.proof_id);
+    if (!stored) return null;
+    const v = await this.verify({ sha256: q.sha256 ?? stored.sha256, proof_id: stored.proof_id });
+    const p = v.proof!;
     if (v.verdict === "X" || v.verdict === "invalid" || v.verdict === "not_found") return null;
     const attachments: CertificateModel["attachments"] = [
       { name: "proof.json", description: "XVcache hosted proof (hashes only)", bytes: Buffer.from(JSON.stringify(p, null, 2)) },
@@ -353,7 +376,7 @@ export class HostedWitness {
       label: p.label,
       sha256: p.sha256,
       gen_time: p.tsa?.gen_time ?? null,
-      tsa: p.tsa ? { provider: p.tsa.provider, label: p.tsa.label, qualified: p.tsa.qualified, policy: p.tsa.policy, serial: p.tsa.serial } : null,
+      tsa: p.tsa ? { provider: p.tsa.provider, label: p.tsa.label, qualified: v.qualified, policy: v.qualification?.policy ?? null, serial: p.tsa.serial, signature: v.signature ?? "unavailable" } : null,
       pending_qualified: p.status === "pending_qualified",
       ots_status: p.ots?.status ?? null,
       ots_detail: p.ots?.detail ?? null,

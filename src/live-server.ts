@@ -21,7 +21,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import { loadLocalEnv } from "./env.js";
-import { resolveTsaProvider, requestTimestamp, verifyTokenSignature, parseTimeStampToken, type TsaProvider } from "./tsa.js";
+import { resolveTsaProvider, requestTimestamp, verifyTokenSignature, parseTimeStampToken, assessQualification, type TsaProvider } from "./tsa.js";
 import { leafHash, merkleRoot } from "./merkle.js";
 import { stampDigest, serializeOts } from "./ots.js";
 import { buildCertificatePdf, formatParisDateTime, otsHuman, type Attachment } from "./certificate.js";
@@ -207,6 +207,8 @@ async function certify(input: { document_text?: string; sha256?: string; documen
 
   const signature = await verifyTokenSignature(res.token, root, provider.caFile, provider.untrustedFile);
   if (signature.status !== "verified") throw new Error("Signature TSA non vérifiée : aucun certificat émis.");
+  // Qualified only if the token proves it (Certigna OID + Certigna chain + verified signature).
+  const qual = await assessQualification(res.token, root);
 
   let otsBuf: Buffer | null = null;
   try {
@@ -218,14 +220,15 @@ async function certify(input: { document_text?: string; sha256?: string; documen
     provider: provider.id,
     label: provider.label,
     url: provider.url,
-    qualified: provider.qualified,
-    qualified_basis: provider.qualifiedBasis,
+    qualified: qual.qualified,
+    qualified_basis: qual.qualified ? provider.qualifiedBasis : `Non qualifié : ${qual.detail}`,
     hash_algorithm: "sha256",
     message_imprint: res.info.messageImprint,
     gen_time: res.info.genTime,
     serial: res.info.serial,
     policy: res.info.policy,
     token_base64: res.token.toString("base64"),
+    qualification: { status: qual.status, signature: qual.signature, signer_issuer: qual.signer_issuer, detail: qual.detail },
   };
   const rec: LiveRecord = {
     format: "xvcache-live/1", certificate_id: id, document_name: name, document_sha256: fp.sha, root,
@@ -256,10 +259,10 @@ async function certify(input: { document_text?: string; sha256?: string; documen
     billing: { paid_feature: true, price: "TBD", payment_live: false },
     notice: "Empreintes uniquement.",
   };
-  const pdf = await buildCertificatePdf({ proof, otsText: otsHuman(otsBuf ? "pending" : null), attachments });
+  const pdf = await buildCertificatePdf({ proof, qualification: qual, otsText: otsHuman(otsBuf ? "pending" : null), attachments });
   await fs.writeFile(path.join(dir, "certificat.pdf"), pdf);
   await fs.writeFile(path.join(dir, "record.json"), JSON.stringify(rec, null, 2) + "\n");
-  await logEvent({ ev: "certify", certificate_id: id, provider: provider.id, qualified: provider.qualified, source: fp.source, gen_time: res.info.genTime });
+  await logEvent({ ev: "certify", certificate_id: id, provider: provider.id, qualified: qual.qualified, source: fp.source, gen_time: res.info.genTime });
 
   const when = formatParisDateTime(res.info.genTime);
   const budget = await readBudget();
@@ -273,10 +276,11 @@ async function certify(input: { document_text?: string; sha256?: string; documen
     timestamp_utc: res.info.genTime,
     timestamp_paris: `${when.long} (heure de Paris)`,
     provider: provider.label,
-    qualified_eidas: provider.qualified,
-    qualified_notice: provider.qualified
+    qualified_eidas: qual.qualified,
+    qualified_notice: qual.qualified
       ? "Horodatage électronique qualifié eIDAS (Certigna) : présomption d'exactitude de la date et d'intégrité (art. 41)."
-      : "ATTENTION : jeton FreeTSA de test, NON qualifié eIDAS, sans présomption légale.",
+      : provider.id === "freetsa" ? "ATTENTION : jeton FreeTSA de test, NON qualifié eIDAS, sans présomption légale."
+      : `ATTENTION : jeton NON qualifié eIDAS (${qual.detail})`,
     fallback_reason: reason,
     content_handling: fp.source === "text"
       ? "Le texte a servi uniquement à calculer l'empreinte en mémoire ; il n'a été ni stocké ni transmis au prestataire."
@@ -324,7 +328,7 @@ async function verify(input: { certificate_id: string; document_text?: string; s
     submitted_sha256: fp.sha,
     timestamp_paris: `${when.long} (heure de Paris)`,
     provider: rec.tsa.label,
-    qualified_eidas: rec.tsa.qualified,
+    qualified_eidas: sig.status === "verified" && (await assessQualification(token, rec.root)).qualified,
     token_signature: sig.status,
     certificate_pdf_url: pdfUrl(rec.certificate_id),
   };

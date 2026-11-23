@@ -54,7 +54,11 @@
     "verdict_intact": "Integro — questo documento è identico a quello validato il {date}.",
     "verdict_modified": "Modificato dal {date}.",
     "verdict_invalid": "Questa prova non può essere convalidata: il file, la data o la marca non corrispondono più.",
-    "verdict_pending": "In attesa — la validazione temporale qualificata non è ancora stata emessa."
+    "verdict_pending": "In attesa — la validazione temporale qualificata non è ancora stata emessa.",
+    "warn_signature_unverified": "Questa NON è dichiarata una validazione temporale qualificata eIDAS: la firma del token non ha potuto essere verificata qui (verifica impossibile). Data e controllo dell'impronta (V/X) sono indicati, senza stato qualificato.",
+    "policy_absent": "assente",
+    "field_signature": "Firma del token",
+    "signature_unverified_line": "NON verificata (verifica impossibile)"
   },
   "offer": {
     "pitch": "XVcache offre agli studi legali validazioni temporali elettroniche qualificate secondo il diritto dell'UE. Ai sensi dell'art. 41 del regolamento eIDAS (UE) n. 910/2014, una validazione temporale qualificata gode della presunzione di accuratezza della data e dell'ora e di integrità dei dati validati, ed è riconosciuta in tutti gli Stati membri. Viene inviata solo l'impronta SHA-256 del documento, mai il suo contenuto. Ogni risultato è un esito (V integro / X modificato) e un certificato PDF di una pagina in 24 lingue dell'UE. Limiti: non è un verbale di ufficiale giudiziario, né una firma, né una consulenza legale; il valore probatorio spetta al giudice.",

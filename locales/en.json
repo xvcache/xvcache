@@ -54,7 +54,11 @@
     "verdict_intact": "Intact — this document is identical to the one timestamped on {date}.",
     "verdict_modified": "Modified since {date}.",
     "verdict_invalid": "This proof cannot be validated: the file, the date or the token no longer match.",
-    "verdict_pending": "Pending — the qualified timestamp has not been issued yet."
+    "verdict_pending": "Pending — the qualified timestamp has not been issued yet.",
+    "warn_signature_unverified": "This is NOT declared a qualified eIDAS timestamp: the token's signature could not be verified here (verification impossible). The date and the fingerprint check (V/X) are shown, but no qualified status is claimed.",
+    "policy_absent": "absent",
+    "field_signature": "Token signature",
+    "signature_unverified_line": "NOT verified (verification impossible)"
   },
   "offer": {
     "pitch": "XVcache gives law firms qualified electronic timestamps under EU law. Under Art. 41 of the eIDAS Regulation (EU) No 910/2014, a qualified timestamp is presumed accurate as to its date and time and as to the integrity of the stamped data, and it is recognised in every Member State. Only the document's SHA-256 fingerprint is sent, never its content. Each result is a verdict (V intact / X modified) and a one-page PDF certificate in 24 EU languages. Limits: not a bailiff report, not a signature, not legal advice; the evidential weight is for the court.",

@@ -21,7 +21,7 @@ function model(lang: string, over: Partial<CertificateModel> = {}): CertificateM
     label: "Contrat-de-cession-2026-11.pdf",
     sha256: SHA,
     gen_time: "2026-11-22T19:08:39.000Z",
-    tsa: { provider: "certigna", label: "Certigna (horodatage qualifié eIDAS)", qualified: true, policy: "1.2.250.1.177.2.9.1", serial: "28166173085740a1b113a8edcb465c87" },
+    tsa: { provider: "certigna", label: "Certigna (horodatage qualifié eIDAS)", qualified: true, policy: "1.2.250.1.177.2.9.1", serial: "28166173085740a1b113a8edcb465c87", signature: "verified" },
     ots_status: "pending",
     proof_id: "20261122T190839000Z-1a2b3c4d.0",
     attachments: [

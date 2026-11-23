@@ -54,7 +54,11 @@
     "verdict_intact": "Intact — ce document est identique à celui horodaté le {date}.",
     "verdict_modified": "Modifié depuis le {date}.",
     "verdict_invalid": "Cette preuve ne peut pas être validée. Le fichier, la date ou le jeton ne correspondent plus.",
-    "verdict_pending": "En attente — l'horodatage qualifié n'a pas encore été émis."
+    "verdict_pending": "En attente — l'horodatage qualifié n'a pas encore été émis.",
+    "warn_signature_unverified": "Attention : ceci n'est PAS déclaré comme un horodatage qualifié eIDAS. La signature du jeton n'a pas pu être vérifiée ici (vérification impossible). La date et le contrôle d'empreinte (V/X) sont indiqués, sans statut qualifié.",
+    "policy_absent": "absent",
+    "field_signature": "Signature du jeton",
+    "signature_unverified_line": "NON vérifiée (vérification impossible)"
   },
   "offer": {
     "pitch": "XVcache fournit aux cabinets d'avocats des horodatages électroniques qualifiés au sens du droit de l'Union. Selon l'art. 41 du règlement eIDAS (UE) n° 910/2014, un horodatage qualifié bénéficie d'une présomption d'exactitude de la date et de l'heure et d'intégrité des données horodatées, et il est reconnu dans tous les États membres. Seule l'empreinte SHA-256 du document est envoyée, jamais son contenu. Chaque résultat est un verdict (V intact / X modifié) et un certificat PDF d'une page dans 24 langues de l'UE. Limites : ni constat d'huissier, ni signature, ni avis juridique ; la force probante relève du juge.",

@@ -4,7 +4,7 @@ import { promises as fs, existsSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { Certifier, certifyConfigFromEnv, type Proof } from "./certify.js";
-import { resolveTsaProvider, type TsaProvider } from "./tsa.js";
+import { resolveTsaProvider, CERTIGNA_QUALIFIED_POLICY_OID, type TsaProvider } from "./tsa.js";
 import { JournalWriter, sha256Hex } from "./journal.js";
 import { startFakeTsa, type FakeTsa } from "./test-tsa.js";
 import {
@@ -102,6 +102,8 @@ function emptyReport(over: Partial<VerifyReport> & { glyph: "V" | "X" }): Verify
     provider: "certigna",
     qualified: true,
     qualified_confirmed: true,
+    signature: "verified",
+    qualification: null,
     checks: {},
     ots: null,
     ...over,
@@ -183,38 +185,63 @@ test("uploaded bytes are checked instead of the vault copy", async () => {
   assert.equal(edited.pdf, null);
 });
 
-test("Certigna-style certificate mentions the qualified provider, OID and serial; never the FreeTSA warning", async () => {
-  const { c, vault } = await setup("label");
-  await fs.writeFile(path.join(vault, "Acte.md"), "# Acte\n");
-  await c.enqueue("Acte.md");
+test("Certigna-style certificate: qualified only from the token (Certigna OID + chain + verified signature), real OID and serial; never the FreeTSA warning", async () => {
+  const cg = await startFakeTsa({ policy: CERTIGNA_QUALIFIED_POLICY_OID });
+  try {
+    const base = path.join(tmp, "label");
+    const vault = path.join(base, "vault");
+    await fs.mkdir(vault, { recursive: true });
+    const tsa: TsaProvider = {
+      id: "certigna", label: "Certigna (horodatage qualifié eIDAS)", url: cg.url, qualified: true, qualifiedBasis: "eIDAS", caFile: cg.caFile,
+      qualifiedTrust: { name: "Certigna (simulated)", policyOids: [CERTIGNA_QUALIFIED_POLICY_OID], caFile: cg.caFile },
+    };
+    const c = new Certifier(certifyConfigFromEnv({ vaultRoot: await fs.realpath(vault), journalPath: path.join(base, "journal.jsonl"), tsa }, { XVCACHE_OTS: "off" }));
+    await fs.writeFile(path.join(vault, "Acte.md"), "# Acte\n");
+    await c.enqueue("Acte.md");
+    const b = await c.runBatch();
+    if ("error" in b) assert.fail(b.error);
+    const proof = b.proofs[0];
+    assert.equal(proof.tsa!.qualified, true);
+    assert.equal(proof.tsa!.policy, CERTIGNA_QUALIFIED_POLICY_OID);
+    const rep = await c.verify({ proof, online: false });
+    assert.equal(rep.glyph, "V");
+    assert.equal(rep.qualified, true);
+    const pack = await writeCertificatePack({ proof, dataDir: c.cfg.dataDir, batchesDir: c.batchesDir(), otsStatus: "pending", qualification: rep.qualification });
+    const raw = pdfText(await fs.readFile(pack.pdf));
+    assert.match(raw, /Certigna/);
+    assert.match(raw, /1\.2\.250\.1\.177\.2\.9\.1/);
+    assert.match(raw, /eIDAS/);
+    assert.doesNotMatch(raw, /FreeTSA/);
+    assert.doesNotMatch(raw, /PAS un horodatage qualifi/);
+    assert.doesNotMatch(raw, /NON QUALIFI/);
+    assert.match(raw, /huissier/);
+    assert.match(raw, /OpenTimestamps/i);
+    // Same proof, no qualification passed: recomputed against the REAL bundled Certigna chain → not qualified.
+    const pack2 = await writeCertificatePack({ proof, dataDir: path.join(c.cfg.dataDir, "again"), batchesDir: c.batchesDir() });
+    const raw2 = pdfText(await fs.readFile(pack2.pdf));
+    assert.match(raw2, /NON QUALIFI/);
+  } finally {
+    await cg.close();
+  }
+});
+
+test("a proof JSON claiming qualified=true with a non-Certigna token is NOT qualified (config/JSON never decides)", async () => {
+  const { c, vault } = await setup("forged");
+  await fs.writeFile(path.join(vault, "Faux.md"), "# Faux\n");
+  await c.enqueue("Faux.md");
   const b = await c.runBatch();
   if ("error" in b) assert.fail(b.error);
   const proof = JSON.parse(JSON.stringify(b.proofs[0])) as Proof;
-  proof.tsa = {
-    ...proof.tsa!,
-    provider: "certigna",
-    label: "Certigna (horodatage qualifié eIDAS)",
-    qualified: true,
-    qualified_basis: "eIDAS",
-    policy: "1.2.250.1.177.2.9.1",
-    serial: "28166173085740a1b113a8edcb465c87",
-    gen_time: "2026-11-22T19:08:39.000Z",
-  };
-  const pack = await writeCertificatePack({
-    proof,
-    dataDir: c.cfg.dataDir,
-    batchesDir: c.batchesDir(),
-    otsStatus: "pending",
-  });
+  proof.tsa = { ...proof.tsa!, provider: "certigna", label: "Certigna (horodatage qualifié eIDAS)", qualified: true, policy: CERTIGNA_QUALIFIED_POLICY_OID };
+  const rep = await c.verify({ proof, online: false });
+  assert.equal(rep.qualified, false);
+  assert.equal(rep.qualification?.status, "policy_not_qualified");
+  assert.equal(rep.qualification?.policy, "1.2.3.4.99", "the OID shown is the one read in the token");
+  const pack = await writeCertificatePack({ proof, dataDir: c.cfg.dataDir, batchesDir: c.batchesDir(), qualification: rep.qualification });
   const raw = pdfText(await fs.readFile(pack.pdf));
-  assert.match(raw, /Certigna/);
-  assert.match(raw, /1\.2\.250\.1\.177\.2\.9\.1/);
-  assert.match(raw, /2816 6173 0857 40a1/);
-  assert.match(raw, /eIDAS/);
-  assert.doesNotMatch(raw, /FreeTSA/);
-  assert.doesNotMatch(raw, /PAS un horodatage qualifi/);
-  assert.match(raw, /huissier/);
-  assert.match(raw, /OpenTimestamps/i);
+  assert.match(raw, /NON QUALIFI/);
+  assert.match(raw, /1\.2\.3\.4\.99/);
+  assert.doesNotMatch(raw, /1\.2\.250\.1\.177\.2\.9\.1/);
 });
 
 test("without a proof and without stamp, handleDocument refuses rather than calling the TSA", async () => {

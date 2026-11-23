@@ -54,7 +54,11 @@
     "verdict_intact": "Nespremenjen — ta dokument je enak dokumentu, ki je bil žigosan {date}.",
     "verdict_modified": "Spremenjen od {date}.",
     "verdict_invalid": "Tega dokaza ni mogoče potrditi: datoteka, datum ali žig se ne ujemajo več.",
-    "verdict_pending": "V čakanju — kvalificirani časovni žig še ni bil izdan."
+    "verdict_pending": "V čakanju — kvalificirani časovni žig še ni bil izdan.",
+    "warn_signature_unverified": "To NI navedeno kot kvalificiran časovni žig eIDAS: podpisa žetona tukaj ni bilo mogoče preveriti (preverjanje ni mogoče). Datum in preverjanje prstnega odtisa (V/X) sta prikazana brez kvalificiranega statusa.",
+    "policy_absent": "manjka",
+    "field_signature": "Podpis žetona",
+    "signature_unverified_line": "NI preverjen (preverjanje ni mogoče)"
   },
   "offer": {
     "pitch": "XVcache odvetniškim pisarnam zagotavlja kvalificirane elektronske časovne žige po pravu EU. Po členu 41 uredbe eIDAS (EU) št. 910/2014 za kvalificirani časovni žig velja domneva točnosti datuma in časa ter celovitosti žigosanih podatkov, priznava pa se v vseh državah članicah. Pošlje se le prstni odtis SHA-256 dokumenta, nikoli vsebina. Vsak rezultat je izid (V nespremenjen / X spremenjen) in enostransko potrdilo PDF v 24 jezikih EU. Omejitve: ni zapisnik izvršitelja, ni podpis in ni pravni nasvet; o dokazni vrednosti odloča sodišče.",

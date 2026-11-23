@@ -6,8 +6,8 @@ import {
 } from "./journal.js";
 import { leafHash, merkleRoot, merklePath, verifyMerklePath, type LeafData, type MerkleStep, type NoteLeaf } from "./merkle.js";
 import {
-  requestTimestamp, parseTimeStampToken, verifyTokenSignature, certsDir, OID_SHA256,
-  type TsaProvider, type FetchLike, type SignatureCheck,
+  requestTimestamp, parseTimeStampToken, verifyTokenSignature, certsDir, OID_SHA256, assessQualification, certignaTrust,
+  type TsaProvider, type FetchLike, type SignatureCheck, type Qualification, type QualifiedTrust,
 } from "./tsa.js";
 import { stampDigest, serializeOts, parseOts, upgradeTimestamp, otsStatus, DEFAULT_CALENDARS, type OtsStatus } from "./ots.js";
 
@@ -54,8 +54,11 @@ export type Proof = {
     message_imprint: string;
     gen_time: string;
     serial: string;
-    policy: string;
+    /** Policy OID read in the token (null = absent). Never a default value. */
+    policy: string | null;
     token_base64: string;
+    /** How `qualified` was decided, from the token itself (OID + Certigna chain + verified signature). */
+    qualification?: { status: Qualification["status"]; signature: Qualification["signature"]; signer_issuer: string | null; detail: string };
   };
   ots: null | { status: string; calendars: string[]; ots_base64: string; detail: string };
   billing: { paid_feature: true; price: "TBD"; payment_live: false };
@@ -111,8 +114,13 @@ export type VerifyReport = {
   root: string | null;
   gen_time: string | null;
   provider: string | null;
+  /** true only if the token itself proves it: Certigna qualified OID + Certigna chain + signature verified. */
   qualified: boolean;
+  /** Kept for compatibility: same value as `qualified`. */
   qualified_confirmed: boolean;
+  /** Token signature status ("unavailable" = verification impossible, e.g. openssl missing). */
+  signature: "verified" | "failed" | "unavailable" | null;
+  qualification: Qualification | null;
   checks: Record<string, CheckResult>;
   ots: OtsStatus | null;
 };
@@ -193,18 +201,21 @@ export class Certifier {
         try {
           const res = await requestTimestamp(this.cfg.tsa, root, { fetchImpl: this.cfg.fetchImpl as unknown as FetchLike | undefined });
           tokenDer = res.token;
+          // "qualified" comes from the token (OID + Certigna chain + verified signature), not from the config.
+          const q = await assessQualification(res.token, root, this.trustFor(this.cfg.tsa.id));
           tsa = {
             provider: this.cfg.tsa.id,
             label: this.cfg.tsa.label,
             url: this.cfg.tsa.url,
-            qualified: this.cfg.tsa.qualified,
-            qualified_basis: this.cfg.tsa.qualifiedBasis,
+            qualified: q.qualified,
+            qualified_basis: q.qualified ? this.cfg.tsa.qualifiedBasis : `Non qualifié : ${q.detail}`,
             hash_algorithm: "sha256",
             message_imprint: res.info.messageImprint,
             gen_time: res.info.genTime,
             serial: res.info.serial,
             policy: res.info.policy,
             token_base64: res.token.toString("base64"),
+            qualification: { status: q.status, signature: q.signature, signer_issuer: q.signer_issuer, detail: q.detail },
           };
         } catch (e) {
           return { error: `Horodatage TSA impossible, notes laissées en attente : ${errMsg(e)}` };
@@ -287,18 +298,32 @@ export class Certifier {
   private caFor(provider: string): { ca?: string; untrusted?: string } {
     if (this.cfg.tsa && this.cfg.tsa.id === provider) return { ca: this.cfg.tsa.caFile, untrusted: this.cfg.tsa.untrustedFile };
     if (provider === "freetsa") return { ca: path.join(certsDir(), "freetsa-cacert.pem") };
+    if (provider === "certigna") { const t = certignaTrust(); return { ca: t.caFile, untrusted: t.untrustedFile }; }
     return {};
+  }
+
+  /** Chain + policy a token must match to be called qualified (bundled Certigna unless a test injects one). */
+  trustFor(provider: string): QualifiedTrust {
+    if (this.cfg.tsa && this.cfg.tsa.id === provider && this.cfg.tsa.qualifiedTrust) return this.cfg.tsa.qualifiedTrust;
+    return certignaTrust();
   }
 
   /** Check a proof: note hash, Merkle path, TSA token, OpenTimestamps anchor. */
   async verify(input: { path?: string; proof?: unknown; online?: boolean; content?: Buffer | Uint8Array }): Promise<VerifyReport> {
     const checks: Record<string, CheckResult> = {};
+    // Recomputed from the token on every verification; the proof JSON's own "qualified" is never trusted.
+    let qual: Qualification | null = null;
     const report = (glyphOk: boolean, p: Partial<Proof> | null, extra: Partial<VerifyReport> = {}): VerifyReport => {
-      const qualified = !!p?.tsa?.qualified;
-      const qualified_confirmed = qualified && checks.tsa_signature?.ok === true;
+      const qualified = !!qual?.qualified && checks.tsa_signature?.ok === true && checks.tsa_token?.ok === true;
+      const qualified_confirmed = qualified;
       const shown = p?.path ?? input.path ?? "?";
       const when = p?.tsa?.gen_time ? ` le ${p.tsa.gen_time}` : "";
-      const level = p?.tsa ? (qualified_confirmed ? "horodatage qualifié eIDAS" : qualified ? "fournisseur qualifié, signature non vérifiée" : p.tsa.label.replace(" (", ", ").replace(/\)$/, "")) : "ancrage OpenTimestamps seul";
+      const sigUnverified = !!p?.tsa && checks.tsa_signature?.ok !== true;
+      const providerName = p?.tsa ? p.tsa.label.replace(/\s*\([^)]*\)\s*$/, "").trim() || p.tsa.provider : "";
+      const level = !p?.tsa ? "ancrage OpenTimestamps seul"
+        : qualified ? `horodatage qualifié eIDAS, ${providerName}, OID ${qual!.policy}`
+        : sigUnverified ? `${providerName}, signature du jeton NON VÉRIFIÉE (vérification impossible : ${(checks.tsa_signature?.detail ?? "non vérifiée").replace(/\.$/, "")}) — horodatage non déclaré qualifié`
+        : `${providerName}, non qualifié : ${(qual?.detail ?? "jeton non qualifié").replace(/\.$/, "")}`;
       const failed = Object.entries(checks).filter(([, c]) => c.ok === false).map(([k, c]) => `${k} : ${c.detail.replace(/\.$/, "")}`);
       return {
         glyph: glyphOk ? "V" : "X",
@@ -312,6 +337,8 @@ export class Certifier {
         provider: p?.tsa?.provider ?? null,
         qualified,
         qualified_confirmed,
+        signature: p?.tsa ? (checks.tsa_signature?.ok === true ? "verified" : checks.tsa_signature?.ok === false ? "failed" : "unavailable") : null,
+        qualification: qual,
         checks,
         ots: null,
         ...extra,
@@ -388,6 +415,7 @@ export class Certifier {
         const ca = this.caFor(proof.tsa.provider);
         const sig: SignatureCheck = await verifyTokenSignature(token, proof.merkle.root, ca.ca, ca.untrusted);
         checks.tsa_signature = { ok: sig.status === "verified" ? true : sig.status === "failed" ? false : null, detail: sig.detail };
+        qual = await assessQualification(token, proof.merkle.root, this.trustFor(proof.tsa.provider));
       } catch (e) {
         checks.tsa_token = { ok: false, detail: `Jeton TSA illisible : ${errMsg(e)}` };
       }

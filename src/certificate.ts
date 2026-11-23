@@ -9,6 +9,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { loadLocale, fill, formatLocalDateTime, resolveLang, type Lang } from "./i18n.js";
 import { sha256Hex, normalizeNotePath } from "./journal.js";
 import { Certifier, PROOF_FORMAT, type Proof, type VerifyReport } from "./certify.js";
+import { assessQualification, type Qualification } from "./tsa.js";
 
 const NBSP = "\u00a0";
 const MONTHS_FR = [
@@ -194,6 +195,8 @@ export async function writeCertificatePack(opts: {
   otsDetail?: string | null;
   lang?: string;
   tz?: string;
+  /** Qualification recomputed from the token (certifier.verify). Omitted → recomputed here (bundled Certigna chain). */
+  qualification?: Qualification | null;
 }): Promise<CertificatePack> {
   const { proof } = opts;
   const dir = certificatePackDir(opts.dataDir, proof);
@@ -235,6 +238,7 @@ export async function writeCertificatePack(opts: {
   const pdfPath = path.join(dir, lang === "fr" ? "certificat.pdf" : `certificate-${lang}.pdf`);
   const bytes = await buildCertificatePdf({
     proof,
+    qualification: opts.qualification,
     otsText: otsHuman(opts.otsStatus ?? proof.ots?.status, opts.otsDetail ?? proof.ots?.detail),
     attachments,
     lang,
@@ -356,6 +360,7 @@ export async function handleDocument(
     otsDetail: report.ots?.detail ?? found.proof.ots?.detail,
     lang,
     tz: input.tz,
+    qualification: report.qualified ? report.qualification : report.qualification ? { ...report.qualification, qualified: false } : null,
   });
   return fromReport(report, {
     proof_id: localProofId(found.proof),
@@ -393,6 +398,7 @@ export async function reissueCertificate(
     otsDetail: report.ots?.detail ?? found.proof.ots?.detail,
     lang,
     tz: input.tz,
+    qualification: report.qualified ? report.qualification : report.qualification ? { ...report.qualification, qualified: false } : null,
   });
   return fromReport(report, { path: found.proof.path, proof_id: input.proof_id, lang, verdict_localized, pdf: pack.pdf, pack: pack.dir, attachments: pack.attachments });
 }
@@ -532,7 +538,11 @@ export type CertificateModel = {
   label: string;
   sha256: string;
   gen_time: string | null;
-  tsa: null | { provider: string; label: string; qualified: boolean; policy?: string; serial?: string };
+  /**
+   * `qualified` must come from the token (see assessQualification). `policy` is the OID read in the token
+   * (null/undefined = absent, then never qualified). `signature` must be "verified" for a qualified PDF.
+   */
+  tsa: null | { provider: string; label: string; qualified: boolean; policy?: string | null; serial?: string; signature?: "verified" | "failed" | "unavailable" | "not_checked" | null };
   /** true when a qualified (Certigna) token is expected but still missing (pending_qualified). */
   pending_qualified?: boolean;
   ots_status?: string | null;
@@ -623,7 +633,12 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   const page = doc.addPage([PAGE_W, PAGE_H]);
   const c = new Canvas(page, fonts, PAGE_H - MARGIN_TOP, scale);
 
-  const qualified = !!model.tsa?.qualified && !model.pending_qualified && model.verdict !== "pending";
+  const tokenPolicy = model.tsa?.policy || null;
+  const sigVerified = model.tsa?.signature === "verified";
+  // Qualified only if the caller derived it from the token AND the token's OID is present AND the
+  // signature was verified. No default OID, no "qualified" without a verified signature.
+  const qualified = !!model.tsa?.qualified && !!tokenPolicy && sigVerified && !model.pending_qualified && model.verdict !== "pending";
+  const sigUnverified = !!model.tsa && !sigVerified;
   const isFreeTsa = model.tsa?.provider === "freetsa";
   const verification = model.kind === "verification";
   const accent = qualified && model.verdict === "V" ? GREEN : RULE;
@@ -672,7 +687,10 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
 
   // ---- NOT QUALIFIED banner ----
   if (!qualified) {
-    const warn = model.pending_qualified || (model.verdict === "pending") ? L.warn_pending : isFreeTsa ? L.warn_freetsa : L.warn_other;
+    const warn = model.pending_qualified || (model.verdict === "pending") ? L.warn_pending
+      : isFreeTsa ? L.warn_freetsa
+      : sigUnverified ? L.warn_signature_unverified
+      : L.warn_other;
     const head = L.banner_not_qualified;
     const warnLines = wrapText(warn, fonts.sans, 8.4 * scale, CONTENT_W - 20);
     const boxH = (warnLines.length + 1) * (8.4 * scale + 3) + 12;
@@ -695,10 +713,13 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   }
   if (model.tsa) {
     const providerName = (model.tsa.label || "Certigna").replace(/\s*\([^)]*\)\s*$/, "").trim() || "Certigna";
+    const sep = lang === "fr" ? " : " : ": ";
+    const policyLine = `${L.policy}${sep}${tokenPolicy ?? L.policy_absent}`;
     const lines = qualified
-      ? `${providerName}\n${L.provider_qualified}\n${L.policy} : ${model.tsa.policy || "1.2.250.1.177.2.9.1"}`.replace(" : ", lang === "fr" ? " : " : ": ")
-      : isFreeTsa ? `${L.freetsa_line}\n${L.not_qualified_line}` : `${model.tsa.label || model.tsa.provider}\n${L.not_qualified_line}`;
+      ? `${providerName}\n${L.provider_qualified}\n${policyLine}`
+      : isFreeTsa ? `${L.freetsa_line}\n${L.not_qualified_line}` : `${providerName}\n${L.not_qualified_line}\n${policyLine}`;
     c.field(L.field_provider, lines);
+    if (sigUnverified) c.field(L.field_signature, L.signature_unverified_line);
     if (model.tsa.serial) c.field(L.field_serial, formatGroupedHex(model.tsa.serial));
   } else {
     c.field(L.field_provider, model.pending_qualified ? `Certigna — ${L.verdict_pending}` : L.no_provider);
@@ -779,7 +800,8 @@ export function localProofId(proof: Proof): string {
   return `${proof.batch_id}.${proof.merkle.leaf_index}`;
 }
 
-export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string; otsText?: string | null; otsStatus?: string | null; otsDetail?: string | null; attachments: Attachment[] }): CertificateModel {
+export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string; otsText?: string | null; otsStatus?: string | null; otsDetail?: string | null; attachments: Attachment[]; qualification?: Qualification | null }): CertificateModel {
+  const q = opts.qualification ?? null;
   return {
     lang: opts.lang,
     tz: opts.tz,
@@ -788,7 +810,8 @@ export function modelFromProof(proof: Proof, opts: { lang?: string; tz?: string;
     label: proof.path,
     sha256: proof.note_sha256,
     gen_time: proof.tsa?.gen_time ?? null,
-    tsa: proof.tsa ? { provider: proof.tsa.provider, label: proof.tsa.label, qualified: proof.tsa.qualified, policy: proof.tsa.policy, serial: proof.tsa.serial } : null,
+    // Qualification, OID and signature status come from the token assessment, never from the stored JSON.
+    tsa: proof.tsa ? { provider: proof.tsa.provider, label: proof.tsa.label, qualified: !!q?.qualified, policy: q ? q.policy : null, serial: proof.tsa.serial, signature: q ? q.signature : "not_checked" } : null,
     ots_status: opts.otsStatus ?? proof.ots?.status ?? null,
     ots_detail: opts.otsDetail ?? proof.ots?.detail ?? null,
     ots_text: opts.otsText ?? null,
@@ -804,8 +827,14 @@ export async function buildCertificatePdf(opts: {
   attachments: Attachment[];
   lang?: string;
   tz?: string;
+  /** Token assessment; omitted → recomputed from the token against the bundled Certigna chain. */
+  qualification?: Qualification | null;
 }): Promise<Uint8Array> {
   const lang = opts.lang ?? "fr";
-  const r = await renderCertificate(modelFromProof(opts.proof, { lang, tz: opts.tz, otsText: lang === "fr" ? opts.otsText : null, attachments: opts.attachments }));
+  let qualification = opts.qualification;
+  if (qualification === undefined) {
+    qualification = opts.proof.tsa ? await assessQualification(Buffer.from(opts.proof.tsa.token_base64, "base64"), opts.proof.merkle.root) : null;
+  }
+  const r = await renderCertificate(modelFromProof(opts.proof, { lang, tz: opts.tz, otsText: lang === "fr" ? opts.otsText : null, attachments: opts.attachments, qualification }));
   return r.bytes;
 }

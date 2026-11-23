@@ -54,7 +54,11 @@
     "verdict_intact": "Nienaruszony — ten dokument jest identyczny z dokumentem oznaczonym czasem {date}.",
     "verdict_modified": "Zmieniony od {date}.",
     "verdict_invalid": "Tego dowodu nie można zweryfikować: plik, data lub znacznik już się nie zgadzają.",
-    "verdict_pending": "W toku — kwalifikowany znacznik czasu nie został jeszcze wydany."
+    "verdict_pending": "W toku — kwalifikowany znacznik czasu nie został jeszcze wydany.",
+    "warn_signature_unverified": "To NIE jest deklarowane jako kwalifikowany znacznik czasu eIDAS: podpisu tokenu nie można było tu zweryfikować (weryfikacja niemożliwa). Data i kontrola odcisku (V/X) są podane, bez statusu kwalifikowanego.",
+    "policy_absent": "brak",
+    "field_signature": "Podpis tokenu",
+    "signature_unverified_line": "NIEZWERYFIKOWANY (weryfikacja niemożliwa)"
   },
   "offer": {
     "pitch": "XVcache zapewnia kancelariom kwalifikowane elektroniczne znaczniki czasu zgodne z prawem UE. Zgodnie z art. 41 rozporządzenia eIDAS (UE) nr 910/2014 kwalifikowany znacznik czasu korzysta z domniemania dokładności daty i czasu oraz integralności oznaczonych danych i jest uznawany we wszystkich państwach członkowskich. Wysyłany jest tylko skrót SHA-256 dokumentu, nigdy jego treść. Każdy wynik to werdykt (V nienaruszony / X zmieniony) i jednostronicowy certyfikat PDF w 24 językach UE. Ograniczenia: to nie protokół komornika, nie podpis ani porada prawna; o mocy dowodowej decyduje sąd.",

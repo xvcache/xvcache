@@ -54,7 +54,11 @@
     "verdict_intact": "Uændret — dette dokument er identisk med det, der blev tidsstemplet den {date}.",
     "verdict_modified": "Ændret siden {date}.",
     "verdict_invalid": "Dette bevis kan ikke valideres: filen, datoen eller tidsstemplet stemmer ikke længere.",
-    "verdict_pending": "Afventer — det kvalificerede tidsstempel er endnu ikke udstedt."
+    "verdict_pending": "Afventer — det kvalificerede tidsstempel er endnu ikke udstedt.",
+    "warn_signature_unverified": "Dette er IKKE angivet som et kvalificeret eIDAS-tidsstempel: tokenets signatur kunne ikke verificeres her (verifikation umulig). Dato og kontrol af fingeraftryk (V/X) vises uden kvalificeret status.",
+    "policy_absent": "mangler",
+    "field_signature": "Tokenets signatur",
+    "signature_unverified_line": "IKKE verificeret (verifikation umulig)"
   },
   "offer": {
     "pitch": "XVcache giver advokatfirmaer kvalificerede elektroniske tidsstempler efter EU-retten. Efter art. 41 i eIDAS-forordningen (EU) nr. 910/2014 nyder et kvalificeret tidsstempel formodning for nøjagtig dato og tid og for integriteten af de stemplede data, og det anerkendes i alle medlemsstater. Kun dokumentets SHA-256-fingeraftryk sendes, aldrig indholdet. Hvert resultat er en afgørelse (V uændret / X ændret) og et PDF-certifikat på én side på 24 EU-sprog. Begrænsninger: ingen fogedrapport, ingen signatur, ingen juridisk rådgivning; bevisværdien afgøres af retten.",

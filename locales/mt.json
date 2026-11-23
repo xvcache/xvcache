@@ -54,7 +54,11 @@
     "verdict_intact": "Intatt — dan id-dokument huwa identiku għal dak ittimbrat fil-{date}.",
     "verdict_modified": "Modifikat mill-{date}.",
     "verdict_invalid": "Din il-prova ma tistax tiġi vvalidata: il-fajl, id-data jew it-timbru ma jaqblux aktar.",
-    "verdict_pending": "Pendenti — it-timbru tal-ħin kwalifikat għadu ma nħariġx."
+    "verdict_pending": "Pendenti — it-timbru tal-ħin kwalifikat għadu ma nħariġx.",
+    "warn_signature_unverified": "Dan MHUWIEX iddikjarat bħala timbru tal-ħin kwalifikat eIDAS: il-firma tat-token ma setgħetx tiġi vverifikata hawn (verifika impossibbli). Id-data u l-kontroll tal-marka (V/X) jintwerew, mingħajr status kwalifikat.",
+    "policy_absent": "nieqes",
+    "field_signature": "Firma tat-token",
+    "signature_unverified_line": "MHUX ivverifikata (verifika impossibbli)"
   },
   "offer": {
     "pitch": "XVcache jagħti lid-ditti legali timbri tal-ħin elettroniċi kwalifikati skont il-liġi tal-UE. Skont l-Artikolu 41 tar-Regolament eIDAS (UE) Nru 910/2014, timbru tal-ħin kwalifikat igawdi l-preżunzjoni tal-eżattezza tad-data u l-ħin u tal-integrità tad-data ttimbrata, u huwa rikonoxxut fl-Istati Membri kollha. Tintbagħat biss il-marka diġitali SHA-256 tad-dokument, qatt il-kontenut. Kull riżultat huwa verdett (V intatt / X modifikat) u ċertifikat PDF ta' paġna waħda f'24 lingwa tal-UE. Limiti: mhuwiex rapport ta' marixxall, firma jew parir legali; il-valur probatorju jiddeċidih il-qorti.",

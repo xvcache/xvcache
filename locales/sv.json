@@ -54,7 +54,11 @@
     "verdict_intact": "Oförändrat — detta dokument är identiskt med det som tidsstämplades den {date}.",
     "verdict_modified": "Ändrat sedan {date}.",
     "verdict_invalid": "Detta bevis kan inte valideras: filen, datumet eller tidsstämpeln stämmer inte längre.",
-    "verdict_pending": "Väntar — den kvalificerade tidsstämpeln har ännu inte utfärdats."
+    "verdict_pending": "Väntar — den kvalificerade tidsstämpeln har ännu inte utfärdats.",
+    "warn_signature_unverified": "Detta anges INTE som en kvalificerad eIDAS-tidsstämpel: tokenets signatur kunde inte verifieras här (verifiering omöjlig). Datum och kontroll av fingeravtryck (V/X) visas, utan kvalificerad status.",
+    "policy_absent": "saknas",
+    "field_signature": "Tokenets signatur",
+    "signature_unverified_line": "INTE verifierad (verifiering omöjlig)"
   },
   "offer": {
     "pitch": "XVcache ger advokatbyråer kvalificerade elektroniska tidsstämplar enligt EU-rätten. Enligt art. 41 i eIDAS-förordningen (EU) nr 910/2014 presumeras en kvalificerad tidsstämpel ange korrekt datum och tid och att de stämplade uppgifterna är intakta, och den erkänns i alla medlemsstater. Endast dokumentets SHA-256-fingeravtryck skickas, aldrig innehållet. Varje resultat är ett utlåtande (V oförändrat / X ändrat) och ett PDF-certifikat på en sida på 24 EU-språk. Begränsningar: inget protokoll från kronofogde, ingen underskrift, ingen juridisk rådgivning; bevisvärdet avgörs av domstolen.",

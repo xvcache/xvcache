@@ -54,7 +54,11 @@
     "verdict_intact": "Intacto — este documento es idéntico al sellado el {date}.",
     "verdict_modified": "Modificado desde el {date}.",
     "verdict_invalid": "Esta prueba no puede validarse: el archivo, la fecha o el sello ya no coinciden.",
-    "verdict_pending": "Pendiente — el sello de tiempo cualificado aún no se ha emitido."
+    "verdict_pending": "Pendiente — el sello de tiempo cualificado aún no se ha emitido.",
+    "warn_signature_unverified": "Esto NO se declara como sello de tiempo cualificado eIDAS: la firma del token no ha podido verificarse aquí (verificación imposible). Se indican la fecha y el control de la huella (V/X), sin estatus cualificado.",
+    "policy_absent": "ausente",
+    "field_signature": "Firma del token",
+    "signature_unverified_line": "NO verificada (verificación imposible)"
   },
   "offer": {
     "pitch": "XVcache ofrece a los despachos de abogados sellos de tiempo electrónicos cualificados conforme al Derecho de la UE. Según el art. 41 del Reglamento eIDAS (UE) n.º 910/2014, un sello de tiempo cualificado goza de presunción de exactitud de la fecha y la hora y de integridad de los datos sellados, y se reconoce en todos los Estados miembros. Solo se envía la huella SHA-256 del documento, nunca su contenido. Cada resultado es un veredicto (V intacto / X modificado) y un certificado PDF de una página en 24 lenguas de la UE. Límites: no es un acta notarial, ni una firma, ni asesoramiento jurídico; el valor probatorio corresponde al tribunal.",

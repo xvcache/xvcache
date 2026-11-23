@@ -54,7 +54,11 @@
     "verdict_intact": "Intacto — este documento é idêntico ao selado em {date}.",
     "verdict_modified": "Modificado desde {date}.",
     "verdict_invalid": "Esta prova não pode ser validada: o ficheiro, a data ou o selo já não correspondem.",
-    "verdict_pending": "Pendente — o selo temporal qualificado ainda não foi emitido."
+    "verdict_pending": "Pendente — o selo temporal qualificado ainda não foi emitido.",
+    "warn_signature_unverified": "Isto NÃO é declarado como selo temporal qualificado eIDAS: a assinatura do token não pôde ser verificada aqui (verificação impossível). A data e o controlo da impressão digital (V/X) são indicados, sem estatuto qualificado.",
+    "policy_absent": "ausente",
+    "field_signature": "Assinatura do token",
+    "signature_unverified_line": "NÃO verificada (verificação impossível)"
   },
   "offer": {
     "pitch": "A XVcache fornece às sociedades de advogados selos temporais eletrónicos qualificados nos termos do direito da UE. Segundo o art. 41.º do Regulamento eIDAS (UE) n.º 910/2014, um selo temporal qualificado goza da presunção de exatidão da data e da hora e de integridade dos dados selados, e é reconhecido em todos os Estados-Membros. Só é enviada a impressão digital SHA-256 do documento, nunca o seu conteúdo. Cada resultado é um veredicto (V intacto / X modificado) e um certificado PDF de uma página em 24 línguas da UE. Limites: não é um auto de agente de execução, nem uma assinatura, nem aconselhamento jurídico; o valor probatório cabe ao tribunal.",

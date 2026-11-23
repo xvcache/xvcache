@@ -576,7 +576,8 @@ server.registerTool(
 function witnessSummary(): Record<string, unknown> {
   const t = certifier.cfg.tsa;
   return {
-    tsa: t ? { provider: t.id, label: t.label, qualified: t.qualified } : null,
+    // expected_qualified = configuration only; each proof says "qualified" only if its token proves it.
+    tsa: t ? { provider: t.id, label: t.label, expected_qualified: t.qualified, qualified_from: "token (Certigna OID 1.2.250.1.177.2.9.1 + Certigna chain + verified signature)" } : null,
     tsa_config_error: tsaConfigError,
     opentimestamps: certifier.cfg.ots.enabled,
   };

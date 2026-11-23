@@ -54,7 +54,11 @@
     "verdict_intact": "Muuttumaton — tämä asiakirja on identtinen {date} aikaleimatun kanssa.",
     "verdict_modified": "Muutettu {date} jälkeen.",
     "verdict_invalid": "Tätä todistetta ei voida vahvistaa: tiedosto, päivämäärä tai aikaleima eivät enää täsmää.",
-    "verdict_pending": "Odottaa — hyväksyttyä aikaleimaa ei ole vielä myönnetty."
+    "verdict_pending": "Odottaa — hyväksyttyä aikaleimaa ei ole vielä myönnetty.",
+    "warn_signature_unverified": "Tätä EI ilmoiteta hyväksytyksi eIDAS-aikaleimaksi: tunnisteen allekirjoitusta ei voitu tarkistaa täällä (tarkistus mahdoton). Päivämäärä ja sormenjäljen tarkistus (V/X) näytetään ilman hyväksyttyä asemaa.",
+    "policy_absent": "puuttuu",
+    "field_signature": "Tunnisteen allekirjoitus",
+    "signature_unverified_line": "EI tarkistettu (tarkistus mahdoton)"
   },
   "offer": {
     "pitch": "XVcache tarjoaa asianajotoimistoille EU-oikeuden mukaisia hyväksyttyjä sähköisiä aikaleimoja. eIDAS-asetuksen (EU) N:o 910/2014 41 artiklan mukaan hyväksytyn aikaleiman päivämäärää ja kellonaikaa sekä leimattujen tietojen eheyttä pidetään oletusarvoisesti oikeina, ja se tunnustetaan kaikissa jäsenvaltioissa. Vain asiakirjan SHA-256-tiiviste lähetetään, ei koskaan sisältöä. Jokainen tulos on ratkaisu (V muuttumaton / X muutettu) ja yksisivuinen PDF-todistus 24 EU-kielellä. Rajoitukset: ei ulosottomiehen pöytäkirja, ei allekirjoitus, ei oikeudellinen neuvo; todistusarvon ratkaisee tuomioistuin.",

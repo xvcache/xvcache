@@ -54,7 +54,11 @@
     "verdict_intact": "Intact — acest document este identic cu cel marcat temporal la {date}.",
     "verdict_modified": "Modificat din {date}.",
     "verdict_invalid": "Această dovadă nu poate fi validată: fișierul, data sau marca nu mai corespund.",
-    "verdict_pending": "În așteptare — marca temporală calificată nu a fost încă emisă."
+    "verdict_pending": "În așteptare — marca temporală calificată nu a fost încă emisă.",
+    "warn_signature_unverified": "Aceasta NU este declarată marcă temporală calificată eIDAS: semnătura tokenului nu a putut fi verificată aici (verificare imposibilă). Data și controlul amprentei (V/X) sunt indicate, fără statut calificat.",
+    "policy_absent": "absent",
+    "field_signature": "Semnătura tokenului",
+    "signature_unverified_line": "NEVERIFICATĂ (verificare imposibilă)"
   },
   "offer": {
     "pitch": "XVcache oferă cabinetelor de avocatură mărci temporale electronice calificate conform dreptului UE. Potrivit art. 41 din Regulamentul eIDAS (UE) nr. 910/2014, o marcă temporală calificată beneficiază de prezumția de exactitate a datei și orei și de integritate a datelor marcate și este recunoscută în toate statele membre. Se trimite doar amprenta SHA-256 a documentului, niciodată conținutul. Fiecare rezultat este un verdict (V intact / X modificat) și un certificat PDF de o pagină în 24 de limbi ale UE. Limite: nu este proces-verbal de executor, semnătură sau consultanță juridică; forța probantă o apreciază instanța.",

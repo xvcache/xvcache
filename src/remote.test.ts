@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { startFakeTsa, type FakeTsa } from "./test-tsa.js";
-import type { TsaProvider, FetchLike } from "./tsa.js";
+import { CERTIGNA_QUALIFIED_POLICY_OID, type TsaProvider, type FetchLike } from "./tsa.js";
 import { HostedWitness } from "./witness.js";
 import { SubscriptionStore } from "./subscriptions.js";
 import { startRemoteServer } from "./remote.js";
@@ -15,11 +15,13 @@ import type { Billing } from "./plans.js";
 
 let fake: FakeTsa;
 let tmp: string;
-before(async () => { fake = await startFakeTsa(); tmp = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-remote-")); });
+before(async () => { fake = await startFakeTsa({ policy: CERTIGNA_QUALIFIED_POLICY_OID }); tmp = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-remote-")); });
 after(async () => { await fake.close(); await fs.rm(tmp, { recursive: true, force: true }); });
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
-const certignaLike = (): TsaProvider => ({ id: "certigna", label: "Certigna (simulated in tests)", url: fake.url, qualified: true, qualifiedBasis: "test", caFile: fake.caFile });
+const certignaLike = (): TsaProvider => ({ id: "certigna", label: "Certigna (simulated in tests)", url: fake.url, qualified: true, qualifiedBasis: "test", caFile: fake.caFile,
+    // Test-only trust anchor standing in for the bundled Certigna chain (the token must still prove it).
+    qualifiedTrust: { name: "Certigna (simulated)", policyOids: [CERTIGNA_QUALIFIED_POLICY_OID], caFile: fake.caFile } });
 
 type ToolOut = { isError?: boolean; content: { type: string; text?: string; resource?: { mimeType: string; blob: string; uri: string } }[] };
 function body(r: unknown): Record<string, any> {

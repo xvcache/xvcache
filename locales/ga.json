@@ -54,7 +54,11 @@
     "verdict_intact": "Slán — is ionann an doiciméad seo agus an ceann a stampáladh ar {date}.",
     "verdict_modified": "Athraithe ó {date}.",
     "verdict_invalid": "Ní féidir an cruthúnas seo a bhailíochtú: ní réitíonn an comhad, an dáta ná an stampa a thuilleadh.",
-    "verdict_pending": "Ar feitheamh — níor eisíodh an stampa ama cáilithe go fóill."
+    "verdict_pending": "Ar feitheamh — níor eisíodh an stampa ama cáilithe go fóill.",
+    "warn_signature_unverified": "NÍ fhógraítear é seo mar stampa ama cáilithe eIDAS: níorbh fhéidir síniú an chomhartha a fhíorú anseo (fíorú dodhéanta). Taispeántar an dáta agus seiceáil na méarloirge (V/X), gan stádas cáilithe.",
+    "policy_absent": "as láthair",
+    "field_signature": "Síniú an chomhartha",
+    "signature_unverified_line": "NÍ fíoraithe (fíorú dodhéanta)"
   },
   "offer": {
     "pitch": "Tugann XVcache stampaí ama leictreonacha cáilithe faoi dhlí an AE do ghnólachtaí dlí. Faoi Airteagal 41 de Rialachán eIDAS (AE) Uimh. 910/2014, tá toimhde ann go bhfuil dáta agus am stampa ama cháilithe cruinn agus go bhfuil na sonraí stampáilte slán, agus aithnítear é i ngach Ballstát. Ní sheoltar ach méarlorg SHA-256 an doiciméid, riamh a ábhar. Is é gach toradh breith (V slán / X athraithe) agus deimhniú PDF aon leathanaigh i 24 theanga an AE. Teorainneacha: ní tuarascáil báille, ní síniú ná comhairle dhlíthiúil é; is faoin gcúirt atá an fiúntas fianaise.",

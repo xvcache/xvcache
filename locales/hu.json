@@ -54,7 +54,11 @@
     "verdict_intact": "Változatlan — ez a dokumentum azonos azzal, amelyet {date} időbélyegeztek.",
     "verdict_modified": "Módosult ekkor óta: {date}.",
     "verdict_invalid": "Ez a bizonyíték nem igazolható: a fájl, a dátum vagy az időbélyeg már nem egyezik.",
-    "verdict_pending": "Függőben — a minősített időbélyeget még nem bocsátották ki."
+    "verdict_pending": "Függőben — a minősített időbélyeget még nem bocsátották ki.",
+    "warn_signature_unverified": "Ez NEM minősül minősített eIDAS időbélyegnek: a token aláírását itt nem lehetett ellenőrizni (az ellenőrzés nem lehetséges). A dátum és az ujjlenyomat-ellenőrzés (V/X) minősített státusz nélkül szerepel.",
+    "policy_absent": "hiányzik",
+    "field_signature": "A token aláírása",
+    "signature_unverified_line": "NINCS ellenőrizve (az ellenőrzés nem lehetséges)"
   },
   "offer": {
     "pitch": "Az XVcache az uniós jog szerinti minősített elektronikus időbélyegeket nyújt ügyvédi irodáknak. A 910/2014/EU (eIDAS) rendelet 41. cikke szerint a minősített időbélyegre vonatkozik a dátum és idő pontosságának, valamint a bélyegzett adatok sértetlenségének vélelme, és azt minden tagállamban elismerik. Csak a dokumentum SHA-256 lenyomatát küldjük, a tartalmát soha. Minden eredmény egy döntés (V változatlan / X módosult) és egy egyoldalas PDF-tanúsítvány 24 uniós nyelven. Korlátok: nem végrehajtói jegyzőkönyv, nem aláírás és nem jogi tanács; a bizonyító erőről a bíróság dönt.",

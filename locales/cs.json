@@ -54,7 +54,11 @@
     "verdict_intact": "Nezměněn — tento dokument je totožný s dokumentem opatřeným razítkem {date}.",
     "verdict_modified": "Změněn od {date}.",
     "verdict_invalid": "Tento důkaz nelze ověřit: soubor, datum nebo razítko si již neodpovídají.",
-    "verdict_pending": "Čeká — kvalifikované časové razítko dosud nebylo vydáno."
+    "verdict_pending": "Čeká — kvalifikované časové razítko dosud nebylo vydáno.",
+    "warn_signature_unverified": "Toto NENÍ uvedeno jako kvalifikované časové razítko eIDAS: podpis tokenu zde nebylo možné ověřit (ověření nemožné). Datum a kontrola otisku (V/X) jsou uvedeny bez kvalifikovaného statusu.",
+    "policy_absent": "chybí",
+    "field_signature": "Podpis tokenu",
+    "signature_unverified_line": "NEOVĚŘEN (ověření nemožné)"
   },
   "offer": {
     "pitch": "XVcache poskytuje advokátním kancelářím kvalifikovaná elektronická časová razítka podle práva EU. Podle čl. 41 nařízení eIDAS (EU) č. 910/2014 se u kvalifikovaného časového razítka uplatní domněnka přesnosti data a času a integrity orazítkovaných dat a je uznáváno ve všech členských státech. Odesílá se pouze otisk SHA-256 dokumentu, nikdy jeho obsah. Každý výsledek je verdikt (V nezměněn / X změněn) a jednostránkový certifikát PDF ve 24 jazycích EU. Omezení: nejde o protokol exekutora, podpis ani právní radu; o důkazní hodnotě rozhoduje soud.",

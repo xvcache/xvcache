@@ -54,7 +54,11 @@
     "verdict_intact": "Muutmata — see dokument on identne dokumendiga, millele anti ajatempel {date}.",
     "verdict_modified": "Muudetud alates {date}.",
     "verdict_invalid": "Seda tõendit ei saa kinnitada: fail, kuupäev või ajatempel ei vasta enam.",
-    "verdict_pending": "Ootel — kvalifitseeritud ajatemplit pole veel väljastatud."
+    "verdict_pending": "Ootel — kvalifitseeritud ajatemplit pole veel väljastatud.",
+    "warn_signature_unverified": "Seda EI ole märgitud kvalifitseeritud eIDAS-ajatempliks: tõendi allkirja ei saanud siin kontrollida (kontroll võimatu). Kuupäev ja sõrmejälje kontroll (V/X) on näidatud ilma kvalifitseeritud staatuseta.",
+    "policy_absent": "puudub",
+    "field_signature": "Tõendi allkiri",
+    "signature_unverified_line": "EI ole kontrollitud (kontroll võimatu)"
   },
   "offer": {
     "pitch": "XVcache pakub advokaadibüroodele ELi õiguse kohaseid kvalifitseeritud elektroonilisi ajatempleid. eIDAS-määruse (EL) nr 910/2014 artikli 41 kohaselt eeldatakse kvalifitseeritud ajatempli kuupäeva ja kellaaja õigsust ning tembeldatud andmete terviklust, ja seda tunnustatakse kõigis liikmesriikides. Saadetakse ainult dokumendi SHA-256 räsi, mitte kunagi sisu. Iga tulemus on otsus (V muutmata / X muudetud) ja üheleheküljeline PDF-tõend 24 ELi keeles. Piirangud: ei ole kohtutäituri protokoll, allkiri ega õigusnõuanne; tõendusväärtuse otsustab kohus.",

@@ -54,7 +54,11 @@
     "verdict_intact": "Nepromijenjen — ovaj je dokument istovjetan dokumentu označenom žigom {date}.",
     "verdict_modified": "Promijenjen od {date}.",
     "verdict_invalid": "Ovaj dokaz nije moguće potvrditi: datoteka, datum ili žig više se ne podudaraju.",
-    "verdict_pending": "Na čekanju — kvalificirani vremenski žig još nije izdan."
+    "verdict_pending": "Na čekanju — kvalificirani vremenski žig još nije izdan.",
+    "warn_signature_unverified": "Ovo NIJE navedeno kao kvalificirani vremenski žig eIDAS: potpis tokena ovdje nije bilo moguće provjeriti (provjera nemoguća). Datum i provjera otiska (V/X) prikazani su bez kvalificiranog statusa.",
+    "policy_absent": "nedostaje",
+    "field_signature": "Potpis tokena",
+    "signature_unverified_line": "NIJE provjeren (provjera nemoguća)"
   },
   "offer": {
     "pitch": "XVcache odvjetničkim uredima pruža kvalificirane elektroničke vremenske žigove prema pravu EU-a. Prema članku 41. Uredbe eIDAS (EU) br. 910/2014 za kvalificirani vremenski žig vrijedi pretpostavka točnosti datuma i vremena te cjelovitosti označenih podataka, i priznaje se u svim državama članicama. Šalje se samo otisak SHA-256 dokumenta, nikada sadržaj. Svaki rezultat je ishod (V nepromijenjen / X promijenjen) i potvrda PDF od jedne stranice na 24 jezika EU-a. Ograničenja: nije zapisnik ovršitelja, potpis ni pravni savjet; o dokaznoj snazi odlučuje sud.",

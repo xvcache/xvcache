@@ -10,7 +10,8 @@ const run = promisify(execFile);
 
 export type FakeTsa = { url: string; caFile: string; dir: string; requests: number; close(): Promise<void> };
 
-export async function startFakeTsa(): Promise<FakeTsa> {
+/** `policy`: TSTInfo policy OID the fake TSA puts in its tokens (default 1.2.3.4.99, not qualified). */
+export async function startFakeTsa(opts: { policy?: string } = {}): Promise<FakeTsa> {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-faketsa-"));
   const p = (f: string) => path.join(dir, f);
   await fs.writeFile(p("ext.cnf"), "[tsa_ext]\nbasicConstraints=CA:FALSE\nkeyUsage=critical,digitalSignature\nextendedKeyUsage=critical,timeStamping\n");
@@ -22,7 +23,7 @@ export async function startFakeTsa(): Promise<FakeTsa> {
     "[ tsa ]", "default_tsa = tsa1", "[ tsa1 ]",
     `serial = ${p("serial")}`, "crypto_device = builtin",
     `signer_cert = ${p("tsa.crt")}`, `certs = ${p("ca.crt")}`, `signer_key = ${p("tsa.key")}`,
-    "signer_digest = sha256", "default_policy = 1.2.3.4.99", "digests = sha256",
+    "signer_digest = sha256", `default_policy = ${opts.policy ?? "1.2.3.4.99"}`, "digests = sha256",
     "accuracy = secs:1", "ordering = no", "tsa_name = no", "ess_cert_id_chain = no", "ess_cert_id_alg = sha256", "",
   ].join("\n"));
   let n = 0;

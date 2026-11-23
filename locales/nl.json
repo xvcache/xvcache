@@ -54,7 +54,11 @@
     "verdict_intact": "Ongewijzigd — dit document is identiek aan het document dat op {date} is gestempeld.",
     "verdict_modified": "Gewijzigd sinds {date}.",
     "verdict_invalid": "Dit bewijs kan niet worden gevalideerd: het bestand, de datum of het tijdstempel komen niet meer overeen.",
-    "verdict_pending": "In afwachting — het gekwalificeerde tijdstempel is nog niet uitgegeven."
+    "verdict_pending": "In afwachting — het gekwalificeerde tijdstempel is nog niet uitgegeven.",
+    "warn_signature_unverified": "Dit wordt NIET als gekwalificeerd eIDAS-tijdstempel aangemerkt: de handtekening van het token kon hier niet worden gecontroleerd (controle onmogelijk). Datum en vingerafdrukcontrole (V/X) worden getoond, zonder gekwalificeerde status.",
+    "policy_absent": "ontbreekt",
+    "field_signature": "Handtekening van het token",
+    "signature_unverified_line": "NIET gecontroleerd (controle onmogelijk)"
   },
   "offer": {
     "pitch": "XVcache biedt advocatenkantoren gekwalificeerde elektronische tijdstempels volgens het EU-recht. Volgens art. 41 van de eIDAS-verordening (EU) nr. 910/2014 geldt voor een gekwalificeerd tijdstempel het vermoeden van juistheid van datum en tijd en van integriteit van de gestempelde gegevens, en het wordt in alle lidstaten erkend. Alleen de SHA-256-vingerafdruk van het document wordt verzonden, nooit de inhoud. Elk resultaat is een uitslag (V ongewijzigd / X gewijzigd) en een PDF-certificaat van één pagina in 24 EU-talen. Grenzen: geen proces-verbaal van een gerechtsdeurwaarder, geen handtekening, geen juridisch advies; over de bewijskracht beslist de rechter.",
