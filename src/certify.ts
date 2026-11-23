@@ -328,7 +328,9 @@ export class Certifier {
       return {
         glyph: glyphOk ? "V" : "X",
         message: glyphOk
-          ? `V  certifiée — Note ${shown} existait telle quelle${when} (${level}).`
+          ? (checks.tsa_signature?.ok === true
+            ? `V  certifiée — Note ${shown} existait telle quelle${when} (${level}).`
+            : `V  empreinte conforme, signature non vérifiée — Note ${shown} existait telle quelle${when} (${level}).`)
           : `X  preuve invalide — Note ${shown} : ${failed.join(" ; ") || "preuve illisible"}.`,
         path: p?.path ?? input.path ?? null,
         batch_id: p?.batch_id ?? null,

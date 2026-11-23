@@ -75,24 +75,40 @@ export function otsHuman(status?: string | null, detail?: string | null): string
 
 export type HumanVerdict = {
   glyph: "V" | "X";
-  kind: "intact" | "modifie" | "invalide";
+  kind: "intact" | "modifie" | "invalide" | "signature_unverified";
   title: string;
   sentence: string;
   since: string | null;
 };
+
+/** Intact only when the fingerprint matches (V) and the token signature is verified. */
+export function kindWhenFingerprintMatches(signature: string | null | undefined): "intact" | "signature_unverified" {
+  return signature === "verified" ? "intact" : "signature_unverified";
+}
 
 export function humanVerdict(report: VerifyReport): HumanVerdict {
   const when = report.gen_time ? formatParisDateTime(report.gen_time) : null;
   const since = when ? when.short : null;
   const noteChanged = report.checks.note?.ok === false;
   if (report.glyph === "V") {
+    if (kindWhenFingerprintMatches(report.signature) === "intact") {
+      return {
+        glyph: "V",
+        kind: "intact",
+        title: "Intact",
+        sentence: when
+          ? `Intact — ce document est identique à celui horodaté le ${when.short} (${when.tz}).`
+          : "Intact — ce document est identique à la version certifiée.",
+        since,
+      };
+    }
     return {
       glyph: "V",
-      kind: "intact",
-      title: "Intact",
+      kind: "signature_unverified",
+      title: "Empreinte conforme — signature non vérifiée",
       sentence: when
-        ? `Intact — ce document est identique à celui horodaté le ${when.short} (${when.tz}).`
-        : "Intact — ce document est identique à la version certifiée.",
+        ? `Empreinte conforme — signature non vérifiée. Ce document a la même empreinte que celui horodaté le ${when.short} (${when.tz}), mais la signature du jeton n'a pas pu être vérifiée.`
+        : "Empreinte conforme — signature non vérifiée.",
       since,
     };
   }
@@ -577,11 +593,12 @@ export function localizedOts(lang: string, status?: string | null, detail?: stri
 }
 
 /** Localized one-line verdict for the AI to show (no question, no advice). */
-export function localizedVerdict(kind: "intact" | "modifie" | "invalide" | "pending", lang: string, genTime: string | null, tz?: string): string {
+export function localizedVerdict(kind: "intact" | "modifie" | "invalide" | "pending" | "signature_unverified", lang: string, genTime: string | null, tz?: string): string {
   const L = loadLocale(lang).cert;
   const when = genTime ? formatLocalDateTime(genTime, loadLocale(lang).lang, tz) : null;
   const date = when ? `${when.local} (${when.tz}) — ${when.utc} UTC` : "?";
   if (kind === "intact") return fill(L.verdict_intact, { date });
+  if (kind === "signature_unverified") return fill(L.verdict_signature_unverified, { date });
   if (kind === "modifie") return fill(L.verdict_modified, { date });
   if (kind === "pending") return L.verdict_pending;
   return L.verdict_invalid;
@@ -673,8 +690,15 @@ async function renderOnce(model: CertificateModel, scale: number): Promise<Rende
   c.gap(6);
 
   // ---- verdict ----
-  const title = model.verdict === "V" ? L.title_intact : model.verdict === "X" ? L.title_modified : L.title_pending;
-  const subtitle = model.verdict === "V" ? L.subtitle_intact : model.verdict === "X" ? L.subtitle_modified : L.subtitle_pending;
+  const unverifiedV = model.verdict === "V" && model.tsa?.signature !== "verified";
+  const title = model.verdict === "X" ? L.title_modified
+    : model.verdict === "pending" ? L.title_pending
+    : unverifiedV ? L.title_signature_unverified
+    : L.title_intact;
+  const subtitle = model.verdict === "X" ? L.subtitle_modified
+    : model.verdict === "pending" ? L.subtitle_pending
+    : unverifiedV ? L.subtitle_signature_unverified
+    : L.subtitle_intact;
   const badgeY = c.y - 16;
   drawBadge(c, MARGIN_X + 16, badgeY, 14, model.verdict);
   const titleX = MARGIN_X + 42;

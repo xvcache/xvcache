@@ -91,6 +91,7 @@ test("worst case in every language (pending Certigna token, 120-char label, X ve
     for (const over of [
       { verdict: "pending" as const, pending_qualified: true, tsa: null, gen_time: null, label: "D".repeat(120) },
       { verdict: "X" as const, kind: "verification" as const, tsa: { provider: "freetsa", label: "FreeTSA (test)", qualified: false, serial: "abcd" }, label: "Ä".repeat(120) },
+      { verdict: "V" as const, kind: "verification" as const, tsa: { provider: "certigna", label: "Certigna", qualified: false, policy: "1.2.250.1.177.2.9.1", serial: "abcd", signature: "unavailable" as const }, label: "D".repeat(120) },
     ]) {
       const r = await renderCertificate(model(lang, over));
       assert.equal(r.pages, 1, lang);

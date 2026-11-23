@@ -1,5 +1,5 @@
 /**
- * Local-only demo for lawyers: drop a document, get a green Intact + PDF
+ * Local-only demo for lawyers: drop a document, get a V report + PDF
  * or a red "Modifié depuis le …". Binds to 127.0.0.1 only. Never Docker.
  * Does not stamp (and therefore does not spend a Certigna token) unless
  * XVCACHE_DEMO_STAMP=1 is set.
@@ -31,13 +31,14 @@ function page(result: DocumentResult | null, notice?: string): string {
   let resultHtml = "";
   if (notice && !has) {
     resultHtml = `<div class="card result miss"><p class="sentence">${escapeHtml(notice)}</p></div>`;
-  } else if (has && kind === "intact") {
+  } else if (has && (kind === "intact" || kind === "signature_unverified")) {
     const pdfLink = result!.pdf
       ? `<a class="btn" href="/certificat?batch=${encodeURIComponent(result!.batch_id ?? "")}&amp;path=${encodeURIComponent(result!.path ?? "")}">Télécharger le Rapport PDF</a>`
       : "";
-    resultHtml = `<div class="card result ok">
+    const cardClass = kind === "intact" ? "ok" : "partial";
+    resultHtml = `<div class="card result ${cardClass}">
       <div class="badge v">V</div>
-      <h2>Intact</h2>
+      <h2>${escapeHtml(v!.title)}</h2>
       <p class="sentence">${escapeHtml(v!.sentence)}</p>
       ${result!.qualified ? `<p class="meta">Prestataire : Certigna — horodatage électronique qualifié eIDAS</p>` : `<p class="meta warn">Ce jeton n'est pas un horodatage qualifié eIDAS.</p>`}
       ${pdfLink}
@@ -80,6 +81,7 @@ function page(result: DocumentResult | null, notice?: string): string {
     .card.result { margin-top: 24px; background: var(--card); border-radius: 16px; padding: 28px 28px 32px;
       border: 1px solid var(--line); }
     .card.result.ok { border-color: #b7dcc8; background: linear-gradient(180deg, var(--green-soft), var(--card) 42%); }
+    .card.result.partial { border-color: #e4d0a6; background: linear-gradient(180deg, #f8f1e0, var(--card) 42%); }
     .card.result.ko { border-color: #f0c2bd; background: linear-gradient(180deg, var(--red-soft), var(--card) 42%); }
     .badge { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-family: Georgia, serif; font-size: 18px; color: #fff; margin-bottom: 14px; }

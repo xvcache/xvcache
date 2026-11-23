@@ -55,7 +55,7 @@
   "scripts": {
     "build": "tsc && chmod +x dist/server.js dist/export-certificate.js dist/remote-server.js",
     "start": "node dist/server.js",
-    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/offer.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js dist/certificate-i18n.test.js dist/subscriptions.test.js dist/witness.test.js dist/remote.test.js dist/stripe-webhook.test.js dist/qualification.test.js dist/daily-anchor.test.js dist/key-delivery.test.js dist/pack.test.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/offer.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js dist/certificate-i18n.test.js dist/subscriptions.test.js dist/witness.test.js dist/remote.test.js dist/stripe-webhook.test.js dist/qualification.test.js dist/daily-anchor.test.js dist/key-delivery.test.js dist/pack.test.js dist/verdict-label.test.js",
     "demo:certify": "npm run build && node scripts/demo-certify.mjs",
     "demo:ui": "npm run build && node scripts/demo-ui.mjs",
     "certificate": "npm run build && node dist/export-certificate.js",

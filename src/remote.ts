@@ -9,7 +9,7 @@ import { getOffer, listPlans, presentToClient, recommendPlan, requestUpgradeFlow
 import { toolError, type ToolError } from "./errors.js";
 import { SubscriptionStore, type SubscriptionRecord } from "./subscriptions.js";
 import { HostedWitness, type HostedProof, type HostedVerification } from "./witness.js";
-import { localizedVerdict } from "./certificate.js";
+import { localizedVerdict, kindWhenFingerprintMatches } from "./certificate.js";
 import { EU_LANGS, resolveLang, DEFAULT_TZ } from "./i18n.js";
 import { STRIPE_WEBHOOK_PATH, handleStripeWebhook, type WebhookLog } from "./stripe-webhook.js";
 import { KEY_PAGE_PREFIX, handleKeyPage, type KeyDeliveryService } from "./key-delivery.js";
@@ -105,7 +105,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     return rec;
   }
 
-  function verdictText(kind: "intact" | "modifie" | "invalide" | "pending", lang: string, genTime: string | null, tz?: string): string {
+  function verdictText(kind: "intact" | "modifie" | "invalide" | "pending" | "signature_unverified", lang: string, genTime: string | null, tz?: string): string {
     return localizedVerdict(kind, lang, genTime, tz);
   }
 
@@ -157,7 +157,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
         qualified: pdf ? pdf.qualified : false,
         gen_time: p.tsa?.gen_time ?? null,
         ...(p.merkle ? {} : { anchor_due_at: p.anchor_due_at ?? null }),
-        verdict_localized: verdictText(p.tsa ? "intact" : "pending", L.lang, p.tsa?.gen_time ?? null, tz),
+        verdict_localized: verdictText(p.tsa ? kindWhenFingerprintMatches(pdf?.proof.tsa?.qualification?.signature ?? (pdf ? "unavailable" : "not_checked")) : "pending", L.lang, p.tsa?.gen_time ?? null, tz),
         ...link,
       });
     }
@@ -181,7 +181,10 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
   }
 
   function verificationBody(v: HostedVerification, lang: string, tz?: string): Record<string, unknown> {
-    const kind = v.verdict === "V" ? "intact" : v.verdict === "X" ? "modifie" : v.verdict === "pending" ? "pending" : "invalide";
+    const kind = v.verdict === "V" ? kindWhenFingerprintMatches(v.signature)
+      : v.verdict === "X" ? "modifie"
+      : v.verdict === "pending" ? "pending"
+      : "invalide";
     return {
       ok: true,
       verdict: v.verdict,

@@ -155,6 +155,8 @@ test("defect 3: PDF with an unverified signature says so explicitly and is NOT q
     assert.match(t, lang === "fr" ? /NON vérifiée \(vérification impossible\)/ : /NOT verified \(verification impossible\)/);
     assert.match(t, lang === "fr" ? /NON QUALIFIÉ/ : /NOT QUALIFIED/);
     assert.match(t, lang === "fr" ? /signature du jeton n'a pas pu être vérifiée/ : /signature could not be verified/);
+    assert.match(t, lang === "fr" ? /Empreinte conforme — signature non vérifiée/ : /Fingerprint matches — signature not verified/);
+    assert.doesNotMatch(t, lang === "fr" ? /Document intact/ : /Document intact/);
     assert.equal(r.pages, 1);
     assert.equal(r.overflow, false);
   }
@@ -187,6 +189,8 @@ test("defect 3, local proofs: openssl missing → V/X on the fingerprint unchang
   assert.equal(off.signature, "unavailable");
   assert.equal(off.qualification?.status, "signature_unverified");
   assert.match(off.message, /signature du jeton NON VÉRIFIÉE \(vérification impossible/);
+  assert.match(off.message, /V  empreinte conforme, signature non vérifiée/);
+  assert.doesNotMatch(off.message, /V  certifiée/);
   assert.doesNotMatch(off.message, /horodatage qualifié eIDAS,/);
 
   await fs.writeFile(path.join(vault, "Acte.md"), "# Acte modifié\n");
@@ -209,9 +213,11 @@ test("defect 3, hosted: openssl missing → verdict V but qualified=false, statu
     const pdf = await withoutOpenssl(() => w.certificatePdf({ proof_id: p.proof_id, lang: "fr" }));
     assert.ok(pdf);
     assert.equal(pdf!.qualified, false);
-    const t = pdf!.lines.join("\n");
+    const t = pdf!.lines.join(" ");
     assert.match(t, /NON QUALIFIÉ/);
     assert.match(t, /NON vérifiée/);
+    assert.match(t, /Empreinte conforme — signature non vérifiée/);
+    assert.doesNotMatch(t, /Document intact/);
     const x = await withoutOpenssl(() => w.verify({ sha256: "00".repeat(32), proof_id: p.proof_id }));
     assert.equal(x.verdict, "X");
     const back = await w.certificatePdf({ proof_id: p.proof_id, lang: "fr" });
