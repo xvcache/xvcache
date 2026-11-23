@@ -1,8 +1,6 @@
 # Changelog
 
-## 0.3.1 (not published)
-
-<!-- Remove "(not published)" and add the publication date when 0.3.1 is published. -->
+## 0.3.1 — 2026-11-23
 
 ### Fixes
 - **Hosted package (A1):** the npm tarball now ships every module imported by `xvcache-remote`, including `dist/stripe-webhook.js`. A test packs the tarball, installs it in a clean directory and starts each bin.

@@ -1,6 +1,6 @@
 # XVcache MCP tools (specification)
 
-Version: `0.3.0`. Two servers share this contract:
+Version: `0.3.1`. Two servers share this contract:
 
 - **Local** (`xvcache-mcp`, npm): MCP over **STDIO**, Markdown vault, tools below.
 - **Hosted XVcache Coffre horodaté** (`xvcache-remote`, `https://mcp.xvcache.com/mcp`, Streamable HTTP): receives fingerprints, optional labels and IP addresses, never document content; reserved for professionals, published by RENO'LINE SARL, not on sale yet. See [Hosted server](#hosted-server-xvcache-coffre-horodaté).
