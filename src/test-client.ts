@@ -514,8 +514,8 @@ try {
       console.error("FAIL 21: request_upgrade sans consentement doit renvoyer CONSENT_REQUIRED + consent_prompt :", upNo);
       failed = true;
     }
-    if (present.lang !== "de" || typeof present.consent_prompt !== "string" || !String(present.message_markdown).includes("€19")) {
-      console.error("FAIL 21: present_to_client(de) doit renvoyer un message allemand avec le prix et la phrase de consentement :", present);
+    if (present.lang !== "de" || typeof present.consent_prompt !== "string" || !String(present.consent_prompt).includes("€19") || !String(present.message_markdown).includes("€29")) {
+      console.error("FAIL 21: present_to_client(de) doit renvoyer un message allemand avec le prix (29/59 dans le message, 19 € avec sa condition dans le consentement) :", present);
       failed = true;
     }
     if (offerDe.lang !== "de" || !/Art\. 41/.test(String(offerDe.pitch)) || offerDe.next_tool !== "present_to_client") {

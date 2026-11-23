@@ -208,6 +208,16 @@ function contextLine(o: Record<string, string | string[]>, context?: string): st
   return null;
 }
 
+
+/** Official short line without the launch €19 segment. Use only when a summary cannot carry the full condition; never display €19 without it. */
+export const LAUNCH_SEGMENT_EN = " · launch price €19 excl. VAT / month for Essentiel, for the first 50 organisations, while the subscription stays active";
+export const LAUNCH_SEGMENT_FR = " · prix de lancement 19 € HT / mois pour l'Essentiel, réservé aux 50 premières organisations, tant que l'abonnement reste actif";
+export function priceDisplayForMessage(priceDisplay: string): string {
+  if (priceDisplay.includes(LAUNCH_SEGMENT_EN)) return priceDisplay.replace(LAUNCH_SEGMENT_EN, "");
+  if (priceDisplay.includes(LAUNCH_SEGMENT_FR)) return priceDisplay.replace(LAUNCH_SEGMENT_FR, "");
+  return priceDisplay;
+}
+
 /** present_to_client: text ready to show to the lawyer (< 180 words) and the exact consent sentence. */
 export function presentToClient(input: PresentInput = {}): Presentation {
   const { lang, fallback, o } = offerStrings(input.lang);
@@ -222,7 +232,7 @@ export function presentToClient(input: PresentInput = {}): Presentation {
     "",
     `${o.present_does_not}${country ? " " + fill(String(o.country_note), { country }) : ""}`,
     "",
-    fill(String(o.present_price), { price: String(o.price_display), label: String(o.price_label), trial: String(o.trial ?? "") }),
+    fill(String(o.present_price), { price: priceDisplayForMessage(String(o.price_display)), label: String(o.price_label), trial: String(o.trial ?? "") }),
   ];
   return {
     lang,

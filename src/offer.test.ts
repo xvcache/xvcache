@@ -60,7 +60,7 @@ test("get_offer(lang=de): contested claims fall back to the validated English te
   assert.match(o.pitch, /not a qualified trust service provider/);
   assert.doesNotMatch(o.pitch, /\bprove/i);
   assert.ok(Array.isArray(o.legal_limits) && o.legal_limits.length >= 3);
-  assert.equal(o.price.display, 'Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for the first 50 organisations · professionals only · demos by application.');
+  assert.equal(o.price.display, 'Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for Essentiel, for the first 50 organisations, while the subscription stays active · professionals only · demos by application.');
   assert.match(String(o.price_details), /Article B4 bis/);
   assert.equal((o.price.plans as unknown[]).length, 3);
   assert.equal(o.price.status, "announced");
@@ -80,8 +80,10 @@ test("get_offer / list_plans / present_to_client in all 24 languages; unsupporte
     // Count words, not punctuation tokens (French typography puts spaces around ":" and ";").
     const words = pr.message_markdown.split(/\s+/).filter((t) => /[\p{L}\p{N}]/u.test(t)).length;
     assert.ok(words < 180, `${lang}: ${words} words`);
-    assert.match(pr.message_markdown, /€19|19 €/);
+    assert.doesNotMatch(pr.message_markdown, /€19|19 €/, `${lang}: message must omit €19 when the full launch condition cannot fit`);
+    assert.match(pr.message_markdown, /€29|29 €/);
     assert.match(pr.consent_prompt, /€19|19 €/);
+    assert.match(pr.consent_prompt, /while the subscription stays active|tant que l'abonnement reste actif/);
     assert.match(pr.message_markdown, /Planned pricing, not on sale yet|Tarifs prévus, pas encore en vente/);
     assert.ok(pr.consent_prompt.trim().endsWith("?") || /\?\s*\(/.test(pr.consent_prompt) || /\)$/.test(pr.consent_prompt.trim()), `${lang}: consent prompt must be a yes/no question`);
     assert.ok(pr.disclaimers.length >= 3);
@@ -99,7 +101,7 @@ test("consent_prompt states price excl. VAT, monthly period, professionals only,
   assert.match(pr.consent_prompt, /Planned pricing, not on sale yet/);
   assert.match(pr.consent_prompt, /€29 excl\. VAT \/ month/);
   assert.match(pr.consent_prompt, /€59 excl\. VAT \/ month/);
-  assert.match(pr.consent_prompt, /launch price €19 excl\. VAT \/ month for the first 50 organisations/);
+  assert.match(pr.consent_prompt, /launch price €19 excl\. VAT \/ month for Essentiel, for the first 50 organisations, while the subscription stays active/);
   assert.match(pr.consent_prompt, /month/);
   assert.doesNotMatch(pr.consent_prompt, /14|trial/i);
   assert.doesNotMatch(pr.consent_prompt, /unlimited|lifetime|for life|à vie|illimité/i);
@@ -111,7 +113,7 @@ test("consent_prompt states price excl. VAT, monthly period, professionals only,
   assert.match(fr.consent_prompt, /Tarifs prévus, pas encore en vente/);
   assert.match(fr.consent_prompt, /29 € HT \/ mois/);
   assert.match(fr.consent_prompt, /59 € HT \/ mois/);
-  assert.match(fr.consent_prompt, /prix de lancement 19 € HT \/ mois pour les 50 premières organisations/);
+  assert.match(fr.consent_prompt, /prix de lancement 19 € HT \/ mois pour l'Essentiel, réservé aux 50 premières organisations, tant que l'abonnement reste actif/);
   assert.doesNotMatch(fr.consent_prompt + fr.message_markdown, /essai|bientôt|prouve/i);
   assert.match(pr.consent_prompt, /cancel/i);
   assert.match(pr.consent_prompt, /VAT/);

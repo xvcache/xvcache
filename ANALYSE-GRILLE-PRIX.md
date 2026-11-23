@@ -2,7 +2,7 @@
 
 Textes validés par Julien le 23 novembre 2026 à 11h30 (Europe/Paris), sur la formule de Sophie (11h28, complément B4 bis à 11h32). Rien n'est en vente. Aucun appel Stripe, aucun push, aucune publication. Cette note décrit ce que demanderaient côté code trois points de la grille ; rien n'a été développé ici.
 
-Libellés retenus (extraits) : « Tarifs prévus, pas encore en vente » / "Planned pricing, not on sale yet" ; Essentiel 29 € HT / mois, 1 utilisateur, preuves non plafonnées dans le cadre d'un usage raisonnable défini par les CGV ; Cabinet 59 € HT / mois, jusqu'à 5 utilisateurs, avec un Rapport PDF à vos couleurs ; prix de lancement 19 € HT / mois pour l'offre Essentiel, réservé aux 50 premières organisations abonnées, garanti tant que l'abonnement reste actif sans interruption (conditions : CGV, article B4 bis). Pas de « à vie », pas d'« illimité », pas de compteur public, pas de date limite, places non réattribuées, prix ferme (`price_locked`).
+Libellés retenus (extraits) : « Tarifs prévus, pas encore en vente » / "Planned pricing, not on sale yet" ; Essentiel 29 € HT / mois, 1 utilisateur, preuves non plafonnées dans le cadre d'un usage raisonnable défini par les CGV ; Cabinet 59 € HT / mois, jusqu'à 5 utilisateurs, avec un Rapport PDF à vos couleurs ; prix de lancement 19 € HT / mois pour l'offre Essentiel, réservé aux 50 premières organisations abonnées, garanti tant que l'abonnement reste actif sans interruption (conditions : [CGV, article B4 bis](https://xvcache.com/fr/conditions-utilisation/#b4-bis)). Pas de « à vie », pas d'« illimité », pas de compteur public, pas de date limite, places non réattribuées, prix ferme (`price_locked`).
 
 ## (a) Cabinet = jusqu'à 5 utilisateurs
 
@@ -34,7 +34,7 @@ Effort indicatif : 3 à 6 jours (modèle PDF, stockage du logo, validations, men
 
 ## (c) Prix de lancement : 19 € HT / mois pour l'Essentiel, 50 premières organisations
 
-Règles retenues : le 19 € s'applique seulement à l'offre Essentiel ; 50 premières organisations abonnées (une place = une organisation, un SIREN ou numéro d'entreprise) ; place non réattribuée (`seats_reassignable: false`) ; pas de date limite ; prix ferme (`price_locked: true`), garanti tant que l'abonnement reste actif sans interruption (conditions : CGV, article B4 bis). Pas de compteur public tant qu'il n'y a pas de données réelles ; pas d'urgence commerciale ; pas de prix barré.
+Règles retenues : le 19 € s'applique seulement à l'offre Essentiel ; 50 premières organisations abonnées (une place = une organisation, un SIREN ou numéro d'entreprise) ; place non réattribuée (`seats_reassignable: false`) ; pas de date limite ; prix ferme (`price_locked: true`), garanti tant que l'abonnement reste actif sans interruption (conditions : [CGV, article B4 bis](https://xvcache.com/fr/conditions-utilisation/#b4-bis)). Pas de compteur public tant qu'il n'y a pas de données réelles ; pas d'urgence commerciale ; pas de prix barré.
 
 Côté code, plus tard et seulement avec un accord direct de Julien pour Stripe :
 
