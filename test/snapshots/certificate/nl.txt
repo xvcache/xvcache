@@ -1,5 +1,5 @@
 XVcache
-TIJDSTEMPELCERTIFICAAT
+TIJDSTEMPELRAPPORT
 V
 Document ongewijzigd
 Uitslag V — de vingerafdruk is sinds het tijdstempel niet veranderd.
@@ -27,7 +27,7 @@ Opnieuw controleren
 openssl ts -verify.
 2. De vingerafdruk ervan wordt vergeleken met die op dit certificaat.
 3. De uitslag is „Ongewijzigd” of „Gewijzigd sinds 22 november 2026 om 20:08:39”.
-Technische bestanden bij dit certificaat
+Technische bestanden bij dit rapport
 token.tst — RFC 3161
 merkle-path.json — Merkle
 JURIDISCHE VERMELDINGEN

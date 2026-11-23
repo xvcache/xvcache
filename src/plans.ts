@@ -53,7 +53,7 @@ export type PlansCatalog = {
   current_tier_id: string;
   plans: Plan[];
   upgrade: Record<string, unknown>;
-  reseller: Record<string, unknown>;
+  reseller?: Record<string, unknown>;
   certified_proofs?: Record<string, unknown>;
   tax?: string;
   default_paid_plan_id?: string;
@@ -128,7 +128,6 @@ export function getOffer(input: { lang?: string } = {}): Record<string, unknown>
     current_tier: current,
     certified_proofs: catalog.certified_proofs ?? null,
     upgrade: catalog.upgrade,
-    reseller: catalog.reseller,
     how_to_upgrade:
       "Call present_to_client, show its message, then show its consent_prompt once: the payment 'yes' is the only question of the whole flow. With the human's exact words, call request_upgrade(human_confirmed=true, consent_quote).",
   };
@@ -138,7 +137,8 @@ export function getOffer(input: { lang?: string } = {}): Record<string, unknown>
 export function listPlans(input: { lang?: string } = {}): Record<string, unknown> {
   const catalog = loadPlansCatalog();
   const { lang, fallback, o } = offerStrings(input.lang);
-  return { ...catalog, lang, lang_fallback: fallback, tax: catalog.tax ?? TAX_NOTE, paid_plan: priceBlock(lang, o) };
+  const { reseller: _omitReseller, ...publicCatalog } = catalog;
+  return { ...publicCatalog, lang, lang_fallback: fallback, tax: catalog.tax ?? TAX_NOTE, paid_plan: priceBlock(lang, o) };
 }
 
 export type PresentInput = { lang?: string; country?: string; context?: string };
@@ -206,7 +206,7 @@ export const DISABLED_BILLING: Billing = {
 export type UpgradeInput = { plan_id?: string; lang?: string; human_confirmed?: boolean; consent_quote?: string; email?: string };
 
 /** request_upgrade: refuses without explicit consent; never charges; returns a Checkout URL from the billing provider. */
-export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: Billing; pairingCode?: () => string | Promise<string> } = {}): Promise<Record<string, unknown> & { ok: boolean; code?: string }> {
+export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: Billing; pairingCode?: () => string | Promise<string>; allowTestCheckout?: boolean } = {}): Promise<Record<string, unknown> & { ok: boolean; code?: string }> {
   const catalog = loadPlansCatalog();
   const planId = input.plan_id?.trim() || PAID_PLAN_ID;
   const pres = presentToClient({ lang: input.lang });
@@ -223,14 +223,20 @@ export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: 
   }
   const consent = { quote: quote.slice(0, 500), at: new Date().toISOString(), lang: pres.lang, prompt: pres.consent_prompt };
   const billing = deps.billing ?? DISABLED_BILLING;
-  if (!billing.live) {
-    return toolError("BILLING_UNAVAILABLE", "Subscriptions cannot be paid yet: the XVcache Stripe account is not connected.", false,
-      "Tell the human in one sentence that online subscription is not open yet (sales opening to be confirmed) and that nothing was charged. Do not ask anything else. Free tools (verify_document, local journal) remain available.",
+  const unavailable = () => toolError("BILLING_UNAVAILABLE", "Subscriptions cannot be paid yet: sales are not open.", false,
+      "Tell the human in one sentence that online subscription is not open yet (no payment can be made at this stage) and that nothing was charged. Do not ask anything else. Free tools (verify_document, local journal) remain available.",
       { checkout_url: null, consent, payment_live: false });
+  if (!billing.live) {
+    return unavailable();
   }
   const pairing_code = deps.pairingCode ? await deps.pairingCode() : undefined;
   try {
     const r = await billing.createCheckout({ plan_id: plan.id, lang: pres.lang, email: input.email, consent_quote: consent.quote, consent_at: consent.at, pairing_code });
+    const url = r.checkout_url || "";
+    const isTestLink = /^https:\/\/buy\.stripe\.com\/test_/.test(url) || /checkout\.stripe\.com\/.*cs_test_/.test(url);
+    if (!url || (isTestLink && deps.allowTestCheckout !== true)) {
+      return unavailable();
+    }
     return {
       ok: true,
       plan_id: plan.id,
@@ -343,11 +349,6 @@ export function recommendPlan(input: RecommendInput): Recommendation {
     alternatives,
     certified_witness_status: plan.certified_witness ? (plan.certified_witness_status ?? "preview") : "not_included",
   };
-  if (input.reseller) {
-    result.reseller = catalog.reseller;
-    result.reason +=
-      " Reseller or partner bundling was requested: terms are TBD; see the reseller field and AGENTS.md. Do not sign or collect money on XVcache's behalf.";
-  }
   return result;
 }
 

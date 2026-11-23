@@ -3,8 +3,8 @@
   "name": "Suomi",
   "reviewed": false,
   "cert": {
-    "header": "AIKALEIMATODISTUS",
-    "header_verification": "TARKISTUSTODISTUS",
+    "header": "AIKALEIMARAPORTTI",
+    "header_verification": "TARKISTUSRAPORTTI",
     "title_intact": "Asiakirja muuttumaton",
     "subtitle_intact": "Tulos V — tiiviste ei ole muuttunut aikaleimauksen jälkeen.",
     "title_modified": "Asiakirjaa on muutettu",

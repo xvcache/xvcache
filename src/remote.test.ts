@@ -48,13 +48,16 @@ test("remote client: lists tools, get_offer without key, paid tools without key 
   try {
     const c = await connect(srv.url);
     const names = (await c.listTools()).tools.map((t) => t.name).sort();
-    for (const n of ["get_offer", "list_plans", "present_to_client", "request_upgrade", "get_subscription", "get_usage", "certify_document", "certify_hash", "verify_document", "verify_proof", "get_certificate_pdf"]) {
+    for (const n of ["get_offer", "list_plans", "present_to_client", "request_upgrade", "get_subscription", "get_usage", "certify_document", "certify_hash", "verify_document", "verify_proof", "get_report_pdf", "get_certificate_pdf"]) {
       assert.ok(names.includes(n), `missing tool ${n}`);
     }
     const offer = body(await c.callTool({ name: "get_offer", arguments: { lang: "de" } }));
     assert.equal(offer.lang, "de");
     assert.equal(offer.next_tool, "present_to_client");
-    for (const [name, args] of [["certify_document", { sha256: sha("x") }], ["certify_hash", { items: [{ sha256: sha("x") }] }], ["get_usage", {}], ["get_certificate_pdf", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }]] as const) {
+    assert.doesNotMatch(JSON.stringify(offer), /sold by/);
+    const plans = body(await c.callTool({ name: "list_plans", arguments: {} }));
+    assert.equal("reseller" in plans, false);
+    for (const [name, args] of [["certify_document", { sha256: sha("x") }], ["certify_hash", { items: [{ sha256: sha("x") }] }], ["get_usage", {}], ["get_report_pdf", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }], ["get_certificate_pdf", { proof_id: "xvh_aaaaaaaaaaaaaaaaaaaaaa" }]] as const) {
       const r = await c.callTool({ name, arguments: args });
       assert.equal(r.isError, true, name);
       const b = body(r);
@@ -88,7 +91,7 @@ test("hash only: anything but 64 hex → HASH_INVALID; content field rejected; l
   } finally { await srv.close(); }
 });
 
-test("multi-firm over HTTP: 2 keys × 3 fingerprints → 1 token, 6 proofs, each verify_proof = V (free, no key); PDF + 24 h link; quota", async () => {
+test("multi-firm over HTTP: 2 keys × 3 fingerprints → 1 token, 6 proofs, each verify_proof = V (free, no key); PDF + 24 h link; proofs not capped", async () => {
   const { srv, store } = await setup("multi", { window: 400 });
   try {
     const A = await store.createApiKey({ plan_id: "coffre-horodate", quota: 4, status: "active", default_lang: "fr" });
@@ -126,17 +129,29 @@ test("multi-firm over HTTP: 2 keys × 3 fingerprints → 1 token, 6 proofs, each
     // certify_document returns the PDF embedded
     const one = await ca.callTool({ name: "certify_document", arguments: { sha256: sha("a4") } }) as ToolOut;
     assert.equal(one.content.find((c) => c.type === "resource")?.resource?.mimeType, "application/pdf");
-    // quota of A = 4 → the 5th is refused with next_reset
-    const q = body(await ca.callTool({ name: "certify_document", arguments: { sha256: sha("a5") } }));
-    assert.equal(q.code, "QUOTA_EXCEEDED");
-    assert.match(q.next_reset, /^\d{4}-\d{2}-01T00:00:00\.000Z$/);
+    // Proofs are not capped: a 5th timestamped proof is accepted (informational counter only).
+    const fifth = body(await ca.callTool({ name: "certify_document", arguments: { sha256: sha("a5") } }));
+    assert.equal(fifth.ok, true);
+    assert.equal(fifth.results[0].status, "qualified");
     const u = body(await ca.callTool({ name: "get_usage", arguments: {} }));
-    assert.equal(u.certifications_this_period, 4);
-    // reissue: own proof in another language OK; another firm's proof → PROOF_NOT_FOUND
-    const re = await ca.callTool({ name: "get_certificate_pdf", arguments: { proof_id: ba.results[0].proof_id, lang: "sv" } }) as ToolOut;
+    assert.equal(u.certifications_this_period, 5);
+    assert.equal("quota" in u, false, "get_usage must not expose a quota cap");
+    assert.equal("next_reset" in u, false, "get_usage must not expose next_reset");
+    // reissue: get_report_pdf and deprecated get_certificate_pdf do the same thing; another firm's proof → PROOF_NOT_FOUND
+    const re = await ca.callTool({ name: "get_report_pdf", arguments: { proof_id: ba.results[0].proof_id, lang: "sv" } }) as ToolOut;
+    const reAlias = await ca.callTool({ name: "get_certificate_pdf", arguments: { proof_id: ba.results[0].proof_id, lang: "sv" } }) as ToolOut;
     assert.equal(body(re).lang, "sv");
+    assert.equal(body(reAlias).lang, "sv");
+    assert.equal(body(re).proof_id, body(reAlias).proof_id);
     assert.ok(re.content.some((c) => c.type === "resource"));
+    assert.ok(reAlias.content.some((c) => c.type === "resource"));
+    const listed = (await ca.listTools()).tools;
+    const reportDesc = listed.find((x) => x.name === "get_report_pdf")?.description ?? "";
+    const aliasDesc = listed.find((x) => x.name === "get_certificate_pdf")?.description ?? "";
+    assert.match(reportDesc, /Re-issues the PDF report \(not a certificate\)/);
+    assert.match(aliasDesc, /Deprecated: use get_report_pdf/);
     assert.equal(body(await ca.callTool({ name: "get_certificate_pdf", arguments: { proof_id: bb.results[0].proof_id } })).code, "PROOF_NOT_FOUND");
+    assert.equal(body(await ca.callTool({ name: "get_report_pdf", arguments: { proof_id: bb.results[0].proof_id } })).code, "PROOF_NOT_FOUND");
     await ca.close(); await cb.close(); await pub.close();
   } finally { await srv.close(); }
 });
@@ -192,6 +207,9 @@ test("single-question journey (fake billing, tests only): get_offer → present_
     const questionsToHuman: string[] = [];
     const offer = body(await ai.callTool({ name: "get_offer", arguments: { lang: "nl" } }));
     assert.equal(offer.next_tool, "present_to_client");
+    assert.doesNotMatch(JSON.stringify(offer), /sold by/);
+    const plans = body(await ai.callTool({ name: "list_plans", arguments: {} }));
+    assert.equal("reseller" in plans, false);
     const pres = body(await ai.callTool({ name: offer.next_tool, arguments: { lang: "nl", context: "litige" } }));
     questionsToHuman.push(pres.consent_prompt); // the only question
     const human = "Ja";

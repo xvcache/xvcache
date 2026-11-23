@@ -3,8 +3,8 @@
   "name": "Magyar",
   "reviewed": false,
   "cert": {
-    "header": "IDŐBÉLYEG-TANÚSÍTVÁNY",
-    "header_verification": "ELLENŐRZÉSI TANÚSÍTVÁNY",
+    "header": "IDŐBÉLYEG-JELENTÉS",
+    "header_verification": "ELLENŐRZÉSI JELENTÉS",
     "title_intact": "A dokumentum változatlan",
     "subtitle_intact": "V eredmény — a lenyomat az időbélyegzés óta nem változott.",
     "title_modified": "A dokumentum módosult",

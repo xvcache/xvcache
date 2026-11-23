@@ -33,7 +33,7 @@ function page(result: DocumentResult | null, notice?: string): string {
     resultHtml = `<div class="card result miss"><p class="sentence">${escapeHtml(notice)}</p></div>`;
   } else if (has && kind === "intact") {
     const pdfLink = result!.pdf
-      ? `<a class="btn" href="/certificat?batch=${encodeURIComponent(result!.batch_id ?? "")}&amp;path=${encodeURIComponent(result!.path ?? "")}">Télécharger le certificat PDF</a>`
+      ? `<a class="btn" href="/certificat?batch=${encodeURIComponent(result!.batch_id ?? "")}&amp;path=${encodeURIComponent(result!.path ?? "")}">Télécharger le Rapport PDF</a>`
       : "";
     resultHtml = `<div class="card result ok">
       <div class="badge v">V</div>
@@ -99,7 +99,7 @@ function page(result: DocumentResult | null, notice?: string): string {
 <body>
   <header>
     <div class="brand">XVcache</div>
-    <p>Déposez un document. Vous obtenez une coche verte et un certificat, ou la date de la modification.</p>
+    <p>Déposez un document. Vous obtenez une coche verte et un rapport PDF, ou la date de la modification.</p>
   </header>
   <main>
     <form class="drop" id="drop" action="/verifier" method="post" enctype="multipart/form-data">
@@ -228,7 +228,7 @@ export function startDemoServer(opts: DemoOptions): Promise<{ url: string; close
         if (!pdf.startsWith(root)) { send(res, 400, "Requête invalide.", "text/plain; charset=utf-8"); return; }
         try {
           const bytes = await fs.readFile(pdf);
-          const name = `XVcache-certificat-${path.basename(pair.rel)}.pdf`;
+          const name = `XVcache-rapport-${path.basename(pair.rel)}.pdf`;
           send(res, 200, bytes, "application/pdf", { "Content-Disposition": `attachment; filename="${name}"` });
         } catch {
           send(res, 404, "Certificat introuvable.", "text/plain; charset=utf-8");

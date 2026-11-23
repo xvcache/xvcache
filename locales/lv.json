@@ -3,8 +3,8 @@
   "name": "Latviešu",
   "reviewed": false,
   "cert": {
-    "header": "LAIKA ZĪMOGA APLIECINĀJUMS",
-    "header_verification": "PĀRBAUDES APLIECINĀJUMS",
+    "header": "LAIKSPIEDEGA ZIŅOJUMS",
+    "header_verification": "PĀRBAUDES ZIŅOJUMS",
     "title_intact": "Dokuments nav mainīts",
     "subtitle_intact": "Rezultāts V — nospiedums kopš laika zīmoga nav mainījies.",
     "title_modified": "Dokuments ir mainīts",

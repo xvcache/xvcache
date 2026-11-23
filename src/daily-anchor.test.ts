@@ -157,7 +157,7 @@ test("hosted server in daily mode: certify answers at once (pending, receipt PDF
     assert.match(r.next_action, /daily shared timestamp/);
     assert.match(r.next_action, /NOT QUALIFIED/);
     assert.equal(r.batch_root, null);
-    assert.equal(r.usage.quota, null, "unlimited");
+    assert.equal("quota" in (r.usage ?? {}), false, "public usage has no quota field");
     assert.equal((await store.usage(key_hash)).certifications_this_period, 0, "pending proofs are not counted");
     assert.equal(await witness.anchorNow(), 30);
     assert.equal(fake.requests - before, 1);

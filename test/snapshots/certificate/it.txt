@@ -1,5 +1,5 @@
 XVcache
-CERTIFICATO DI VALIDAZIONE TEMPORALE
+RAPPORTO DI MARCATURA TEMPORALE
 V
 Documento integro
 Esito V — l'impronta non è cambiata dalla validazione temporale.
@@ -26,7 +26,7 @@ Come verificare di nuovo
 1. Ripresentare lo stesso file (verify_document) o controllare la marca allegata con openssl ts -verify.
 2. La sua impronta viene confrontata con quella riportata su questo certificato.
 3. Il risultato è «Integro» oppure «Modificato dal 22 novembre 2026 alle ore 20:08:39».
-File tecnici allegati a questo certificato
+File tecnici allegati a questo rapporto
 token.tst — RFC 3161
 merkle-path.json — Merkle
 NOTE LEGALI

@@ -1,5 +1,5 @@
 XVcache
-CERTIFICADO DE SELO TEMPORAL
+RELATÓRIO DE SELO TEMPORAL
 V
 Documento intacto
 Veredicto V — a impressão digital não mudou desde o selo temporal.
@@ -26,7 +26,7 @@ Como verificar novamente
 1. Volte a submeter o mesmo ficheiro (verify_document) ou verifique o selo anexo com openssl ts -verify.
 2. A sua impressão digital é comparada com a que consta deste certificado.
 3. O resultado é «Intacto» ou «Modificado desde 22 de novembro de 2026 às 20:08:39».
-Ficheiros técnicos anexos a este certificado
+Ficheiros técnicos anexos a este relatório
 token.tst — RFC 3161
 merkle-path.json — Merkle
 AVISO LEGAL

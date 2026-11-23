@@ -3,8 +3,8 @@
   "name": "Hrvatski",
   "reviewed": false,
   "cert": {
-    "header": "POTVRDA O VREMENSKOM ŽIGU",
-    "header_verification": "POTVRDA O PROVJERI",
+    "header": "IZVJEŠTAJ O VREMENSKOM ŽIGU",
+    "header_verification": "IZVJEŠTAJ O PROVJERI",
     "title_intact": "Dokument nepromijenjen",
     "subtitle_intact": "Rezultat V — otisak se nije promijenio od vremenskog žiga.",
     "title_modified": "Dokument promijenjen",

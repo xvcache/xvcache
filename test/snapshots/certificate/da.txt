@@ -1,5 +1,5 @@
 XVcache
-TIDSSTEMPELCERTIFIKAT
+TIDSSTEMPELRAPPORT
 V
 Dokument uændret
 Resultat V — fingeraftrykket er ikke ændret siden tidsstemplingen.

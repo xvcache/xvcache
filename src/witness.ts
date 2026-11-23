@@ -100,7 +100,7 @@ export type HostedVerification = {
   proof: HostedProof | null;
 };
 
-const NOTICE = "Hash-only proof: XVcache never received the document, only its SHA-256 fingerprint. One RFC 3161 token covers the Merkle root shared by every fingerprint of the batch; the Merkle path proves this fingerprint is under that root. Legal presumption (eIDAS art. 41) only if status is 'qualified'.";
+const NOTICE = "Document content stays on your computer. The hosted server receives the SHA-256 fingerprint and an optional label (up to 120 characters); the infrastructure also processes the IP address. A Merkle root is sent to the timestamping and OpenTimestamps services. The Merkle path links this fingerprint to that root. The eIDAS art. 41(2) presumption of accuracy of the date and time and of integrity applies only if status is 'qualified'; evidential weight is for the court to assess.";
 
 const HEX64 = /^[0-9a-f]{64}$/;
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;

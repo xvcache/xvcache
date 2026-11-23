@@ -3,8 +3,8 @@
   "name": "Svenska",
   "reviewed": false,
   "cert": {
-    "header": "TIDSSTÄMPELCERTIFIKAT",
-    "header_verification": "VERIFIERINGSCERTIFIKAT",
+    "header": "TIDSSTÄMPELRAPPORT",
+    "header_verification": "VERIFIERINGSRAPPORT",
     "title_intact": "Dokumentet oförändrat",
     "subtitle_intact": "Resultat V — fingeravtrycket har inte ändrats sedan tidsstämplingen.",
     "title_modified": "Dokumentet ändrat",

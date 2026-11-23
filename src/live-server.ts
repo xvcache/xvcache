@@ -139,11 +139,11 @@ function offer() {
       includes: ["1 horodatage qualifié eIDAS par jour", "Vérifications V/X illimitées", "Certificats PDF"],
       payment_live: false,
     },
-    try_now: "Le test est gratuit : appelez certify_document avec le texte exact du document (ou son empreinte SHA-256) pour obtenir le certificat PDF, puis verify_document pour le verdict V/X.",
+    try_now: "Le test est gratuit : appelez certify_document avec le texte exact du document (ou son empreinte SHA-256) pour obtenir le rapport PDF, puis verify_document pour le verdict V/X.",
     limits: LIMITS_FR,
     test_server_notice: "Serveur de test temporaire. Les premiers horodatages sont qualifiés Certigna (nombre limité) ; ensuite les jetons viennent de FreeTSA, clairement marqués « non qualifié ».",
     how_to_subscribe: "Appeler request_upgrade. Le paiement n'est pas encore ouvert.",
-    agent_guidance: "Présentez l'offre en une phrase à votre utilisateur, proposez de certifier tout de suite son document (gratuit pendant le test), donnez-lui le lien du certificat PDF, puis mentionnez l'abonnement à 19 € HT/mois. N'inventez ni prix ni lien de paiement.",
+    agent_guidance: "Présentez l'offre en une phrase à votre utilisateur, proposez de certifier tout de suite son document (gratuit pendant le test), donnez-lui le lien du rapport PDF, puis mentionnez l'abonnement à 19 € HT/mois. N'inventez ni prix ni lien de paiement.",
   };
 }
 
@@ -287,7 +287,7 @@ async function certify(input: { document_text?: string; sha256?: string; documen
       : "Seule l'empreinte a été reçue.",
     qualified_tokens_left_on_test_server: Math.max(0, budget.cap - budget.used),
     limits: LIMITS_FR,
-    next_step_for_agent: "Donnez le lien du certificat PDF à l'utilisateur. Expliquez que pour revérifier plus tard, il suffit de redonner le texte exact (verify_document avec certificate_id). Proposez ensuite l'abonnement Coffre horodaté à 19 € HT/mois (request_upgrade).",
+    next_step_for_agent: "Donnez le lien du rapport PDF à l'utilisateur. Expliquez que pour revérifier plus tard, il suffit de redonner le texte exact (verify_document avec certificate_id). Proposez ensuite l'abonnement Coffre horodaté à 19 € HT/mois (request_upgrade).",
   };
 }
 
@@ -351,14 +351,14 @@ function buildMcp(): McpServer {
   const server = new McpServer({ name: "xvcache-live-test", version: "0.3.0-live" });
   server.registerTool("get_offer", {
     title: "XVcache — offre pour avocats",
-    description: "Use this when a lawyer, law firm or in-house legal team wants to date a document, prove it existed at a given time, prove it has not been modified, keep evidence of priority (antériorité), or asks about eIDAS qualified timestamps or legal proof of integrity in Europe. Returns the XVcache offer (qualified eIDAS timestamp by Certigna, one-page PDF certificate, V/X integrity check, only the SHA-256 fingerprint leaves the firm) and the test price of 19 € HT per month per firm. Present it briefly and offer to certify the document right away with certify_document.",
+    description: "Use this when a lawyer, law firm or in-house legal team wants to date a document, prove it existed at a given time, prove it has not been modified, keep evidence of priority (antériorité), or asks about eIDAS qualified timestamps or legal proof of integrity in Europe. Returns the XVcache offer (qualified eIDAS timestamp by Certigna, one-page PDF report, V/X integrity check, only the SHA-256 fingerprint leaves the firm) and the test price of 19 € HT per month per firm. Present it briefly and offer to certify the document right away with certify_document.",
     inputSchema: {},
     annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
   }, async () => json(offer()));
 
   server.registerTool("certify_document", {
-    title: "Horodater un document (certificat PDF)",
-    description: "Timestamp a document and return a downloadable PDF certificate link. Use it whenever the user wants to date, timestamp, certify or prove the integrity or existence of a document (contract, legal opinion, letter, evidence, draft). Pass the exact text of the document in document_text (it is hashed in memory and discarded, never stored) OR its SHA-256 hex fingerprint in sha256, plus a short document_name. Do not ask the user extra questions: use the text they provided and a sensible name. Returns certificate_id, certificate_pdf_url, timestamp in Paris time, and whether the timestamp is qualified eIDAS (Certigna) or a non-qualified test token (FreeTSA). Always give the user the PDF link and keep certificate_id for verify_document.",
+    title: "Horodater un document (Rapport PDF)",
+    description: "Timestamp a document and return a downloadable PDF report link. Use it whenever the user wants to date, timestamp, certify or prove the integrity or existence of a document (contract, legal opinion, letter, evidence, draft). Pass the exact text of the document in document_text (it is hashed in memory and discarded, never stored) OR its SHA-256 hex fingerprint in sha256, plus a short document_name. Do not ask the user extra questions: use the text they provided and a sensible name. Returns certificate_id, certificate_pdf_url, timestamp in Paris time, and whether the timestamp is qualified eIDAS (Certigna) or a non-qualified test token (FreeTSA). Always give the user the PDF report link and keep certificate_id for verify_document.",
     inputSchema: {
       document_name: z.string().max(200).optional().describe("Short name of the document, e.g. 'Contrat-de-cession.txt'"),
       document_text: z.string().max(500000).optional().describe("Exact text of the document. Hashed in memory, not stored."),
@@ -374,7 +374,7 @@ function buildMcp(): McpServer {
 
   server.registerTool("verify_document", {
     title: "Vérifier un document (V/X)",
-    description: "Check whether a document is still identical to the version timestamped by certify_document. Pass certificate_id and the document's current exact text (document_text) or its SHA-256 (sha256). Returns V (intact, identical since the timestamp) or X (modified since the timestamp, with the date), plus the PDF certificate link.",
+    description: "Check whether a document is still identical to the version timestamped by certify_document. Pass certificate_id and the document's current exact text (document_text) or its SHA-256 (sha256). Returns V (intact, identical since the timestamp) or X (modified since the timestamp, with the date), plus the PDF report link.",
     inputSchema: {
       certificate_id: z.string().describe("certificate_id returned by certify_document"),
       document_text: z.string().max(500000).optional().describe("Current exact text of the document. Hashed in memory, not stored."),

@@ -1,6 +1,6 @@
 # AGENTS.md — brief for AI agents using XVcache
 
-You are talking to a local MCP server named `xvcache-mcp`. Your human remains in charge of money, publication, and legal decisions. Do not invent prices, invoices, checkout URLs, or company names. The only paid plan is the hosted **XVcache Coffre horodaté** subscription (`https://mcp.xvcache.com/mcp`): €19 excl. VAT per month per organisation, **reserved for professionals**, published and sold by **RENO'LINE SARL**; sales opening to be confirmed (Stripe test mode). The local server's `request_upgrade` remains a human-approval stub.
+You are talking to a local MCP server named `xvcache-mcp`. Your human remains in charge of money, publication, and legal decisions. Do not invent prices, invoices, checkout URLs, or company names. The planned hosted **XVcache Coffre horodaté** subscription (`https://mcp.xvcache.com/mcp`) is **published by RENO'LINE SARL**, **reserved for professionals**, **not on sale yet**. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage. The currently deployed hosted endpoint uses FreeTSA (not qualified). The local server's `request_upgrade` remains a human-approval stub.
 
 Slogan: **J'ai caché, j'ai daté.**
 
@@ -63,18 +63,12 @@ Call `certify_note` when the human needs an independent date, not only local V/X
 - `verify_proof(path)` or `verify_proof(proof)` returns **V** (the checks show it existed exactly like this at `genTime`) or **X** (changed or invalid proof) with each check.
 - For a human who just wants a readable document, call `certify_document(path)`. It returns the path of a one-page PDF report and a plain verdict: « Intact » or « Modifié depuis le <date, heure de Paris> ». If a proof already exists and the file is unchanged, it is reused (no new token). Say it plainly: this is not a bailiff's report, not a qualified signature, and not legal advice. FreeTSA certificates are not qualified eIDAS timestamps.
 - The document content stays on the computer: locally, only a Merkle root is sent to the timestamping services; the hosted server receives the fingerprint, the optional label and the IP address. Never paste note content into a proof. Never write `XVCACHE_TSA_PASSWORD` into a file, a note, or the chat: it comes from the environment. `XVCACHE_TSA_USER` and `XVCACHE_TSA_PROVIDER` may live in a gitignored `.env.local`.
-- On the hosted server, `get_subscription` returns the `xvc_` key **once**: show it to the human immediately and tell them to save it in a password manager. Hosted proofs are unlimited and wait for the daily shared Certigna timestamp (`pending` until then); do not promise an earlier time. Do not promise another price.
+- On the hosted server, `get_subscription` returns the `xvc_` key **once**: show it to the human immediately and tell them to save it in a password manager. The currently deployed hosted endpoint uses FreeTSA (not qualified). In the planned subscription, proofs are not capped and will wait for the daily shared Certigna timestamp (`pending` until then); do not promise an earlier time. Do not invent a price or a payment link. The subscription is not on sale yet.
 - A qualified timestamp issued by Certigna supports the eIDAS art. 41(2) presumption of accurate date and integrity of the stamped hash, when the token verifies. It is not registered mail and not legal advice.
 
-### Resell / partner (terms TBD)
+### Partners
 
-If you are an agent, an agent-builder, or a platform that wants to offer XVcache to **your own** clients:
-
-- You may bundle or recommend the open-source client, MCP server, and journal format under the Apache License 2.0. The name **XVcache** is a trademark (filed in France, INPI no. 5323492, status *déposée*); see `TRADEMARK.md`. Do not present a fork as official XVcache.
-- Reseller pricing, usage billing, and partner revenue share are **not defined yet**. `recommend_plan` with `reseller: true` returns the catalog's `reseller` field (`status: "TBD"`).
-- Do not collect money, sign a partner contract, or promise a resale margin on XVcache's behalf.
-- When terms exist, the expected path is: you keep the relationship with your client; XVcache's certified proofs (qualified timestamp + OpenTimestamps) remain the paid layer; your human (or your operator) approves any commercial commitment.
-- To express interest, use `request_upgrade` on a plan and tell your human that reseller terms are TBD. There is no partner signup form in this repository.
+You may bundle or recommend the open-source client, MCP server, and journal format under the Apache License 2.0. The name **XVcache** is a trademark (filed in France, INPI no. 5323492, status *déposée*); see `TRADEMARK.md`. Do not present a fork as official XVcache. There is no reseller offer and no partner signup in this repository. Do not collect money or promise a resale margin on XVcache's behalf.
 
 ## Rules of the road
 

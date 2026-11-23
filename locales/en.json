@@ -65,7 +65,7 @@
     "price_label": "monthly subscription; professional price",
     "price_display": "19 EUR excl. VAT / month / organisation",
     "includes": [
-      "Qualified eIDAS timestamps issued by Certigna: one Merkle root shared by all subscribers, stamped once a day; unlimited proofs (pending proofs are never counted)",
+      "In the planned subscription, qualified eIDAS timestamps issued by Certigna: one Merkle root shared by all subscribers, stamped once a day; proofs are not capped (pending proofs are never counted). The currently deployed hosted endpoint uses FreeTSA (not qualified).",
       "Document content stays on your computer; the hosted server receives the fingerprint and an optional label, and processes the IP address",
       "V/X verdict and a one-page PDF report in 24 EU languages; verification is free for anyone"
     ],
@@ -83,7 +83,7 @@
     "context_anteriorite": "For prior rights: show that a text or a design existed on this date.",
     "context_dossier": "For a client file: seal the documents received or sent on this date.",
     "country_note": "In {country}, the evidential weight is assessed by the court under national procedure.",
-    "consent_prompt": "Do you want to subscribe to XVcache Coffre horodaté, reserved for professionals and sold by RENO'LINE SARL, for 19 EUR excl. VAT per month per organisation (VAT according to your country; reverse charge for EU businesses with a valid VAT number), cancellable at any time from the customer portal, effective at the end of the paid month? (yes / no)",
-    "recommend_reason": "A qualified timestamp was requested: XVcache Coffre horodaté is the only paid plan."
+    "consent_prompt": "Do you want to subscribe to XVcache Coffre horodaté, reserved for professionals and published by RENO'LINE SARL, at the planned price of 19 EUR excl. VAT per month per organisation (VAT according to your country; reverse charge for EU businesses with a valid VAT number), cancellable at any time from the customer portal, effective at the end of the paid month? The subscription is not on sale yet (demos by application). (yes / no)",
+    "recommend_reason": "A qualified timestamp was requested: XVcache Coffre horodaté is the planned plan (not on sale yet)."
   }
 }

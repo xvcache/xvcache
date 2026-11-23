@@ -3,8 +3,8 @@
   "name": "Polski",
   "reviewed": false,
   "cert": {
-    "header": "CERTYFIKAT ZNACZNIKA CZASU",
-    "header_verification": "CERTYFIKAT WERYFIKACJI",
+    "header": "RAPORT ZE STEMPLEM CZASOWYM",
+    "header_verification": "RAPORT WERYFIKACYJNY",
     "title_intact": "Dokument nienaruszony",
     "subtitle_intact": "Wynik V — skrót nie zmienił się od oznaczenia czasem.",
     "title_modified": "Dokument zmieniony",

@@ -3,8 +3,8 @@
   "name": "Slovenčina",
   "reviewed": false,
   "cert": {
-    "header": "CERTIFIKÁT ČASOVEJ PEČIATKY",
-    "header_verification": "CERTIFIKÁT OVERENIA",
+    "header": "SPRÁVA O ČASOVEJ PEČIATIKE",
+    "header_verification": "SPRÁVA O OVERENÍ",
     "title_intact": "Dokument nezmenený",
     "subtitle_intact": "Výsledok V — odtlačok sa od časovej pečiatky nezmenil.",
     "title_modified": "Dokument zmenený",

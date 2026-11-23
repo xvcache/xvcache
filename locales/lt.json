@@ -3,8 +3,8 @@
   "name": "Lietuvių",
   "reviewed": false,
   "cert": {
-    "header": "LAIKO ŽYMOS PAŽYMA",
-    "header_verification": "PATIKRINIMO PAŽYMA",
+    "header": "LAIKO ŽYMOS ATASKAITA",
+    "header_verification": "PATIKRINIMO ATASKAITA",
     "title_intact": "Dokumentas nepakeistas",
     "subtitle_intact": "Rezultatas V — santrauka nepasikeitė nuo laiko žymos.",
     "title_modified": "Dokumentas pakeistas",

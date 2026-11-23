@@ -1,5 +1,5 @@
 XVcache
-CERTIFICADO DE SELLO DE TIEMPO
+INFORME DE SELLO DE TIEMPO
 V
 Documento intacto
 Veredicto V — la huella no ha cambiado desde el sellado de tiempo.
@@ -27,7 +27,7 @@ Cómo volver a verificar
 -verify.
 2. Su huella se compara con la que figura en este certificado.
 3. El resultado es «Intacto» o «Modificado desde el 22 de noviembre de 2026 a las 20:08:39».
-Archivos técnicos adjuntos a este certificado
+Archivos técnicos adjuntos a este informe
 token.tst — RFC 3161
 merkle-path.json — Merkle
 AVISO LEGAL

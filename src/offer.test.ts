@@ -8,7 +8,7 @@ import { getOffer, listPlans, presentToClient, requestUpgradeFlow, recommendPlan
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-test("plans.json: XVcache Coffre horodaté is 19 EUR excl. VAT / month / organisation, professionals only, sold by RENO'LINE SARL, unlimited; no other amount is invented", () => {
+test("plans.json: XVcache Coffre horodaté is 19 EUR excl. VAT / month / organisation, professionals only, published by RENO'LINE SARL, proofs not capped; no other amount is invented", () => {
   const cat = loadPlansCatalog();
   const p = cat.plans.find((x) => x.id === PAID_PLAN_ID)!;
   assert.ok(p, "coffre-horodate plan missing");
@@ -20,7 +20,7 @@ test("plans.json: XVcache Coffre horodaté is 19 EUR excl. VAT / month / organis
   assert.equal(p.name, "XVcache Coffre horodaté");
   assert.match(String((p as any).audience), /professionals only/);
   assert.equal((p as any).seller.name, "RENO'LINE SARL");
-  assert.equal(p.limits.certifications_per_month.status, "unlimited");
+  assert.equal(p.limits.certifications_per_month.status, "not_capped");
   assert.equal((p as any).trial, undefined, "no trial announced");
   for (const other of cat.plans.filter((x) => x.id !== PAID_PLAN_ID)) {
     assert.equal(other.price.amount, null, `${other.id} must stay TBD`);
@@ -61,6 +61,7 @@ test("get_offer / list_plans / present_to_client in all 24 languages; unsupporte
     assert.ok(pr.disclaimers.length >= 3);
     const lp = listPlans({ lang }) as Record<string, any>;
     assert.match(lp.tax, /reverse charge/);
+    assert.equal("reseller" in lp, false, `${lang}: list_plans must not expose reseller`);
   }
   const ja = getOffer({ lang: "ja" }) as Record<string, any>;
   assert.equal(ja.lang, "en");
@@ -110,15 +111,30 @@ test("request_upgrade with a billing provider returns its checkout URL and recor
   const seen: Record<string, unknown>[] = [];
   const r = await requestUpgradeFlow(
     { human_confirmed: true, consent_quote: "Ja, bitte", lang: "de" },
-    { billing: { live: true, async createCheckout(req) { seen.push(req); return { checkout_url: "https://checkout.stripe.com/c/pay/cs_test_x", expires_at: "2026-11-23T20:00:00.000Z" }; } } },
+    { billing: { live: true, async createCheckout(req) { seen.push(req); return { checkout_url: "https://checkout.stripe.com/c/pay/cs_live_x", expires_at: "2026-11-23T20:00:00.000Z" }; } } },
   );
   assert.equal(r.ok, true);
-  assert.equal(r.checkout_url, "https://checkout.stripe.com/c/pay/cs_test_x");
+  assert.equal(r.checkout_url, "https://checkout.stripe.com/c/pay/cs_live_x");
   assert.equal(seen.length, 1);
   assert.equal(seen[0].plan_id, PAID_PLAN_ID);
   const consent = r.consent as { quote: string; at: string };
   assert.equal(consent.quote, "Ja, bitte");
   assert.ok(Date.parse(consent.at) > 0);
+});
+
+test("request_upgrade never returns a Stripe TEST checkout URL unless allowTestCheckout is set", async () => {
+  const denied = await requestUpgradeFlow(
+    { human_confirmed: true, consent_quote: "yes" },
+    { billing: { live: true, async createCheckout() { return { checkout_url: "https://buy.stripe.com/test_xxxxxxxx", expires_at: "2026-11-23T20:00:00.000Z" }; } } },
+  );
+  assert.equal(denied.code, "BILLING_UNAVAILABLE");
+  assert.equal(denied.checkout_url, null);
+  const allowed = await requestUpgradeFlow(
+    { human_confirmed: true, consent_quote: "yes" },
+    { allowTestCheckout: true, billing: { live: true, async createCheckout() { return { checkout_url: "https://buy.stripe.com/test_xxxxxxxx", expires_at: "2026-11-23T20:00:00.000Z" }; } } },
+  );
+  assert.equal(allowed.ok, true);
+  assert.match(String(allowed.checkout_url), /buy\.stripe\.com\/test_/);
 });
 
 test("recommend_plan: needs_qualified_timestamp or docs_per_month → coffre-horodate with a localized reason", () => {

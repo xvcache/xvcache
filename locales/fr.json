@@ -65,7 +65,7 @@
     "price_label": "abonnement mensuel ; tarif professionnel",
     "price_display": "19 EUR HT / mois / organisation",
     "includes": [
-      "Horodatages qualifiés eIDAS émis par Certigna : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; preuves illimitées (une preuve en attente n'est jamais décomptée)",
+      "Dans l'abonnement prévu, horodatages qualifiés eIDAS émis par Certigna : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; les preuves ne sont pas plafonnées (une preuve en attente n'est jamais décomptée). Le point d'accès hébergé actuellement déployé utilise FreeTSA (non qualifié).",
       "Le contenu des documents reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte et un libellé facultatif, et traite l'adresse IP",
       "Verdict V/X et rapport PDF d'une page en 24 langues de l'UE ; vérification gratuite pour tous"
     ],
@@ -83,7 +83,7 @@
     "context_anteriorite": "Pour une antériorité : montrez qu'un texte ou un dessin existait à cette date.",
     "context_dossier": "Pour un dossier client : scellez les pièces reçues ou envoyées à cette date.",
     "country_note": "En {country}, la force probante est appréciée par le juge selon la procédure nationale.",
-    "consent_prompt": "Voulez-vous souscrire à XVcache Coffre horodaté, réservé aux professionnels et vendu par RENO'LINE SARL, pour 19 EUR HT par mois et par organisation (TVA selon votre pays ; autoliquidation pour les entreprises de l'UE avec un numéro de TVA valide), résiliable à tout moment depuis le portail client, avec effet à la fin du mois payé ? (oui / non)",
-    "recommend_reason": "Un horodatage qualifié a été demandé : XVcache Coffre horodaté est le seul plan payant."
+    "consent_prompt": "Voulez-vous souscrire à XVcache Coffre horodaté, réservé aux professionnels et édité par RENO'LINE SARL, pour un tarif prévu de 19 EUR HT par mois et par organisation (TVA selon votre pays ; autoliquidation pour les entreprises de l'UE avec un numéro de TVA valide), résiliable à tout moment depuis le portail client, avec effet à la fin du mois payé ? L'abonnement n'est pas encore en vente (démonstrations sur candidature). (oui / non)",
+    "recommend_reason": "Un horodatage qualifié a été demandé : XVcache Coffre horodaté est le forfait prévu (pas encore en vente)."
   }
 }

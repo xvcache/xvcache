@@ -93,14 +93,19 @@ const keyDelivery = keyEmail ? new KeyDeliveryService({
 }) : undefined;
 const webhookSecret = env.STRIPE_WEBHOOK_SECRET?.trim() || undefined;
 const linkUrl = env.XVCACHE_STRIPE_PAYMENT_LINK_URL?.trim() || undefined;
-const billing = webhookSecret ? paymentLinkBilling(linkUrl) : undefined;
+const salesOpen = env.XVCACHE_SALES_OPEN === "1";
+const allowTestCheckout = env.XVCACHE_STRIPE_ALLOW_TEST_CHECKOUT === "1";
+const testLink = isTestPaymentLink(linkUrl);
+// Until sales open, request_upgrade must return BILLING_UNAVAILABLE with no payment link.
+// A Stripe TEST link is never served in production unless XVCACHE_STRIPE_ALLOW_TEST_CHECKOUT=1 (local tests only).
+const billing = (webhookSecret && salesOpen && linkUrl && (!testLink || allowTestCheckout)) ? paymentLinkBilling(linkUrl) : undefined;
 const srv = await startRemoteServer({
   store,
   witness,
   dataDir,
   billing,
   stripeWebhookSecret: webhookSecret,
-  billingTestMode: isTestPaymentLink(linkUrl),
+  billingTestMode: Boolean(billing) && testLink && allowTestCheckout,
   host: env.XVCACHE_REMOTE_HOST || "127.0.0.1",
   port: Number(env.XVCACHE_REMOTE_PORT || 0),
   publicBaseUrl: env.XVCACHE_PUBLIC_URL || undefined,

@@ -62,7 +62,7 @@ function err(e: ToolError): Result {
 
 const LANG_DESC = `Language of the conversation, one of ${EU_LANGS.join(", ")} (unknown → en). Never ask the human: use the conversation language.`;
 const HASH_DESC = "SHA-256 of the file, 64 hexadecimal characters, computed ON THE LAWYER'S SIDE (e.g. `sha256sum file`, `Get-FileHash file`, or your own code). Never send the document itself.";
-const LABEL_DESC = `Short neutral label shown on the certificate (max ${MAX_LABEL} characters). Do not put client names or confidential facts in it (e.g. \"Contract draft v3\"). Optional: default \"Document 1\".`;
+const LABEL_DESC = `Short neutral label shown on the PDF report (max ${MAX_LABEL} characters). Do not put client names or confidential facts in it (e.g. \"Contract draft v3\"). Optional: default \"Document 1\".`;
 
 function paymentRequired(): ToolError {
   return toolError("PAYMENT_REQUIRED", "This tool needs an XVcache subscription (API key).", false,
@@ -109,6 +109,19 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     return localizedVerdict(kind, lang, genTime, tz);
   }
 
+
+  /** Public usage: informational counter only. Proofs are not capped; never expose quota or next_reset. */
+  function publicUsage(u: { plan_id?: string; status?: string; certifications_this_period: number; total_certified?: number; period_start?: string; quota?: unknown; remaining?: unknown; next_reset?: unknown }) {
+    return {
+      plan_id: u.plan_id,
+      status: u.status,
+      certifications_this_period: u.certifications_this_period,
+      used_this_period: u.certifications_this_period,
+      total_certified: u.total_certified,
+      period_start: u.period_start,
+    };
+  }
+
   async function certify(apiKey: string | null, items: { sha256: string; label?: string }[], lang: string | undefined, tz: string | undefined, withBlob: boolean, content: unknown): Promise<Result> {
     if (content !== undefined && content !== null && content !== "") return err(hashInvalid("content"));
     if (!items.length) return err(hashInvalid("items"));
@@ -122,11 +135,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     const a = await auth(apiKey);
     if ("code" in a) return err(a);
     const L = resolveLang(lang ?? a.default_lang);
-    const q = await opts.store.checkQuota(a.key_hash, items.length);
-    if (!q.ok) {
-      return err(toolError("QUOTA_EXCEEDED", `Monthly quota reached (${q.used}/${q.quota}).`, false,
-        "Tell the human in one sentence that the monthly quota is reached and when it resets; do not ask anything.", { next_reset: q.next_reset, quota: q.quota, used: q.used }));
-    }
+    // Proofs are not capped (decision of 23/11/2026): informational counter only. Never QUOTA_EXCEEDED.
     let proofs: HostedProof[];
     try {
       proofs = await opts.witness.submit(items.map((it, i) => ({ sha256: it.sha256.trim().toLowerCase(), label: (it.label?.trim() || `Document ${i + 1}`).slice(0, MAX_LABEL), owner: a.key_hash })));
@@ -161,9 +170,9 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
       fingerprints_in_shared_timestamp: proofs[0]?.merkle?.leaf_count ?? null,
       results: out,
       proofs: proofs.map(publicProof),
-      usage: { used_this_period: usage.certifications_this_period, quota: usage.quota, next_reset: usage.next_reset },
+      usage: publicUsage(usage),
       next_action: proofs.some((p) => !p.merkle)
-        ? `Queued for the daily shared timestamp (one Merkle root for all subscribers, stamped once a day; the certified date will be the issue time of that daily token, not the submission time; due ${proofs.find((p) => !p.merkle)?.anchor_due_at ?? "today"}). The PDF given now is only a receipt marked NOT QUALIFIED. After that time, call get_certificate_pdf(proof_id) for the report with the timestamp issued by Certigna. A pending proof is not counted. Do not ask the human anything.`
+        ? `Queued for the daily shared timestamp (one Merkle root for all subscribers, stamped once a day; the certified date will be the issue time of that daily token, not the submission time; due ${proofs.find((p) => !p.merkle)?.anchor_due_at ?? "today"}). The PDF given now is only a receipt marked NOT QUALIFIED. After that time, call get_report_pdf(proof_id) (or get_certificate_pdf, deprecated) for the report with the timestamp token (Certigna on the planned subscription; the currently deployed hosted endpoint uses FreeTSA). A pending proof is not counted. Do not ask the human anything.`
         : pending
         ? "The qualified timestamp is pending (provider unavailable). Give the PDF marked NOT QUALIFIED only as a receipt; XVcache retries automatically — call get_certificate_pdf later for the qualified version. A pending proof is not counted. Do not ask the human anything."
         : "Give the PDF to the lawyer (pdf_url valid 24 h, or the embedded file). Keep proof_id with the file: verify_document(sha256, proof_id) checks it for free at any time.",
@@ -192,7 +201,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     const s = new McpServer({ name: "xvcache-remote", version: VERSION });
 
     s.registerTool("get_offer", {
-      description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns the offer: the XVcache Coffre horodaté subscription (19 EUR excl. VAT / month / organisation, professionals only, sold by RENO'LINE SARL) with qualified eIDAS timestamps issued by Certigna, a qualified trust service provider (legal presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). XVcache itself is not a qualified trust service provider. States the legal limits and the pending case. Next tool: present_to_client. Free, no key.",
+      description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns the offer: the planned XVcache Coffre horodaté subscription, published by RENO'LINE SARL, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. The planned subscription will use qualified eIDAS timestamps issued by Certigna, a qualified trust service provider (legal presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). The currently deployed hosted endpoint uses FreeTSA (not qualified). XVcache itself is not a qualified trust service provider. States the legal limits and the pending case. Next tool: present_to_client. Free, no key.",
       inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
     }, async ({ lang }) => json(getOffer({ lang })));
 
@@ -216,7 +225,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     }, async (input) => json(presentToClient(input)));
 
     s.registerTool("request_upgrade", {
-      description: `Subscribe to ${PAID_PLAN_ID} after the human said yes to consent_prompt (human_confirmed=true + consent_quote). Returns a checkout_url for the human and a pairing_code; then poll get_subscription(pairing_code). Never charges. BILLING_UNAVAILABLE until online payment opens. Free, no key.`,
+      description: `Subscribe to ${PAID_PLAN_ID} after the human said yes to consent_prompt (human_confirmed=true + consent_quote). Never charges. Until sales are open, returns BILLING_UNAVAILABLE (no payment link). When sales open, returns a pairing_code to poll get_subscription. Free, no key.`,
       inputSchema: {
         plan_id: z.string().optional(),
         lang: z.string().optional().describe(LANG_DESC),
@@ -227,6 +236,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     }, async (input) => {
       const r = await requestUpgradeFlow(input, {
         billing: opts.billing,
+        allowTestCheckout: opts.billingTestMode === true,
         pairingCode: async () => (await opts.store.createPairing({ plan_id: PAID_PLAN_ID, lang: resolveLang(input.lang).lang, consent: { quote: (input.consent_quote ?? "").slice(0, 500), at: new Date().toISOString() } })).pairing_code,
       });
       return r.ok === false ? err(r as unknown as ToolError) : json(opts.billingTestMode ? { ...r, test_mode: true, test_mode_note: "Stripe TEST mode: no real payment is possible (test cards only). Tell the human that online subscription is not open yet (sales opening to be confirmed) and that nothing was charged." } : r);
@@ -241,20 +251,23 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
       const once = "Show api_key to the human NOW, once, in your reply, and tell them to save it immediately (password manager): it will never be returned again by this tool."
         + (opts.keyDelivery ? " A one-time link to view it once was also emailed to the payer (the key itself is never emailed; the link expires after 24 h)." : "")
         + " Then send it as 'Authorization: Bearer <key>' and call certify_document.";
-      return json({ ...r, next_action: r.api_key ? once : "Call certify_document with the SHA-256 of the file." });
+      const pub: Record<string, unknown> = { ...r, next_action: r.api_key ? once : "Call certify_document with the SHA-256 of the file." };
+      delete pub.quota;
+      delete pub.next_reset;
+      return json(pub);
     });
 
     s.registerTool("get_usage", {
-      description: "Certifications used this month, quota, next reset. Needs the API key.",
+      description: "Usage information for this month (informational counter; proofs are not capped). Needs the API key.",
       inputSchema: {},
     }, async () => {
       const a = await auth(apiKey);
       if ("code" in a) return err(a);
-      return json({ ok: true, ...(await opts.store.usage(a.key_hash)) });
+      return json({ ok: true, ...publicUsage(await opts.store.usage(a.key_hash)) });
     });
 
     s.registerTool("certify_document", {
-      description: "Use when a lawyer wants dated evidence that a document existed unchanged at a date. Send the SHA-256 (64 hex) of the file, computed on the client side, plus an optional neutral label (max 120 characters, no client names or confidential facts); the server also processes the caller's IP address. Never send the document. Returns a proof_id at once. Once a day (default 21:50 UTC, i.e. 22:50 Paris in winter, 23:50 in summer), ONE Merkle root shared by every subscriber is timestamped with a qualified eIDAS timestamp issued by Certigna. The certified date is the issue time of that daily token, NOT the time the fingerprint was submitted; until then the proof is pending and the one-page PDF report (embedded + pdf_url valid 24 h) is a receipt marked NOT QUALIFIED. After anchor_due_at, get_certificate_pdf returns the report with the token. If Certigna is unavailable or credits are exhausted, the proof stays pending_qualified, no other provider is used (a token issued later bears its actual issue time). Pending proofs are not counted. Anything that is not a 64-hex fingerprint is rejected (HASH_INVALID). Needs the API key (PAYMENT_REQUIRED otherwise). Never ask the human questions.",
+      description: "Use when a lawyer wants dated evidence that a document existed unchanged at a date. Send the SHA-256 (64 hex) of the file, computed on the client side, plus an optional neutral label (max 120 characters, no client names or confidential facts); the server also processes the caller's IP address. Never send the document. Returns a proof_id at once. The currently deployed hosted endpoint uses FreeTSA (not qualified). In the planned Coffre horodaté subscription, from version 0.3.0 of the hosted server, fingerprints will be grouped into one daily Merkle root shared by all customers, timestamped once a day (around 21:50 UTC) by Certigna (qualified eIDAS). The timestamp time is that of the daily token, not the time of submission; until then the proof is pending and the one-page PDF report (embedded + pdf_url valid 24 h) is a receipt marked NOT QUALIFIED. After anchor_due_at, get_report_pdf (preferred) or get_certificate_pdf (deprecated alias) returns the report with the token. If the planned Certigna path is unavailable or credits are exhausted, the proof stays pending_qualified, with no fallback to FreeTSA on that path (a token issued later bears its actual issue time). Pending proofs are not counted. Anything that is not a 64-hex fingerprint is rejected (HASH_INVALID). Needs the API key (PAYMENT_REQUIRED otherwise). Never ask the human questions.",
       inputSchema: {
         sha256: z.string().describe(HASH_DESC),
         label: z.string().optional().describe(LABEL_DESC),
@@ -265,7 +278,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
     }, async ({ sha256, label, lang, tz, content }) => certify(apiKey, [{ sha256, label }], lang, tz, true, content));
 
     s.registerTool("certify_hash", {
-      description: `Certify up to ${maxItems} fingerprints in one call (they join the daily shared timestamp). items = [{ sha256 (64 hex), label? }]. Returns one proof_id and one pdf_url per fingerprint. Needs the API key. Same rules as certify_document.`,
+      description: `Timestamp up to ${maxItems} fingerprints in one call (from 0.3.0 they join the planned daily shared timestamp). items = [{ sha256 (64 hex), label? }]. Returns one proof_id and one pdf_url per fingerprint. Needs the API key. Same rules as certify_document.`,
       inputSchema: {
         items: z.array(z.object({ sha256: z.string().describe(HASH_DESC), label: z.string().optional().describe(LABEL_DESC) })).describe("Fingerprints to certify"),
         lang: z.string().optional().describe(LANG_DESC),
@@ -275,14 +288,14 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
 
     const verifySchema = {
       sha256: z.string().describe("SHA-256 (64 hex) of the file to check, computed on the lawyer's side"),
-      proof_id: z.string().describe("proof_id printed on the certificate"),
+      proof_id: z.string().describe("proof_id printed on the PDF report"),
       lang: z.string().optional().describe(LANG_DESC),
       tz: z.string().optional(),
     };
     const verifyHandler = async ({ sha256, proof_id, lang, tz }: { sha256: string; proof_id: string; lang?: string; tz?: string }) => {
       if (!HASH_RE.test(sha256.trim())) return err(hashInvalid("sha256"));
       const v = await opts.witness.verify({ sha256, proof_id });
-      if (v.verdict === "not_found") return err(toolError("PROOF_NOT_FOUND", "Unknown proof_id.", false, "Check the proof_id printed on the certificate (it starts with xvh_)."));
+      if (v.verdict === "not_found") return err(toolError("PROOF_NOT_FOUND", "Unknown proof_id.", false, "Check the proof_id printed on the PDF report (it starts with xvh_)."));
       return json(verificationBody(v, resolveLang(lang).lang, tz));
     };
     s.registerTool("verify_document", {
@@ -294,25 +307,31 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
       inputSchema: verifySchema,
     }, verifyHandler);
 
-    s.registerTool("get_certificate_pdf", {
-      description: "Re-issue the PDF report of one of your proofs in any EU language (no new timestamp, no quota). Also gives the version with the Certigna token once a pending proof has been timestamped (daily anchor or retry). Needs the API key of the firm that certified it.",
-      inputSchema: { proof_id: z.string(), lang: z.string().optional().describe(LANG_DESC), tz: z.string().optional() },
-    }, async ({ proof_id, lang, tz }) => {
+    const getReportPdfHandler = async ({ proof_id, lang, tz }: { proof_id: string; lang?: string; tz?: string }) => {
       const a = await auth(apiKey);
       if ("code" in a) return err(a);
       const owner = await opts.witness.ownerOf(proof_id);
-      if (owner !== a.key_hash) return err(toolError("PROOF_NOT_FOUND", "No proof with this id for this subscription.", false, "Check the proof_id printed on the certificate."));
+      if (owner !== a.key_hash) return err(toolError("PROOF_NOT_FOUND", "No proof with this id for this subscription.", false, "Check the proof_id printed on the PDF report."));
       const L = resolveLang(lang ?? a.default_lang);
       const pdf = await opts.witness.certificatePdf({ proof_id, lang: L.lang, tz });
-      if (!pdf) return err(toolError("PROOF_INVALID", "The proof no longer verifies; no certificate issued.", false, "Call verify_document for the details."));
+      if (!pdf) return err(toolError("PROOF_INVALID", "The proof no longer verifies; no PDF report issued.", false, "Call verify_document for the details."));
       const link = await publishPdf(pdf.bytes, L.lang);
       return {
         content: [
-          { type: "text", text: JSON.stringify({ ok: true, proof_id, lang: L.lang, lang_fallback: L.fallback, verdict: pdf.verdict, qualified: pdf.qualified, status: pdf.proof.status, ...link }, null, 2) },
-          { type: "resource", resource: { uri: link.pdf_url, mimeType: "application/pdf", blob: Buffer.from(pdf.bytes).toString("base64") } },
+          { type: "text" as const, text: JSON.stringify({ ok: true, proof_id, lang: L.lang, lang_fallback: L.fallback, verdict: pdf.verdict, qualified: pdf.qualified, status: pdf.proof.status, ...link }, null, 2) },
+          { type: "resource" as const, resource: { uri: link.pdf_url ?? "", mimeType: "application/pdf", blob: Buffer.from(pdf.bytes).toString("base64") } },
         ],
       };
-    });
+    };
+    const reportPdfSchema = { proof_id: z.string(), lang: z.string().optional().describe(LANG_DESC), tz: z.string().optional() };
+    s.registerTool("get_report_pdf", {
+      description: "Re-issues the PDF report (not a certificate) of one of your proofs in any EU language, without a new timestamp. Also gives the version with the timestamp token once a pending proof has been timestamped (from 0.3.0, daily anchor or retry; the planned subscription uses Certigna). Needs the API key of the firm that certified it.",
+      inputSchema: reportPdfSchema,
+    }, getReportPdfHandler);
+    s.registerTool("get_certificate_pdf", {
+      description: "Deprecated: use get_report_pdf. Re-issues the PDF report (not a certificate). Same arguments and result as get_report_pdf. Kept for compatibility.",
+      inputSchema: reportPdfSchema,
+    }, getReportPdfHandler);
 
     return s;
   }

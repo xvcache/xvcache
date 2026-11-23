@@ -3,8 +3,8 @@
   "name": "Malti",
   "reviewed": false,
   "cert": {
-    "header": "ĊERTIFIKAT TA' TIMBRU TAL-ĦIN",
-    "header_verification": "ĊERTIFIKAT TA' VERIFIKA",
+    "header": "RAPPORT TAT-TIMBRU TAL-ĦIN",
+    "header_verification": "RAPPORT TA' VERIFIKA",
     "title_intact": "Dokument intatt",
     "subtitle_intact": "Verdett V — il-marka diġitali ma nbidlitx mit-timbru tal-ħin.",
     "title_modified": "Dokument modifikat",

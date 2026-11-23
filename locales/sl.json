@@ -3,8 +3,8 @@
   "name": "Slovenščina",
   "reviewed": false,
   "cert": {
-    "header": "POTRDILO O ČASOVNEM ŽIGU",
-    "header_verification": "POTRDILO O PREVERJANJU",
+    "header": "POROČILO O ČASOVNEM ŽIGU",
+    "header_verification": "POROČILO O PREVERJANJU",
     "title_intact": "Dokument nespremenjen",
     "subtitle_intact": "Izid V — prstni odtis se od časovnega žiga ni spremenil.",
     "title_modified": "Dokument spremenjen",

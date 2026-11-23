@@ -3,8 +3,8 @@
   "name": "Čeština",
   "reviewed": false,
   "cert": {
-    "header": "CERTIFIKÁT ČASOVÉHO RAZÍTKA",
-    "header_verification": "CERTIFIKÁT OVĚŘENÍ",
+    "header": "ZPRÁVA O ČASOVÉM RAZÍTKU",
+    "header_verification": "ZPRÁVA O OVĚŘENÍ",
     "title_intact": "Dokument nezměněn",
     "subtitle_intact": "Výsledek V — otisk se od opatření časovým razítkem nezměnil.",
     "title_modified": "Dokument změněn",

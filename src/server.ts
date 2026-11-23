@@ -510,7 +510,7 @@ const LANG_DESC = `Language of the conversation, one of ${EU_LANGS.join(", ")} (
 server.registerTool(
   "get_offer",
   {
-    description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns a short pitch: the local version uses FreeTSA by default (not qualified, no legal presumption); the XVcache Coffre horodaté subscription (19 EUR excl. VAT / month / organisation, professionals only, sold by RENO'LINE SARL) uses qualified eIDAS timestamps issued by Certigna (presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). XVcache itself is not a qualified trust service provider. Also returns what is included, the legal limits and the next tool: present_to_client. Free, no key. Not written into the journal.",
+    description: "Use first when a lawyer or legal team needs dated evidence that a document existed unchanged at a date (litigation, prior rights, client file). Returns a short pitch: the local version uses FreeTSA by default (not qualified, no legal presumption); the planned XVcache Coffre horodaté subscription is published by RENO'LINE SARL, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. The planned subscription will use qualified eIDAS timestamps issued by Certigna (presumption of date and integrity, eIDAS art. 41(2); recognised in all Member States, art. 24a(6)). The currently deployed hosted endpoint uses FreeTSA (not qualified). XVcache itself is not a qualified trust service provider. Also returns what is included, the legal limits and the next tool: present_to_client. Free, no key. Not written into the journal.",
     inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
   async ({ lang }) => ok(JSON.stringify(getOffer({ lang }), null, 2))
@@ -519,7 +519,7 @@ server.registerTool(
 server.registerTool(
   "list_plans",
   {
-    description: "Machine-readable XVcache catalog (plans.json): the free local journal, the paid plan coffre-horodate (XVcache Coffre horodaté, 19 EUR excl. VAT / month / organisation, professionals only) and placeholder plans whose prices stay TBD. Tax: excl. VAT; reverse charge for EU B2B with a valid VAT number. Free, no key. Not written into the journal.",
+    description: "Machine-readable XVcache catalog (plans.json): the free local journal, the planned plan coffre-horodate (XVcache Coffre horodaté, not on sale yet; Planned price: €19 excl. VAT / month per organisation · professionals · demos on application) and placeholder plans whose prices stay TBD. Tax: excl. VAT; reverse charge for EU B2B with a valid VAT number. Free, no key. Not written into the journal.",
     inputSchema: { lang: z.string().optional().describe(LANG_DESC) },
   },
   async ({ lang }) => ok(JSON.stringify(listPlans({ lang }), null, 2))
@@ -528,15 +528,11 @@ server.registerTool(
 server.registerTool(
   "recommend_plan",
   {
-    description: "Pick a plan from the need. needs_qualified_timestamp=true or docs_per_month>0 → coffre-horodate (the only paid plan), with a localized reason. Legacy inputs (notes_per_month, certifications_per_month, needs_certified_witness, reseller) keep their placeholder behaviour. Free. Not written into the journal.",
+    description: "Pick a plan from the need. needs_qualified_timestamp=true or docs_per_month>0 → coffre-horodate (the planned plan, not on sale yet), with a localized reason. Public arguments: needs_qualified_timestamp, docs_per_month, lang. Free. Not written into the journal.",
     inputSchema: {
       needs_qualified_timestamp: z.boolean().optional().describe("true if a qualified eIDAS timestamp is needed"),
       docs_per_month: z.number().int().nonnegative().optional().describe("Expected documents per month"),
       lang: z.string().optional().describe(LANG_DESC),
-      notes_per_month: z.number().int().nonnegative().optional().describe("Legacy: expected notes per month"),
-      certifications_per_month: z.number().int().nonnegative().optional().describe("Legacy: expected certified proofs per month"),
-      needs_certified_witness: z.boolean().optional().describe("Legacy: true if a certified external witness is needed"),
-      reseller: z.boolean().optional().describe("Legacy: true if you want to resell or bundle XVcache (terms TBD)"),
     },
   },
   async (input) => ok(JSON.stringify(recommendPlan(input), null, 2))
@@ -558,9 +554,9 @@ server.registerTool(
 server.registerTool(
   "request_upgrade",
   {
-    description: `Subscribe to ${PAID_PLAN_ID} after the human said yes to consent_prompt. Requires human_confirmed=true AND consent_quote (the human's exact words); otherwise returns CONSENT_REQUIRED with the consent_prompt to show. Never charges anyone: it returns a Stripe Checkout link for the human to pay. Until the dedicated XVcache Stripe account is connected it returns BILLING_UNAVAILABLE (nothing charged). Errors: CONSENT_REQUIRED, PLAN_UNKNOWN, BILLING_UNAVAILABLE. Not written into the journal.`,
+    description: `Subscribe to ${PAID_PLAN_ID} after the human said yes to consent_prompt. Requires human_confirmed=true AND consent_quote (the human's exact words); otherwise returns CONSENT_REQUIRED with the consent_prompt to show. Never charges. Until sales are open it returns BILLING_UNAVAILABLE (no payment link, nothing charged). Errors: CONSENT_REQUIRED, PLAN_UNKNOWN, BILLING_UNAVAILABLE. Not written into the journal.`,
     inputSchema: {
-      plan_id: z.string().optional().describe(`Default ${PAID_PLAN_ID} (the only paid plan)`),
+      plan_id: z.string().optional().describe(`Default ${PAID_PLAN_ID} (the planned plan, not on sale yet)`),
       lang: z.string().optional().describe(LANG_DESC),
       human_confirmed: z.boolean().optional().describe("true only if the human explicitly answered yes to consent_prompt"),
       consent_quote: z.string().optional().describe("The human's exact words, e.g. \"Oui\""),
@@ -586,7 +582,7 @@ function witnessSummary(): Record<string, unknown> {
 server.registerTool(
   "certify_note",
   {
-    description: "Certify a vault note with an independent timestamp. XVcache computes the note's sha256 (document content never leaves the machine; only the Merkle root is sent to the TSA and calendars, which also see your IP address), puts it in a Merkle batch with every other pending note and the journal head, and stamps the single Merkle root twice: (A) an RFC 3161 token from the configured TSA (FreeTSA by default: not qualified, no legal presumption; a qualified eIDAS timestamp only when a Certigna account is configured and the token is actually issued by Certigna) and (B) an OpenTimestamps anchor (Bitcoin, confirmation takes hours, pending is normal). Returns the note's individual proof JSON (note sha256, Merkle path, root, token base64, genTime, provider, qualified, OTS status) and stores it under .xvcache/proofs/. Use defer=true to only queue the note and stamp later with certify_batch (one timestamp for many notes). Certified proofs are a paid feature (price TBD, payment not live); local V/X via verify_journal stays free. Check later with verify_proof. Not written into the journal.",
+    description: "Certify a vault note with an independent timestamp. XVcache computes the note's sha256 (document content never leaves the machine; only the Merkle root is sent to the TSA and calendars, which also see your IP address), puts it in a Merkle batch with every other pending note and the journal head, and stamps the single Merkle root twice: (A) an RFC 3161 token from the configured TSA (FreeTSA by default: not qualified, no legal presumption; a qualified eIDAS timestamp only when a Certigna account is configured and the token is actually issued by Certigna) and (B) an OpenTimestamps anchor (Bitcoin, confirmation takes hours, pending is normal). Returns the note's individual proof JSON (note sha256, Merkle path, root, token base64, genTime, provider, qualified, OTS status) and stores it under .xvcache/proofs/. Use defer=true to only queue the note and stamp later with certify_batch (one timestamp for many notes). Free; FreeTSA by default, not qualified. A qualified eIDAS timestamp is used only with your own Certigna account and a token actually issued by Certigna. Check later with verify_proof. Not written into the journal.",
     inputSchema: {
       path: z.string().min(1).describe("Vault-relative note to certify, e.g. Tests/Memo.md"),
       defer: z.boolean().optional().describe("true = queue only, stamp later with certify_batch (default false = stamp now)"),
@@ -618,7 +614,7 @@ server.registerTool(
 server.registerTool(
   "certify_batch",
   {
-    description: "Stamp every note queued with certify_note(defer=true) now, with ONE timestamp over their Merkle root (plus the journal head). Writes one individual proof per note under .xvcache/proofs/ and returns a summary (batch id, root, genTime, provider, qualified, proof files). Paid feature (price TBD, payment not live). Not written into the journal.",
+    description: "Stamp every note queued with certify_note(defer=true) now, with ONE timestamp over their Merkle root (plus the journal head). Writes one individual proof per note under .xvcache/proofs/ and returns a summary (batch id, root, genTime, provider, qualified, proof files). Free; FreeTSA by default, not qualified. Not written into the journal.",
     inputSchema: {},
   },
   async () => {
@@ -662,7 +658,7 @@ server.registerTool(
 server.registerTool(
   "certify_document",
   {
-    description: "Use when a lawyer or a legal team needs dated evidence that a document in the local vault existed unchanged at a date. Certifies the note if needed (one batched timestamp), then returns the verdict (V: checks passed / X: modified or invalid) and a one-page PDF report in the requested EU language (24 languages, default English; pass the conversation language, never ask). If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent). If the document changed since the timestamp, no new stamp is taken: the verdict is X « modified since <date> » and no certificate is issued. stamp=false never stamps. Technical files (.tst, .ots, Merkle path) are attached to the PDF. Non-qualified tokens (FreeTSA, or Certigna missing) carry a NOT QUALIFIED banner. Not a bailiff report, not a qualified signature, not legal advice. Next tool: verify_document or get_certificate_pdf. Not written into the journal.",
+    description: "Use when a lawyer or a legal team needs dated evidence that a document in the local vault existed unchanged at a date. Certifies the note if needed (one batched timestamp), then returns the verdict (V: checks passed / X: modified or invalid) and a one-page PDF report in the requested EU language (24 languages, default English; pass the conversation language, never ask). If a proof already exists and the document is unchanged, it is reused (no new timestamp, no Certigna token spent). If the document changed since the timestamp, no new stamp is taken: the verdict is X « modified since <date> » and no PDF report is issued. stamp=false never stamps. Technical files (.tst, .ots, Merkle path) are attached to the PDF. Non-qualified tokens (FreeTSA, or Certigna missing) carry a NOT QUALIFIED banner. Not a bailiff report, not a qualified signature, not legal advice. Next tool: verify_document or get_report_pdf (get_certificate_pdf is a deprecated alias). Not written into the journal.",
     inputSchema: {
       path: z.string().min(1).describe("Vault-relative note, e.g. Contrats/Devis-042.md"),
       stamp: z.boolean().optional().describe("true (default) = stamp if no proof exists. false = reuse or report only, never spend a token."),
@@ -699,23 +695,33 @@ server.registerTool(
   }
 );
 
+const reportPdfSchema = {
+  proof_id: z.string().min(1).describe("proof_id returned by certify_document, e.g. 20261122T190839123Z-1a2b3c4d.0"),
+  lang: z.string().optional().describe(`One of ${EU_LANGS.join(", ")}; unknown → en. Default en.`),
+  tz: z.string().optional().describe("IANA time zone printed next to UTC. Default Europe/Brussels."),
+};
+const getReportPdfHandler = async ({ proof_id, lang, tz }: { proof_id: string; lang?: string; tz?: string }) => {
+  const r = await reissueCertificate(certifier, { proof_id, lang, tz });
+  if (!r.ok) {
+    return fail(JSON.stringify({ ok: false, code: "PROOF_NOT_FOUND", message_localized: r.error, retryable: false, next_action: "Use the proof_id returned by certify_document, or call certify_document again with stamp=false." }, null, 2));
+  }
+  return withPdf(JSON.stringify({ ok: true, glyph: r.glyph, verdict: r.verdict?.kind, verdict_localized: r.verdict_localized, lang: r.lang, proof_id: r.proof_id, pdf: r.pdf, attachments: r.attachments, qualified: r.qualified, gen_time: r.gen_time }, null, 2), r.pdf ?? null);
+};
+server.registerTool(
+  "get_report_pdf",
+  {
+    description: "Use when the lawyer needs the PDF report of an existing proof in another EU language. Re-issues the PDF report (not a certificate) of proof_id (from certify_document) in lang, without a new timestamp. The proof is re-checked first: if the note changed, the verdict is X and no PDF report is issued. Not written into the journal.",
+    inputSchema: reportPdfSchema,
+  },
+  getReportPdfHandler
+);
 server.registerTool(
   "get_certificate_pdf",
   {
-    description: "Use when the lawyer needs the PDF report of an existing proof in another EU language. Reissues the one-page PDF of proof_id (from certify_document) in lang, without a new timestamp and without spending a Certigna token. The proof is re-checked first: if the note changed, the verdict is X and no PDF is issued. Not written into the journal.",
-    inputSchema: {
-      proof_id: z.string().min(1).describe("proof_id returned by certify_document, e.g. 20261122T190839123Z-1a2b3c4d.0"),
-      lang: z.string().optional().describe(`One of ${EU_LANGS.join(", ")}; unknown → en. Default en.`),
-      tz: z.string().optional().describe("IANA time zone printed next to UTC. Default Europe/Brussels."),
-    },
+    description: "Deprecated: use get_report_pdf. Re-issues the PDF report (not a certificate). Same arguments and result as get_report_pdf. Kept for compatibility. Not written into the journal.",
+    inputSchema: reportPdfSchema,
   },
-  async ({ proof_id, lang, tz }) => {
-    const r = await reissueCertificate(certifier, { proof_id, lang, tz });
-    if (!r.ok) {
-      return fail(JSON.stringify({ ok: false, code: "PROOF_NOT_FOUND", message_localized: r.error, retryable: false, next_action: "Use the proof_id returned by certify_document, or call certify_document again with stamp=false." }, null, 2));
-    }
-    return withPdf(JSON.stringify({ ok: true, glyph: r.glyph, verdict: r.verdict?.kind, verdict_localized: r.verdict_localized, lang: r.lang, proof_id: r.proof_id, pdf: r.pdf, attachments: r.attachments, qualified: r.qualified, gen_time: r.gen_time }, null, 2), r.pdf ?? null);
-  }
+  getReportPdfHandler
 );
 
 await server.connect(new StdioServerTransport());

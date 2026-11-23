@@ -446,14 +446,14 @@ try {
   const before21 = await readJournalEntries(journalPath);
   const rOffer = await client.callTool({ name: "get_offer", arguments: {} });
   const rPlans = await client.callTool({ name: "list_plans", arguments: {} });
-  const rRecFree = await client.callTool({ name: "recommend_plan", arguments: { needs_certified_witness: false } });
+  const rRecFree = await client.callTool({ name: "recommend_plan", arguments: {} });
   const rRecBundle = await client.callTool({
     name: "recommend_plan",
-    arguments: { notes_per_month: 80, certifications_per_month: 15, needs_certified_witness: true },
+    arguments: { needs_qualified_timestamp: true, docs_per_month: 20 },
   });
   const rRecReseller = await client.callTool({
     name: "recommend_plan",
-    arguments: { certifications_per_month: 30, reseller: true },
+    arguments: { needs_qualified_timestamp: true },
   });
   const rUp = await client.callTool({ name: "request_upgrade", arguments: { human_confirmed: true, consent_quote: "Oui" } });
   const rUpNoConsent = await client.callTool({ name: "request_upgrade", arguments: {} });
@@ -498,12 +498,12 @@ try {
       console.error("FAIL 21: sans témoin certifié, recommend_plan doit suggérer free, obtenu :", recFree.recommended_plan_id);
       failed = true;
     }
-    if (recBundle.recommended_plan_id !== "bundle-starter") {
-      console.error("FAIL 21: 15 certifications / 80 notes devraient suggérer bundle-starter (quotas placeholder), obtenu :", recBundle.recommended_plan_id);
+    if (recBundle.recommended_plan_id !== "coffre-horodate") {
+      console.error("FAIL 21: needs_qualified_timestamp doit suggérer coffre-horodate, obtenu :", recBundle.recommended_plan_id);
       failed = true;
     }
-    if (recReseller.reseller == null) {
-      console.error("FAIL 21: recommend_plan avec reseller=true doit inclure le champ reseller (termes TBD)");
+    if (recReseller.reseller != null || plans.reseller != null) {
+      console.error("FAIL 21: le champ reseller ne doit plus figurer dans la réponse publique");
       failed = true;
     }
     if (!rUp.isError || up.code !== "BILLING_UNAVAILABLE" || up.checkout_url != null || up.payment_live !== false) {

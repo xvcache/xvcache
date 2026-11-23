@@ -3,8 +3,8 @@
   "name": "Dansk",
   "reviewed": false,
   "cert": {
-    "header": "TIDSSTEMPELCERTIFIKAT",
-    "header_verification": "VERIFIKATIONSCERTIFIKAT",
+    "header": "TIDSSTEMPELRAPPORT",
+    "header_verification": "VERIFIKATIONSRAPPORT",
     "title_intact": "Dokument uændret",
     "subtitle_intact": "Resultat V — fingeraftrykket er ikke ændret siden tidsstemplingen.",
     "title_modified": "Dokument ændret",

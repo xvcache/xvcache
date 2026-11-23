@@ -3,8 +3,8 @@
   "name": "Eesti",
   "reviewed": false,
   "cert": {
-    "header": "AJATEMPLI TÕEND",
-    "header_verification": "KONTROLLI TÕEND",
+    "header": "AJATEMBLIARUANNE",
+    "header_verification": "KONTROLLIARUANNE",
     "title_intact": "Dokument muutmata",
     "subtitle_intact": "Tulemus V — räsi ei ole pärast ajatemplit muutunud.",
     "title_modified": "Dokumenti on muudetud",

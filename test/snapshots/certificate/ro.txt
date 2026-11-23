@@ -1,5 +1,5 @@
 XVcache
-CERTIFICAT DE MARCARE TEMPORALĂ
+RAPORT DE MARCAJ TEMPORAL
 V
 Document intact
 Verdict V — amprenta nu s-a schimbat de la marcarea temporală.
@@ -26,7 +26,7 @@ Cum se verifică din nou
 1. Depuneți din nou același fișier (verify_document) sau verificați marca atașată cu openssl ts -verify.
 2. Amprenta sa este comparată cu cea înscrisă pe acest certificat.
 3. Rezultatul este „Intact” sau „Modificat din 22 noiembrie 2026 la 20:08:39”.
-Fișiere tehnice atașate acestui certificat
+Fișiere tehnice atașate acestui raport
 token.tst — RFC 3161
 merkle-path.json — Merkle
 MENȚIUNI LEGALE

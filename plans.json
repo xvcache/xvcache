@@ -3,7 +3,7 @@
   "prices_status": "announced",
   "payment_live": false,
   "currency": "EUR",
-  "notice": "One paid plan: XVcache Coffre horodaté (coffre-horodate), 19 EUR excl. VAT per month per organisation, reserved for professionals, sold by RENO'LINE SARL. Sales opening to be confirmed: payment_live stays false until live billing is confirmed. Qualified eIDAS timestamps are issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. Local version: FreeTSA by default, not qualified. Every other amount, quota and fee is a placeholder (TBD); none is invented.",
+  "notice": "One planned plan: XVcache Coffre horodaté (coffre-horodate), published by RENO'LINE SARL, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage: payment_live stays false until sales open. The planned subscription will use qualified eIDAS timestamps issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. The currently deployed hosted endpoint uses FreeTSA (not qualified). Local version: FreeTSA by default, not qualified.",
   "updated": "2026-11-23",
   "current_tier_id": "free",
   "plans": [
@@ -36,7 +36,7 @@
           "value": null,
           "status": "TBD",
           "placeholder": true,
-          "note": "Test-mode proofs (FreeTSA, not qualified) are not billed. Qualified certified proofs are the paid feature (price TBD)."
+          "note": "Test-mode proofs (FreeTSA, not qualified) are not billed. Local certify tools are free."
         }
       },
       "certified_witness": false
@@ -72,9 +72,9 @@
         },
         "certifications_per_month": {
           "value": null,
-          "status": "unlimited",
+          "status": "not_capped",
           "placeholder": false,
-          "note": "Unlimited proofs per subscription. Usage is counted only when a proof obtains its timestamp token; a pending proof (pending_qualified) is never counted."
+          "note": "Proofs are not capped. Usage is an informational counter; a pending proof is never counted."
         }
       },
       "certified_witness": true,
@@ -246,11 +246,6 @@
       "note": "Agent-to-agent payment in USDC via x402 is planned for later. It is not available today."
     }
   },
-  "reseller": {
-    "status": "TBD",
-    "terms": null,
-    "note": "An agent or agent-builder may later resell or bundle XVcache for its own clients. Partner terms, revenue share and limits are TBD. Nothing is offered or signed today."
-  },
   "certified_proofs": {
     "status": "preview",
     "tools": [
@@ -258,12 +253,12 @@
       "certify_batch",
       "verify_proof"
     ],
-    "paid_feature": true,
-    "price": "19 EUR excl. VAT / month / firm (coffre-horodate, to_test)",
+    "paid_feature": false,
+    "price": "Local certify_note / certify_batch are free (FreeTSA by default, not qualified).",
     "payment_live": false,
-    "model": "One timestamp covers a Merkle root of many notes (tampon groupé); each note gets its own proof (preuve vendue à l'unité).",
+    "model": "One timestamp covers a Merkle root of many notes; each note gets its own proof.",
     "layers": {
-      "A": "RFC 3161 token: qualified eIDAS only when a qualified TSA (Certigna) is configured; FreeTSA default is test, non qualifié.",
+      "A": "RFC 3161 token: FreeTSA by default, not qualified; a qualified eIDAS timestamp only when the client's own Certigna account is configured and the token is actually issued by Certigna.",
       "B": "OpenTimestamps anchor of the same root (public, Bitcoin, pending for a few hours)."
     },
     "free_local_verdict": "verify_journal V/X stays free."

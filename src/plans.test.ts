@@ -16,7 +16,7 @@ test("plans catalog: only coffre-horodate has an (announced) price; every other 
   }
 });
 
-test("recommend_plan: free without witness, bundle for moderate volume, reseller terms TBD", () => {
+test("recommend_plan: free without witness, bundle for moderate volume, no public reseller field", () => {
   const free = recommendPlan({ needs_certified_witness: false });
   assert.equal(free.recommended_plan_id, "free");
   assert.equal(free.payment_live, false);
@@ -33,8 +33,7 @@ test("recommend_plan: free without witness, bundle for moderate volume, reseller
   assert.equal(usage.recommended_plan_id, "usage");
 
   const resale = recommendPlan({ certifications_per_month: 10, reseller: true });
-  assert.ok(resale.reseller);
-  assert.equal((resale.reseller as { status: string }).status, "TBD");
+  assert.equal(resale.reseller, undefined, "reseller field is not part of the 0.3.0 public schema");
 });
 
 test("request_upgrade is a human-approval stub with no checkout URL", () => {
@@ -50,7 +49,7 @@ test("request_upgrade is a human-approval stub with no checkout URL", () => {
   assert.equal(bad.ok, false);
 });
 
-test("catalog marks certified proofs as paid (price TBD) and local V/X as free", () => {
+test("catalog marks local certify tools as free and payment_live false", () => {
   const cat = loadPlansCatalog();
   const free = cat.plans.find((p) => p.id === "free")!;
   assert.equal(free.certified_witness, false);

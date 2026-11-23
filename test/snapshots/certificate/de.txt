@@ -1,5 +1,5 @@
 XVcache
-ZEITSTEMPEL-ZERTIFIKAT
+ZEITSTEMPELBERICHT
 V
 Dokument unverändert
 Ergebnis V — der Fingerabdruck hat sich seit dem Zeitstempel nicht geändert.
@@ -27,7 +27,7 @@ Erneut prüfen
 -verify prüfen.
 2. Ihr Fingerabdruck wird mit dem auf diesem Zertifikat verglichen.
 3. Das Ergebnis lautet „Unverändert“ oder „Geändert seit 22. November 2026 um 20:08:39“.
-Diesem Zertifikat beigefügte technische Dateien
+Diesem Bericht beigefügte technische Dateien
 token.tst — RFC 3161
 merkle-path.json — Merkle
 RECHTLICHE HINWEISE
