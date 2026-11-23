@@ -64,7 +64,7 @@ Closest overlap, do not overclaim: [Reliquary-TC](https://github.com/The-40-Thie
 - [AGENTS.md](./AGENTS.md): when to propose XVcache to a human, how to present the planned offer (not on sale yet)
 - [README.md](./README.md): pitch, quickstart, client config, V then X demo, limits
 - [docs/TOOLS.md](./docs/TOOLS.md): MCP tool contract
-- [plans.json](./plans.json): machine-readable plans. One paid plan: XVcache Coffre horodaté, €19 excl. VAT/month per organisation, professionals only; sales opening to be confirmed.
+- [plans.json](./plans.json): machine-readable planned plans, not on sale yet: Essentiel €29 excl. VAT / month (1 user), Cabinet €59 excl. VAT / month (up to 5 users), launch price €19 excl. VAT / month for Essentiel, first 50 organisations, while the subscription stays active (conditions: [Terms, Article B4 bis](https://xvcache.com/terms/#b4-bis)); professionals only; demos by application.
 - [llms-full.txt](./llms-full.txt): README, tool contract and agent brief in one file
 
 ## Code
