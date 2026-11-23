@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { leafHash, merklePath, merkleRoot, verifyMerklePath, type HashLeaf, type MerkleStep } from "./merkle.js";
+import { leafHash, merklePaths, verifyMerklePath, type HashLeaf, type MerkleStep } from "./merkle.js";
 import { requestTimestamp, parseTimeStampToken, verifyTokenSignature, resolveTsaProvider, OID_SHA256, assessQualification, certignaTrust, type Qualification, type QualifiedTrust, type TsaProvider, type FetchLike, isQualifiedTsaId, sameTsaId } from "./tsa.js";
 import { stampDigest, serializeOts, parseOts, otsStatus } from "./ots.js";
 import { renderCertificate, earliestOtsBlockTime, type CertificateModel } from "./certificate.js";
@@ -283,7 +283,7 @@ export class HostedWitness {
     const created_at = new Date().toISOString();
     const batch_id = `${created_at.replace(/[-:.]/g, "").slice(0, 15)}Z-${randomBytes(4).toString("hex")}`;
     const lhs = stored.map((s) => leafHash(s.proof.leaf));
-    const root = merkleRoot(lhs);
+    const { root, paths } = merklePaths(lhs);
     const st = await this.stampRoot(root);
     if (st.error) {
       const t = this.opts.tsa!;
@@ -297,7 +297,7 @@ export class HostedWitness {
     if (st.tokenDer) await fs.writeFile(this.dir("batches", `${batch_id}.tst`), st.tokenDer);
     if (otsBuf) await fs.writeFile(this.dir("batches", `${batch_id}.ots`), otsBuf);
     for (const [i, s] of stored.entries()) {
-      s.proof.merkle = { scheme: MERKLE_SCHEME, leaf_index: i, leaf_count: lhs.length, path: merklePath(lhs, i), root };
+      s.proof.merkle = { scheme: MERKLE_SCHEME, leaf_index: i, leaf_count: lhs.length, path: paths[i], root };
       s.proof.batch_id = batch_id;
       s.proof.status = status;
       s.proof.qualified = status === "qualified";
@@ -362,7 +362,7 @@ export class HostedWitness {
       const ids = batch.map(() => "xvh_" + randomBytes(16).toString("base64url"));
       const leaves: HashLeaf[] = batch.map((b, i) => ({ k: "hash", id: ids[i], h: b.item.sha256 }));
       const lhs = leaves.map(leafHash);
-      const root = merkleRoot(lhs);
+      const { root, paths } = merklePaths(lhs);
 
       const st = await this.stampRoot(root);
       if (st.error) {
@@ -385,7 +385,7 @@ export class HostedWitness {
         label: b.item.label,
         leaf: leaves[i],
         leaf_hash: lhs[i],
-        merkle: { scheme: MERKLE_SCHEME, leaf_index: i, leaf_count: lhs.length, path: merklePath(lhs, i), root },
+        merkle: { scheme: MERKLE_SCHEME, leaf_index: i, leaf_count: lhs.length, path: paths[i], root },
         batch_id,
         created_at,
         status,

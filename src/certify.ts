@@ -4,7 +4,7 @@ import {
   sha256Hex, verifyJournalFile, readCompleteJournalLines, parseEntry, lastNoteRecord, normalizeNotePath,
   type JournalEntry,
 } from "./journal.js";
-import { leafHash, merkleRoot, merklePath, verifyMerklePath, type LeafData, type MerkleStep, type NoteLeaf } from "./merkle.js";
+import { leafHash, merklePaths, verifyMerklePath, type LeafData, type MerkleStep, type NoteLeaf } from "./merkle.js";
 import {
   requestTimestamp, parseTimeStampToken, verifyTokenSignature, certsDir, OID_SHA256, assessQualification, certignaTrust,
   type TsaProvider, type FetchLike, type SignatureCheck, type Qualification, type QualifiedTrust, isQualifiedTsaId, sameTsaId,
@@ -193,7 +193,7 @@ export class Certifier {
         journalHead = { seq: j.lastSeq, hash: j.lastHash, leaf_hash: leafHash(jl) };
       }
       const hashes = leaves.map(leafHash);
-      const root = merkleRoot(hashes);
+      const { root, paths } = merklePaths(hashes);
 
       let tsa: Proof["tsa"] = null;
       let tokenDer: Buffer | null = null;
@@ -263,7 +263,7 @@ export class Certifier {
           note_sha256: p.note_sha256,
           leaf: leaves[i] as NoteLeaf,
           leaf_hash: hashes[i],
-          merkle: { scheme: "sha256, leaf=H(0x00||canonical_json(leaf)), node=H(0x01||L||R), odd node promoted", leaf_index: i, leaf_count: hashes.length, path: merklePath(hashes, i), root },
+          merkle: { scheme: "sha256, leaf=H(0x00||canonical_json(leaf)), node=H(0x01||L||R), odd node promoted", leaf_index: i, leaf_count: hashes.length, path: paths[i], root },
           batch_id: batchId,
           batch_created_at: created.toISOString(),
           queued_at: p.queued_at,

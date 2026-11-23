@@ -3,6 +3,7 @@
 ## 0.3.1 (not published)
 
 - Public texts reworded
+- Merkle audit paths for a batch are computed in linear time (the tree is built once, not rebuilt for every leaf)
 
 ## 0.3.0 — 2026-11-23 (prepared, not published)
 
