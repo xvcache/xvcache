@@ -10,11 +10,14 @@ import { fileURLToPath } from "node:url";
  * Hosted xvcache-remote must refuse to start without qualified TSA credentials
  * (no FreeTSA fallback). Local xvcache-mcp is unchanged.
  *
- * Replay the failure on the previous commit (keep this test file):
- *   git checkout HEAD~1 -- src/tsa.ts src/remote-server.ts
+ * Hosted mode also refuses XVCACHE_TSA_PROVIDER=off / none (no TSA-less hosted mode).
+ * Local xvcache-mcp and in-process unit tests may still use off.
+ *
+ * Replay the "off in hosted mode" failure on a050cb1 (keep this test file):
+ *   git checkout a050cb1cfe282708095e3eb578ad086c4ed7444c -- src/tsa.ts src/remote-server.ts
  *   npm run build && node --test dist/hosted-tsa-guard.test.js
  * Then restore:
- *   git checkout HEAD -- src/tsa.ts src/remote-server.ts
+ *   git checkout HEAD -- src/tsa.ts src/remote-server.ts && npm run build
  */
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -141,6 +144,41 @@ test("hosted xvcache-remote refuses to start without qualified TSA credentials",
   }
 });
 
+for (const offValue of ["off", "none", "OFF"]) {
+  test(`hosted xvcache-remote refuses XVCACHE_TSA_PROVIDER=${offValue} (no TSA-less hosted mode)`, async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-hosted-guard-"));
+    try {
+      const r = await runProcess(remoteBin, [], {
+        cwd: tmp,
+        env: baseEnv({
+          HOME: tmp,
+          XVCACHE_REMOTE_DATA: path.join(tmp, "data"),
+          XVCACHE_TSA_PROVIDER: offValue,
+          // Even with credentials present, "off" must be refused in hosted mode.
+          XVCACHE_TSA_USER: FAKE_USER,
+          XVCACHE_TSA_PASSWORD: FAKE_PASSWORD,
+        }),
+        timeoutMs: 8_000,
+        // Before the fix, "off" was accepted and the server listened; stop it so the assertion fails quickly.
+        stopWhen: (text) => /xvcache-remote listening on /i.test(text),
+      });
+      const text = combined(r);
+      assert.equal(r.timedOut, false, `hosted server should exit on its own, not hang:\n${text}`);
+      assert.doesNotMatch(text, /xvcache-remote listening on /i, `hosted server must not listen with ${offValue}:\n${text}`);
+      assert.equal(r.code, 1, `hosted server with XVCACHE_TSA_PROVIDER=${offValue} must exit with code 1, got ${r.code}:\n${text}`);
+      assert.match(r.stderr, /n'est pas autorisé en mode hébergé/);
+      assert.match(r.stderr, /XVCACHE_TSA_PROVIDER=qualified/);
+      assert.match(r.stderr, /XVCACHE_TSA_USER/);
+      assert.match(r.stderr, /XVCACHE_TSA_PASSWORD/);
+      assert.doesNotMatch(r.stderr, /ou XVCACHE_TSA_PROVIDER=off/);
+      assertNoSecret(text);
+      assert.doesNotMatch(text, new RegExp(FAKE_USER));
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
+}
+
 test("hosted xvcache-remote starts with fake qualified credentials and makes no network call at startup", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "xvcache-hosted-guard-"));
   try {
@@ -152,6 +190,8 @@ test("hosted xvcache-remote starts with fake qualified credentials and makes no 
         XVCACHE_TSA_PROVIDER: "qualified",
         XVCACHE_TSA_USER: FAKE_USER,
         XVCACHE_TSA_PASSWORD: FAKE_PASSWORD,
+        // Closed local port: even if a stamp were attempted, no request could leave the machine.
+        XVCACHE_TSA_URL: "http://127.0.0.1:9/tsr",
       }),
       timeoutMs: 15_000,
       stopWhen: (text) => /xvcache-remote listening on /i.test(text),

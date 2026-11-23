@@ -17,7 +17,7 @@ import { loadStripePriceTableFromEnv, priceTableStartupMessage } from "./stripe-
  * no deployment, no domain (L5/L7), no billing (L4: request_upgrade answers BILLING_UNAVAILABLE).
  * Env: XVCACHE_REMOTE_HOST (127.0.0.1), XVCACHE_REMOTE_PORT (0 = free port), XVCACHE_REMOTE_DATA
  * (~/.xvcache-remote), XVCACHE_PUBLIC_URL, XVCACHE_BATCH_WINDOW_MS (2000), XVCACHE_RETRY_MS (300000),
- * XVCACHE_OTS (on/off), TSA: qualified credentials required (XVCACHE_TSA_USER, XVCACHE_TSA_PASSWORD); no FreeTSA fallback. XVCACHE_TSA_PROVIDER=off is an explicit test/demo opt-out only.
+ * XVCACHE_OTS (on/off), TSA: qualified credentials required (XVCACHE_TSA_USER, XVCACHE_TSA_PASSWORD); no FreeTSA fallback. XVCACHE_TSA_PROVIDER=freetsa, custom and off/none are refused (exit 1).
  * L4 billing: XVCACHE_STRIPE_PAYMENT_LINK_URL + STRIPE_WEBHOOK_SECRET (both needed; webhook on POST /stripe/webhook).
  *   Price table (required to honour paid checkouts): XVCACHE_STRIPE_PRICE_TABLE (JSON file path) or
  *   XVCACHE_STRIPE_PRICE_TABLE_JSON; see stripe-price-table.example.json (fake ids only). Missing/empty = refuse all paid checkouts.

@@ -4,7 +4,7 @@
 
 - Public texts reworded
 - Merkle audit paths for a batch are computed in linear time (the tree is built once, not rebuilt for every leaf)
-- Hosted `xvcache-remote` refuses to start without qualified TSA credentials (no FreeTSA fallback). `XVCACHE_TSA_PROVIDER=off` remains an explicit test/demo opt-out. Local `xvcache-mcp` is unchanged (FreeTSA by default).
+- Hosted `xvcache-remote` refuses to start without qualified TSA credentials (no FreeTSA fallback). `XVCACHE_TSA_PROVIDER=freetsa`, `custom` and `off`/`none` are refused in hosted mode (exit code 1). Local `xvcache-mcp` is unchanged (FreeTSA by default, `off` still available).
 
 ## 0.3.0 — 2026-11-23 (prepared, not published)
 

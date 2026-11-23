@@ -4,7 +4,8 @@
  * (pairing / get_subscription, and the one-time email link). A Stripe retry of
  * the same event must not mint a second key or a second subscription.
  *
- * Isolation: 127.0.0.1, port 0, tmp dir, TSA/OTS off, no Stripe API, no real
+ * Isolation: 127.0.0.1, port 0, tmp dir, fake qualified TSA (closed local URL,
+ * never called), OTS off, fetch trapped in the harness, no Stripe API, no real
  * email (fake mailer), signed webhook payloads only. Never logs a raw API key.
  *
  * These tests use only APIs present on 5364b2f. They must compile and fail
@@ -146,6 +147,11 @@ function linkFrom(mail: { text: string }): string {
   return line!;
 }
 
+async function assertNoNetwork(mailLog: string): Promise<void> {
+  const calls = await fs.readFile(mailLog + ".network", "utf8").catch(() => "");
+  assert.equal(calls, "", `the harness must not make any network call, got:\n${calls}`);
+}
+
 async function reveal(link: string): Promise<string> {
   const html = await (await fetch(link, { method: "POST" })).text();
   const m = /<code>(xvc_[A-Za-z0-9_-]+)<\/code>/.exec(html);
@@ -206,6 +212,7 @@ test("crash after Stripe 200: pairing still yields the same key after restart; e
   } finally {
     await killHard(second.child);
   }
+  await assertNoNetwork(mailLog);
 });
 
 test("crash after Stripe 200 without pairing (website): the same key is recoverable from the resumed email link; replay mints nothing", async () => {
@@ -245,4 +252,5 @@ test("crash after Stripe 200 without pairing (website): the same key is recovera
   } finally {
     await killHard(second.child);
   }
+  await assertNoNetwork(mailLog);
 });

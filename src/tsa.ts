@@ -163,23 +163,31 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
 }
 
 
+/** Operator hint repeated by every hosted refusal. Names variables only, never their values. */
+const HOSTED_TSA_REQUIRED = "Le mode hébergé exige l'horodatage qualifié : définir XVCACHE_TSA_PROVIDER=qualified avec XVCACHE_TSA_USER et XVCACHE_TSA_PASSWORD.";
+
 /**
- * Hosted entry (xvcache-remote): never fall back to FreeTSA.
+ * Hosted entry (xvcache-remote): never fall back to FreeTSA and never run without a TSA.
  * Default and `qualified` (plus the legacy alias) require XVCACHE_TSA_USER and
- * XVCACHE_TSA_PASSWORD. `off` / `none` is an explicit test/demo opt-out, never a default.
- * `freetsa` and `custom` are refused so the public "no fallback to FreeTSA" promise holds.
+ * XVCACHE_TSA_PASSWORD. `freetsa`, `custom` and `off` / `none` are refused so the public
+ * "qualified timestamp, no fallback to FreeTSA" promise holds. `off` stays available to the
+ * local xvcache-mcp (resolveTsaProvider) and to in-process tests that pass `tsa: null`.
  */
 export function resolveHostedTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaProvider | null | TsaConfigError {
   const raw = (env.XVCACHE_TSA_PROVIDER || "").trim().toLowerCase();
-  if (raw === "off" || raw === "none") return null;
+  if (raw === "off" || raw === "none") {
+    return {
+      error: `XVCACHE_TSA_PROVIDER=${raw} n'est pas autorisé en mode hébergé (pas de service hébergé sans horodatage). ${HOSTED_TSA_REQUIRED}`,
+    };
+  }
   if (raw === "freetsa") {
     return {
-      error: "FreeTSA n'est pas autorisé en mode hébergé (aucun repli). Définir XVCACHE_TSA_PROVIDER=qualified avec XVCACHE_TSA_USER et XVCACHE_TSA_PASSWORD, ou XVCACHE_TSA_PROVIDER=off pour un test ou une démo sans TSA.",
+      error: `FreeTSA n'est pas autorisé en mode hébergé (aucun repli). ${HOSTED_TSA_REQUIRED}`,
     };
   }
   if (raw && !isQualifiedTsaId(raw)) {
     return {
-      error: `XVCACHE_TSA_PROVIDER=${raw} n'est pas autorisé en mode hébergé. Valeurs autorisées : qualified (ou l'alias héritée), ou off (test/démo, jamais par défaut).`,
+      error: `XVCACHE_TSA_PROVIDER=${raw} n'est pas autorisé en mode hébergé. ${HOSTED_TSA_REQUIRED}`,
     };
   }
   const missing = missingQualifiedTsaVars(env);
@@ -187,7 +195,7 @@ export function resolveHostedTsaProvider(env: NodeJS.ProcessEnv = process.env): 
     const list = missing.join(" et ");
     const noun = missing.length > 1 ? "Variables manquantes" : "Variable manquante";
     return {
-      error: `le service hébergé exige un horodatage qualifié, sans repli sur FreeTSA. ${noun} : ${list}. Définir XVCACHE_TSA_PROVIDER=qualified avec ces identifiants, ou XVCACHE_TSA_PROVIDER=off pour un test ou une démo sans TSA.`,
+      error: `le service hébergé exige un horodatage qualifié, sans repli sur FreeTSA. ${noun} : ${list}. ${HOSTED_TSA_REQUIRED}`,
     };
   }
   return resolveTsaProvider({ ...env, XVCACHE_TSA_PROVIDER: raw || "qualified" });

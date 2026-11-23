@@ -183,7 +183,11 @@ test("installed pack: remote-server --help and the other bins load without ERR_M
       XVCACHE_REMOTE_HOST: "127.0.0.1",
       XVCACHE_REMOTE_PORT: "0",
       XVCACHE_REMOTE_DATA: remoteData,
-      XVCACHE_TSA_PROVIDER: "off",
+      // Hosted mode refuses off: fake qualified credentials, TSA URL on a closed local port.
+      // Startup never contacts the TSA (stamps happen only when a batch is flushed), and
+      // even if one were attempted, 127.0.0.1:9 keeps every request on this machine.
+      XVCACHE_TSA_PROVIDER: "qualified",
+      XVCACHE_TSA_URL: "http://127.0.0.1:9/tsr",
       XVCACHE_OTS: "off",
       XVCACHE_RETRY_MS: "0",
       XVCACHE_ANCHOR_MODE: "window",
@@ -192,11 +196,13 @@ test("installed pack: remote-server --help and the other bins load without ERR_M
       XVCACHE_STRIPE_PAYMENT_LINK_URL: "",
       XVCACHE_STRIPE_ALLOW_TEST_CHECKOUT: "",
       STRIPE_WEBHOOK_SECRET: "",
-      XVCACHE_TSA_USER: "",
-      XVCACHE_TSA_PASSWORD: "",
+      XVCACHE_TSA_USER: "xvcache-fake-tsa-user",
+      XVCACHE_TSA_PASSWORD: "FAKE_TSA_PASSWORD_PACK_TEST",
       XVCACHE_PUBLIC_URL: "",
     }),
   });
+  assert.doesNotMatch(combined(remote), /FAKE_TSA_PASSWORD_PACK_TEST/);
+  assert.doesNotMatch(combined(remote), /ECONNREFUSED|ENOTFOUND|fetch failed|getaddrinfo/i);
   assert.doesNotMatch(combined(remote), new RegExp(MODULE_NOT_FOUND));
   assert.ok(
     /xvcache-remote listening on /i.test(combined(remote)),
