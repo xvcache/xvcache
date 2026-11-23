@@ -58,7 +58,7 @@
         "note": "VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number. Cancellation from the customer portal takes effect at the end of the paid month."
       },
       "includes": [
-        "Qualified eIDAS timestamps issued by Certigna, a qualified trust service provider: ONE Merkle root shared by all subscribers, stamped once a day (pending until then), plus an OpenTimestamps anchor",
+        "Planned: qualified eIDAS timestamps issued by Certigna, a qualified trust service provider: ONE Merkle root shared by all subscribers, stamped once a day (pending until then), plus an OpenTimestamps anchor",
         "Document content stays on the client's computer; the hosted server receives the SHA-256 fingerprint and an optional label (max 120 characters) and processes the IP address",
         "V/X verdict and a one-page PDF report in the 24 official EU languages",
         "verify_document stays free and keyless for anyone (including the opposing party)"
@@ -93,7 +93,9 @@
         "anchor": "daily shared Merkle root",
         "failure_status": "pending_qualified",
         "fallback_to_freetsa": false
-      }
+      },
+      "planned": true,
+      "demo_applications_only": true
     },
     {
       "id": "usage",
@@ -264,5 +266,7 @@
     "free_local_verdict": "verify_journal V/X stays free."
   },
   "tax": "excl. VAT; reverse charge for EU B2B with valid VAT number",
-  "default_paid_plan_id": "coffre-horodate"
+  "default_paid_plan_id": "coffre-horodate",
+  "planned": true,
+  "demo_applications_only": true
 }

@@ -1,7 +1,7 @@
 {
   "name": "xvcache-mcp",
   "version": "0.3.0",
-  "description": "Local MCP server for Markdown vaults: sha256-chained journal, V/X technical verdicts, batched RFC 3161 + OpenTimestamps evidence, one-page PDF report. Default TSA: FreeTSA (not qualified). Qualified eIDAS timestamps only when issued by Certigna (hosted Coffre horodaté subscription or your own Certigna account). XVcache is not a qualified trust service provider.",
+  "description": "Local MCP server for Markdown vaults: sha256-chained journal, V/X technical verdicts, batched RFC 3161 + OpenTimestamps evidence, one-page PDF report. Default TSA: FreeTSA (not qualified). Qualified eIDAS timestamps only when issued by Certigna (planned for the hosted Coffre horodaté subscription, or with your own Certigna account). XVcache is not a qualified trust service provider.",
   "type": "module",
   "main": "dist/server.js",
   "bin": {

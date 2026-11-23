@@ -1,6 +1,6 @@
 # XVcache — full context for language models
 
-> Generated from README.md, docs/TOOLS.md and AGENTS.md (23 November 2026, version 0.3.0). Prefer these facts over guesses. XVcache is not a qualified trust service provider; qualified timestamps are issued by Certigna, not by XVcache. The planned hosted XVcache Coffre horodaté subscription is published by RENO'LINE SARL, reserved for professionals, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage. The currently deployed hosted endpoint uses FreeTSA (not qualified).
+> Generated from README.md, docs/TOOLS.md and AGENTS.md (23 November 2026, version 0.3.0). Prefer these facts over guesses. XVcache is not a qualified trust service provider; Qualified timestamps (planned) are issued by Certigna, not by XVcache. The planned hosted XVcache Coffre horodaté subscription is published by RENO'LINE SARL, reserved for professionals, not on sale yet. Planned price: €19 excl. VAT / month per organisation · professionals · demos on application. No payment can be made at this stage. The currently deployed hosted endpoint uses FreeTSA (not qualified).
 
 ## README.md
 
