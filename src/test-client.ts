@@ -498,8 +498,8 @@ try {
       console.error("FAIL 21: sans témoin certifié, recommend_plan doit suggérer free, obtenu :", recFree.recommended_plan_id);
       failed = true;
     }
-    if (recBundle.recommended_plan_id !== "coffre-horodate") {
-      console.error("FAIL 21: needs_qualified_timestamp doit suggérer coffre-horodate, obtenu :", recBundle.recommended_plan_id);
+    if (recBundle.recommended_plan_id !== "essentiel") {
+      console.error("FAIL 21: needs_qualified_timestamp doit suggérer essentiel, obtenu :", recBundle.recommended_plan_id);
       failed = true;
     }
     if (recReseller.reseller != null || plans.reseller != null) {
@@ -514,7 +514,7 @@ try {
       console.error("FAIL 21: request_upgrade sans consentement doit renvoyer CONSENT_REQUIRED + consent_prompt :", upNo);
       failed = true;
     }
-    if (present.lang !== "de" || typeof present.consent_prompt !== "string" || !String(present.message_markdown).includes("19 EUR")) {
+    if (present.lang !== "de" || typeof present.consent_prompt !== "string" || !String(present.message_markdown).includes("€19")) {
       console.error("FAIL 21: present_to_client(de) doit renvoyer un message allemand avec le prix et la phrase de consentement :", present);
       failed = true;
     }

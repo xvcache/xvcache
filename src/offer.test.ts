@@ -4,25 +4,48 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { EU_LANGS } from "./i18n.js";
-import { getOffer, listPlans, presentToClient, requestUpgradeFlow, recommendPlan, loadPlansCatalog, PAID_PLAN_ID } from "./plans.js";
+import { getOffer, listPlans, presentToClient, requestUpgradeFlow, recommendPlan, loadPlansCatalog, PAID_PLAN_ID, PAID_PLAN_IDS } from "./plans.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-test("plans.json: XVcache Coffre horodaté is 19 EUR excl. VAT / month / organisation, professionals only, published by RENO'LINE SARL, proofs not capped; no other amount is invented", () => {
+test("plans.json: three planned paid plans (essentiel 29, cabinet 59, launch 19 on essentiel), professionals only, published by RENO'LINE SARL, proofs not capped; no other amount is invented", () => {
   const cat = loadPlansCatalog();
-  const p = cat.plans.find((x) => x.id === PAID_PLAN_ID)!;
-  assert.ok(p, "coffre-horodate plan missing");
-  assert.equal(p.price.amount, 19);
-  assert.equal(p.price.currency, "EUR");
-  assert.equal(p.price.status, "announced");
-  assert.equal(p.price.tax_behavior, "exclusive");
-  assert.equal(p.price.display, "19 EUR excl. VAT / month / organisation");
-  assert.equal(p.name, "XVcache Coffre horodaté");
-  assert.match(String((p as any).audience), /professionals only/);
-  assert.equal((p as any).seller.name, "RENO'LINE SARL");
-  assert.equal(p.limits.certifications_per_month.status, "not_capped");
-  assert.equal((p as any).trial, undefined, "no trial announced");
-  for (const other of cat.plans.filter((x) => x.id !== PAID_PLAN_ID)) {
+  const byId = Object.fromEntries(cat.plans.map((x) => [x.id, x]));
+  const essentiel = byId.essentiel;
+  const cabinet = byId.cabinet;
+  const launch = byId.launch;
+  assert.ok(essentiel && cabinet && launch, "planned paid plans missing");
+  assert.deepEqual([...PAID_PLAN_IDS], ["essentiel", "cabinet", "launch"]);
+  assert.equal(cat.default_paid_plan_id, "essentiel");
+  assert.equal(essentiel.price.amount, 29);
+  assert.equal(cabinet.price.amount, 59);
+  assert.equal(launch.price.amount, 19);
+  for (const p of [essentiel, cabinet, launch]) {
+    assert.equal(p.price.currency, "EUR");
+    assert.equal(p.price.status, "announced");
+    assert.equal(p.price.tax_behavior, "exclusive");
+    assert.equal((p as any).price.tax, "HT");
+    assert.equal((p as any).price.period, "month");
+    assert.equal((p as any).planned, true);
+    assert.equal((p as any).demo_applications_only, true);
+    assert.equal(p.limits.certifications_per_month.status, "not_capped");
+    assert.equal((p as any).trial, undefined, "no trial announced");
+    assert.match(String((p as any).audience), /professionals only/);
+    assert.equal((p as any).seller.name, "RENO'LINE SARL");
+    assert.equal((p as any).price_eur_ht_month, p.price.amount);
+  }
+  assert.equal(essentiel.users, 1);
+  assert.equal(cabinet.users, 5);
+  assert.equal(launch.users, 1);
+  assert.equal((launch as any).applies_to, "essentiel");
+  assert.equal((launch as any).max_organisations, 50);
+  assert.equal((launch as any).seats_reassignable, false);
+  assert.equal((launch as any).price_locked, true);
+  assert.equal((launch as any).lifetime, undefined);
+  assert.ok(!("launch_offer" in cat));
+  assert.match(String(cat.price_line), /Planned pricing, not on sale yet/);
+  assert.doesNotMatch(JSON.stringify([essentiel, cabinet, launch, cat.price_line, cat.price_details]), /unlimited|lifetime|for life|à vie|illimité/i);
+  for (const other of cat.plans.filter((x) => !PAID_PLAN_IDS.includes(x.id as typeof PAID_PLAN_IDS[number]))) {
     assert.equal(other.price.amount, null, `${other.id} must stay TBD`);
     assert.equal(other.price.status, "TBD");
   }
@@ -37,7 +60,9 @@ test("get_offer(lang=de): contested claims fall back to the validated English te
   assert.match(o.pitch, /not a qualified trust service provider/);
   assert.doesNotMatch(o.pitch, /\bprove/i);
   assert.ok(Array.isArray(o.legal_limits) && o.legal_limits.length >= 3);
-  assert.equal(o.price.display, "19 EUR excl. VAT / month / organisation");
+  assert.equal(o.price.display, 'Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for the first 50 organisations · professionals only · demos by application.');
+  assert.match(String(o.price_details), /Article B4 bis/);
+  assert.equal((o.price.plans as unknown[]).length, 3);
   assert.equal(o.price.status, "announced");
   assert.match(o.price.label_localized, /professional price/);
   assert.match(o.eidas_basis.url, /eur-lex\.europa\.eu/);
@@ -55,8 +80,9 @@ test("get_offer / list_plans / present_to_client in all 24 languages; unsupporte
     // Count words, not punctuation tokens (French typography puts spaces around ":" and ";").
     const words = pr.message_markdown.split(/\s+/).filter((t) => /[\p{L}\p{N}]/u.test(t)).length;
     assert.ok(words < 180, `${lang}: ${words} words`);
-    assert.match(pr.message_markdown, /19 EUR/);
-    assert.match(pr.consent_prompt, /19 EUR/);
+    assert.match(pr.message_markdown, /€19|19 €/);
+    assert.match(pr.consent_prompt, /€19|19 €/);
+    assert.match(pr.message_markdown, /Planned pricing, not on sale yet|Tarifs prévus, pas encore en vente/);
     assert.ok(pr.consent_prompt.trim().endsWith("?") || /\?\s*\(/.test(pr.consent_prompt) || /\)$/.test(pr.consent_prompt.trim()), `${lang}: consent prompt must be a yes/no question`);
     assert.ok(pr.disclaimers.length >= 3);
     const lp = listPlans({ lang }) as Record<string, any>;
@@ -70,15 +96,22 @@ test("get_offer / list_plans / present_to_client in all 24 languages; unsupporte
 
 test("consent_prompt states price excl. VAT, monthly period, professionals only, seller, cancellation and VAT, no trial (en, fr)", () => {
   const pr = presentToClient({ lang: "en" });
-  assert.match(pr.consent_prompt, /19 EUR excl\. VAT/);
+  assert.match(pr.consent_prompt, /Planned pricing, not on sale yet/);
+  assert.match(pr.consent_prompt, /€29 excl\. VAT \/ month/);
+  assert.match(pr.consent_prompt, /€59 excl\. VAT \/ month/);
+  assert.match(pr.consent_prompt, /launch price €19 excl\. VAT \/ month for the first 50 organisations/);
   assert.match(pr.consent_prompt, /month/);
   assert.doesNotMatch(pr.consent_prompt, /14|trial/i);
+  assert.doesNotMatch(pr.consent_prompt, /unlimited|lifetime|for life|à vie|illimité/i);
   assert.match(pr.consent_prompt, /reserved for professionals/);
   assert.match(pr.consent_prompt, /RENO'LINE SARL/);
   assert.match(pr.consent_prompt, /end of the paid month/);
   const fr = presentToClient({ lang: "fr" });
   assert.match(fr.consent_prompt, /réservé aux professionnels/);
-  assert.match(fr.consent_prompt, /19 EUR HT par mois et par organisation/);
+  assert.match(fr.consent_prompt, /Tarifs prévus, pas encore en vente/);
+  assert.match(fr.consent_prompt, /29 € HT \/ mois/);
+  assert.match(fr.consent_prompt, /59 € HT \/ mois/);
+  assert.match(fr.consent_prompt, /prix de lancement 19 € HT \/ mois pour les 50 premières organisations/);
   assert.doesNotMatch(fr.consent_prompt + fr.message_markdown, /essai|bientôt|prouve/i);
   assert.match(pr.consent_prompt, /cancel/i);
   assert.match(pr.consent_prompt, /VAT/);
@@ -89,7 +122,7 @@ test("request_upgrade: CONSENT_REQUIRED without human_confirmed AND consent_quot
   const noConsent = await requestUpgradeFlow({ lang: "fr" });
   assert.equal(noConsent.ok, false);
   assert.equal(noConsent.code, "CONSENT_REQUIRED");
-  assert.match(String(noConsent.consent_prompt), /19 EUR/);
+  assert.match(String(noConsent.consent_prompt), /€19|19 €/);
   const emptyQuote = await requestUpgradeFlow({ human_confirmed: true, consent_quote: "  " });
   assert.equal(emptyQuote.code, "CONSENT_REQUIRED");
   const unconfirmed = await requestUpgradeFlow({ human_confirmed: false, consent_quote: "oui" });
@@ -137,7 +170,7 @@ test("request_upgrade never returns a Stripe TEST checkout URL unless allowTestC
   assert.match(String(allowed.checkout_url), /buy\.stripe\.com\/test_/);
 });
 
-test("recommend_plan: needs_qualified_timestamp or docs_per_month → coffre-horodate with a localized reason", () => {
+test("recommend_plan: needs_qualified_timestamp or docs_per_month → essentiel with a localized reason", () => {
   const r = recommendPlan({ needs_qualified_timestamp: true, docs_per_month: 20, lang: "it" }) as Record<string, any>;
   assert.equal(r.plan_id, PAID_PLAN_ID);
   assert.equal(r.recommended_plan_id, PAID_PLAN_ID);

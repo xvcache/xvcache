@@ -3,7 +3,7 @@
   "prices_status": "announced",
   "payment_live": false,
   "currency": "EUR",
-  "notice": "One planned plan: XVcache Coffre horodaté (coffre-horodate), published by RENO'LINE SARL, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. No payment can be made at this stage: payment_live stays false until sales open. The planned subscription will use qualified eIDAS timestamps issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
+  "notice": "Three planned Coffre horodaté plans (essentiel, cabinet, launch), published by RENO'LINE SARL, not on sale yet. Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for the first 50 organisations · professionals only · demos by application. No payment can be made at this stage: payment_live stays false until sales open. The planned subscription will use qualified eIDAS timestamps issued by Certigna, a qualified trust service provider; XVcache itself is not a qualified trust service provider. The hosted endpoint, currently in demo, requests its tokens from Certigna, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
   "updated": "2026-11-23",
   "current_tier_id": "free",
   "plans": [
@@ -42,22 +42,26 @@
       "certified_witness": false
     },
     {
-      "id": "coffre-horodate",
-      "name": "XVcache Coffre horodaté",
+      "id": "essentiel",
+      "name": "Essentiel",
       "kind": "subscription",
-      "status": "sales_status_to_confirm",
+      "status": "demo_applications_only",
       "price": {
-        "amount": 19,
+        "amount": 29,
         "currency": "EUR",
-        "unit": "per_month_per_organisation",
+        "unit": "per_month",
         "status": "announced",
         "tax_behavior": "exclusive",
         "placeholder": false,
-        "display": "19 EUR excl. VAT / month / organisation",
+        "display": "€29 excl. VAT / month",
         "label": "monthly subscription; professional price",
-        "note": "VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number. Cancellation from the customer portal takes effect at the end of the paid month."
+        "note": "VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number. Cancellation from the customer portal takes effect at the end of the paid month.",
+        "tax": "HT",
+        "period": "month"
       },
       "includes": [
+        "1 user",
+        "Uncapped proofs within the reasonable use defined in the Terms",
         "Planned: qualified eIDAS timestamps issued by Certigna, a qualified trust service provider: ONE Merkle root shared by all subscribers, stamped once a day (pending until then), plus an OpenTimestamps anchor",
         "Document content stays on the client's computer; the hosted server receives the SHA-256 fingerprint and an optional label (max 120 characters) and processes the IP address",
         "V/X verdict and a one-page PDF report in the 24 official EU languages",
@@ -74,9 +78,10 @@
           "value": null,
           "status": "not_capped",
           "placeholder": false,
-          "note": "Proofs are not capped. Usage is an informational counter; a pending proof is never counted."
+          "note": "Proofs are not capped, subject to reasonable use under the Terms (Article A6). Usage is an informational counter; a pending proof is never counted."
         }
       },
+      "users": 1,
       "certified_witness": true,
       "certified_witness_status": "preview",
       "audience": "professionals only (B2B)",
@@ -95,7 +100,136 @@
         "fallback_to_freetsa": false
       },
       "planned": true,
-      "demo_applications_only": true
+      "demo_applications_only": true,
+      "price_eur_ht_month": 29
+    },
+    {
+      "id": "cabinet",
+      "name": "Cabinet",
+      "kind": "subscription",
+      "status": "demo_applications_only",
+      "price": {
+        "amount": 59,
+        "currency": "EUR",
+        "unit": "per_month",
+        "status": "announced",
+        "tax_behavior": "exclusive",
+        "placeholder": false,
+        "display": "€59 excl. VAT / month",
+        "label": "monthly subscription; professional price",
+        "note": "VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number. Cancellation from the customer portal takes effect at the end of the paid month.",
+        "tax": "HT",
+        "period": "month"
+      },
+      "includes": [
+        "Up to 5 users",
+        "PDF report in your branding",
+        "Planned: qualified eIDAS timestamps issued by Certigna, a qualified trust service provider: ONE Merkle root shared by all subscribers, stamped once a day (pending until then), plus an OpenTimestamps anchor",
+        "Document content stays on the client's computer; the hosted server receives the SHA-256 fingerprint and an optional label (max 120 characters) and processes the IP address",
+        "V/X verdict and a one-page PDF report in the 24 official EU languages",
+        "verify_document stays free and keyless for anyone (including the opposing party)"
+      ],
+      "limits": {
+        "notes_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Not applicable in hash-only mode."
+        },
+        "certifications_per_month": {
+          "value": null,
+          "status": "not_capped",
+          "placeholder": false,
+          "note": "Proofs are not capped, subject to reasonable use under the Terms (Article A6). Usage is an informational counter; a pending proof is never counted."
+        }
+      },
+      "users": 5,
+      "certified_witness": true,
+      "certified_witness_status": "preview",
+      "audience": "professionals only (B2B)",
+      "seller": {
+        "name": "RENO'LINE SARL",
+        "legal_form": "SARL au capital de 10 500 EUR",
+        "address": "6 rue du Commerce, 68420 Herrlisheim-près-Colmar, France",
+        "rcs": "832 059 513 RCS Colmar",
+        "vat": "FR48832059513"
+      },
+      "timestamping": {
+        "provider": "Certigna",
+        "qualified": "only tokens actually issued by Certigna (policy OID, chain and signature checked)",
+        "anchor": "daily shared Merkle root",
+        "failure_status": "pending_qualified",
+        "fallback_to_freetsa": false
+      },
+      "planned": true,
+      "demo_applications_only": true,
+      "price_eur_ht_month": 59
+    },
+    {
+      "id": "launch",
+      "name": "Launch price",
+      "kind": "subscription",
+      "status": "demo_applications_only",
+      "price": {
+        "amount": 19,
+        "currency": "EUR",
+        "unit": "per_month",
+        "status": "announced",
+        "tax_behavior": "exclusive",
+        "placeholder": false,
+        "display": "€19 excl. VAT / month",
+        "label": "monthly subscription; professional price",
+        "note": "VAT is added on top (Stripe Tax); reverse charge for EU businesses with a valid VAT number. Cancellation from the customer portal takes effect at the end of the paid month.",
+        "tax": "HT",
+        "period": "month"
+      },
+      "includes": [
+        "Planned launch price, for the first 50 organisations, on the Essentiel plan",
+        "Guaranteed for as long as the subscription stays active without interruption (conditions: Terms, Article B4 bis)",
+        "Planned: qualified eIDAS timestamps issued by Certigna, a qualified trust service provider: ONE Merkle root shared by all subscribers, stamped once a day (pending until then), plus an OpenTimestamps anchor",
+        "Document content stays on the client's computer; the hosted server receives the SHA-256 fingerprint and an optional label (max 120 characters) and processes the IP address",
+        "V/X verdict and a one-page PDF report in the 24 official EU languages",
+        "verify_document stays free and keyless for anyone (including the opposing party)"
+      ],
+      "limits": {
+        "notes_per_month": {
+          "value": null,
+          "status": "TBD",
+          "placeholder": true,
+          "note": "Not applicable in hash-only mode."
+        },
+        "certifications_per_month": {
+          "value": null,
+          "status": "not_capped",
+          "placeholder": false,
+          "note": "Proofs are not capped, subject to reasonable use under the Terms (Article A6). Usage is an informational counter; a pending proof is never counted."
+        }
+      },
+      "users": 1,
+      "certified_witness": true,
+      "certified_witness_status": "preview",
+      "audience": "professionals only (B2B)",
+      "seller": {
+        "name": "RENO'LINE SARL",
+        "legal_form": "SARL au capital de 10 500 EUR",
+        "address": "6 rue du Commerce, 68420 Herrlisheim-près-Colmar, France",
+        "rcs": "832 059 513 RCS Colmar",
+        "vat": "FR48832059513"
+      },
+      "timestamping": {
+        "provider": "Certigna",
+        "qualified": "only tokens actually issued by Certigna (policy OID, chain and signature checked)",
+        "anchor": "daily shared Merkle root",
+        "failure_status": "pending_qualified",
+        "fallback_to_freetsa": false
+      },
+      "planned": true,
+      "demo_applications_only": true,
+      "applies_to": "essentiel",
+      "max_organisations": 50,
+      "seats_reassignable": false,
+      "price_locked": true,
+      "price_eur_ht_month": 19
     },
     {
       "id": "usage",
@@ -266,7 +400,11 @@
     "free_local_verdict": "verify_journal V/X stays free."
   },
   "tax": "excl. VAT; reverse charge for EU B2B with valid VAT number",
-  "default_paid_plan_id": "coffre-horodate",
+  "default_paid_plan_id": "essentiel",
   "planned": true,
-  "demo_applications_only": true
+  "demo_applications_only": true,
+  "price_line": "Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for the first 50 organisations · professionals only · demos by application.",
+  "price_line_fr": "Tarifs prévus, pas encore en vente : Essentiel 29 € HT / mois · Cabinet 59 € HT / mois · prix de lancement 19 € HT / mois pour les 50 premières organisations · professionnels · démos sur candidature.",
+  "price_details": "XVcache is not on sale yet. Planned pricing is as follows. Essentiel: €29 excl. VAT per month, 1 user, uncapped proofs within the reasonable use defined in the Terms. Cabinet: €59 excl. VAT per month, up to 5 users, with a PDF report in your branding. Launch price: €19 excl. VAT per month for the Essentiel plan, for the first 50 subscribing organisations, guaranteed for as long as the subscription stays active without interruption (conditions: Terms, Article B4 bis). Professionals only; demos by application.",
+  "price_details_fr": "XVcache n'est pas encore en vente. Les tarifs prévus sont les suivants. Essentiel : 29 € HT par mois, 1 utilisateur, preuves non plafonnées dans le cadre d'un usage raisonnable défini par les CGV. Cabinet : 59 € HT par mois, jusqu'à 5 utilisateurs, avec un Rapport PDF à vos couleurs. Prix de lancement : 19 € HT par mois pour l'offre Essentiel, réservé aux 50 premières organisations abonnées et garanti tant que l'abonnement reste actif sans interruption (conditions : CGV, article B4 bis). L'offre est réservée aux professionnels ; les démos se font sur candidature."
 }

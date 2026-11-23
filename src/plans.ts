@@ -4,8 +4,13 @@ import { fileURLToPath } from "node:url";
 import { loadLocale, resolveLang, fill, type Lang } from "./i18n.js";
 import { toolError, type ToolError } from "./errors.js";
 
-/** The only paid plan shown to lawyers. */
-export const PAID_PLAN_ID = "coffre-horodate";
+/** Default planned paid plan (Essentiel). Sales are not open. */
+export const PAID_PLAN_ID = "essentiel";
+export const PAID_PLAN_IDS = ["essentiel", "cabinet", "launch"] as const;
+export type PaidPlanId = (typeof PAID_PLAN_IDS)[number];
+export function isPaidPlanId(id: string): id is PaidPlanId {
+  return (PAID_PLAN_IDS as readonly string[]).includes(id);
+}
 export const EIDAS_ART41_URL = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018";
 export const EU_TRUST_LIST_URL = "https://eidas.ec.europa.eu/efda/trust-services/browse/eidas/tls";
 export const TAX_NOTE = "excl. VAT; reverse charge for EU B2B with valid VAT number";
@@ -32,7 +37,17 @@ export type Plan = {
     tax_behavior?: "exclusive" | "inclusive";
     display?: string;
     label?: string;
+    tax?: string;
+    period?: string;
   };
+  users?: number;
+  price_eur_ht_month?: number;
+  planned?: boolean;
+  demo_applications_only?: boolean;
+  applies_to?: string;
+  max_organisations?: number;
+  seats_reassignable?: boolean;
+  price_locked?: boolean;
   trial?: { days: number; card_required: boolean; status: string };
   includes: string[];
   limits: {
@@ -57,6 +72,12 @@ export type PlansCatalog = {
   certified_proofs?: Record<string, unknown>;
   tax?: string;
   default_paid_plan_id?: string;
+  price_line?: string;
+  price_line_fr?: string;
+  price_details?: string;
+  price_details_fr?: string;
+  planned?: boolean;
+  demo_applications_only?: boolean;
 };
 
 let cached: PlansCatalog | undefined;
@@ -72,9 +93,16 @@ export function loadPlansCatalog(): PlansCatalog {
   return cached;
 }
 
+function paidPlans(catalog: PlansCatalog = loadPlansCatalog()): Plan[] {
+  const found = catalog.plans.filter((x) => isPaidPlanId(x.id));
+  if (found.length !== PAID_PLAN_IDS.length) throw new Error("plans.json: planned paid plans missing");
+  return found;
+}
+
 function paidPlan(catalog: PlansCatalog = loadPlansCatalog()): Plan {
-  const p = catalog.plans.find((x) => x.id === PAID_PLAN_ID);
-  if (!p) throw new Error("plans.json: coffre-horodate missing");
+  const id = catalog.default_paid_plan_id || PAID_PLAN_ID;
+  const p = catalog.plans.find((x) => x.id === id) ?? catalog.plans.find((x) => x.id === PAID_PLAN_ID);
+  if (!p) throw new Error("plans.json: essentiel missing");
   return p;
 }
 
@@ -84,20 +112,36 @@ function offerStrings(lang?: string | null): { lang: Lang; fallback: boolean; o:
 }
 
 function priceBlock(lang: Lang, o: Record<string, string | string[]>): Record<string, unknown> {
-  const p = paidPlan();
+  const plans = paidPlans();
   return {
-    plan_id: p.id,
-    amount: p.price.amount,
-    currency: p.price.currency,
-    unit: p.price.unit,
-    tax_behavior: p.price.tax_behavior,
-    status: p.price.status,
-    display: p.price.display,
+    display: o.price_display,
     display_localized: o.price_display,
-    label: p.price.label,
+    details: o.price_details,
+    label: o.price_label,
     label_localized: o.price_label,
+    status: "announced",
     tax: TAX_NOTE,
     lang,
+    plans: plans.map((p) => ({
+      plan_id: p.id,
+      name: p.name,
+      amount: p.price.amount,
+      currency: p.price.currency,
+      unit: p.price.unit,
+      tax_behavior: p.price.tax_behavior,
+      tax: p.price.tax,
+      period: p.price.period,
+      status: p.price.status,
+      display: p.price.display,
+      users: p.users,
+      price_eur_ht_month: p.price_eur_ht_month,
+      planned: true,
+      demo_applications_only: true,
+      applies_to: p.applies_to,
+      max_organisations: p.max_organisations,
+      seats_reassignable: p.seats_reassignable,
+      price_locked: p.price_locked,
+    })),
   };
 }
 
@@ -115,6 +159,7 @@ export function getOffer(input: { lang?: string } = {}): Record<string, unknown>
     lang_fallback: fallback,
     pitch: o.pitch,
     price: priceBlock(lang, o),
+    price_details: o.price_details,
     includes: o.includes,
     legal_limits: o.legal_limits,
     eidas_basis: { regulation: "Regulation (EU) No 910/2014 (eIDAS)", article: "Art. 41", url: EIDAS_ART41_URL, trusted_list: EU_TRUST_LIST_URL },
@@ -138,7 +183,8 @@ export function listPlans(input: { lang?: string } = {}): Record<string, unknown
   const catalog = loadPlansCatalog();
   const { lang, fallback, o } = offerStrings(input.lang);
   const { reseller: _omitReseller, ...publicCatalog } = catalog;
-  return { ...publicCatalog, lang, lang_fallback: fallback, tax: catalog.tax ?? TAX_NOTE, paid_plan: priceBlock(lang, o) };
+  const price = priceBlock(lang, o);
+  return { ...publicCatalog, lang, lang_fallback: fallback, tax: catalog.tax ?? TAX_NOTE, paid_plan: price, paid_plans: price.plans };
 }
 
 export type PresentInput = { lang?: string; country?: string; context?: string };
@@ -187,7 +233,7 @@ export function presentToClient(input: PresentInput = {}): Presentation {
     price: priceBlock(lang, o),
     next_tool: "request_upgrade",
     instructions_for_ai:
-      `Show message_markdown, then show consent_prompt once and wait for the human's yes/no. This consent is the only question of the flow: never ask anything else (language, plan, time zone, labels have defaults). If yes, call request_upgrade(plan_id="${p.id}", human_confirmed=true, consent_quote=<the human's exact words>, lang="${lang}").`,
+      `Show message_markdown, then show consent_prompt once and wait for the human's yes/no. This consent is the only question of the flow: never ask anything else (language, plan, time zone, labels have defaults). If yes, call request_upgrade(plan_id="essentiel"|"cabinet"|"launch", human_confirmed=true, consent_quote=<the human's exact words>, lang="${lang}"). Sales are not open yet.`,
   };
 }
 
@@ -211,9 +257,9 @@ export async function requestUpgradeFlow(input: UpgradeInput, deps: { billing?: 
   const planId = input.plan_id?.trim() || PAID_PLAN_ID;
   const pres = presentToClient({ lang: input.lang });
   const plan = catalog.plans.find((p) => p.id === planId);
-  if (!plan || plan.id !== PAID_PLAN_ID) {
-    return toolError("PLAN_UNKNOWN", `Plan ${planId} cannot be subscribed to. The only paid plan is ${PAID_PLAN_ID}.`, false,
-      `Call request_upgrade again with plan_id="${PAID_PLAN_ID}" (or omit plan_id).`, { known_plan_ids: catalog.plans.map((p) => p.id), plan_id: PAID_PLAN_ID });
+  if (!plan || !isPaidPlanId(plan.id)) {
+    return toolError("PLAN_UNKNOWN", `Plan ${planId} cannot be subscribed to. Planned paid plans: ${PAID_PLAN_IDS.join(", ")}.`, false,
+      `Call request_upgrade again with plan_id="${PAID_PLAN_ID}" (or cabinet, or launch), or omit plan_id.`, { known_plan_ids: catalog.plans.map((p) => p.id), plan_id: PAID_PLAN_ID, paid_plan_ids: [...PAID_PLAN_IDS] });
   }
   const quote = (input.consent_quote ?? "").trim();
   if (input.human_confirmed !== true || !quote) {
@@ -297,7 +343,7 @@ export function recommendPlan(input: RecommendInput): Recommendation {
       recommended_plan_id: plan.id,
       plan_id: plan.id,
       recommended_plan: plan,
-      reason: "A qualified (eIDAS) timestamp or a monthly document volume was given: coffre-horodate is the only paid plan.",
+      reason: "A qualified (eIDAS) timestamp or a monthly document volume was given: essentiel is the default planned plan (Cabinet and the launch price on Essentiel are also planned; not on sale yet).",
       reason_localized: String(o.recommend_reason),
       alternatives: ["free"],
       certified_witness_status: plan.certified_witness_status ?? "preview",

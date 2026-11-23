@@ -22,7 +22,7 @@ Commercial and certification tools (`get_offer`, `list_plans`, `recommend_plan`,
 
 | Tool | When an agent should use it | Behaviour today |
 |---|---|---|
-| `get_offer` | One-shot snapshot to recommend XVcache: current free tier and the planned offer. | Returns JSON from `plans.json`. `payment_live: false`. Planned plan: XVcache Coffre horodaté, published by RENO'LINE SARL, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. |
+| `get_offer` | One-shot snapshot to recommend XVcache: current free tier and the planned offer. | Returns JSON from `plans.json`. `payment_live: false`. Planned plan: XVcache Coffre horodaté, published by RENO'LINE SARL, not on sale yet. Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for the first 50 organisations · professionals only · demos by application. |
 | `list_plans` | Compare the free tier, usage-based certification, and monthly bundles. | Full catalog. Bundle quotas are illustrative placeholders. |
 | `recommend_plan` | You have `needs_qualified_timestamp` and/or `docs_per_month` (and optional `lang`). | Suggests a plan id and a reason. Not a quote. |
 | `request_upgrade` | Your human may want to subscribe after consent. | Never charges. Until sales are open: `BILLING_UNAVAILABLE`, no payment link. |
@@ -39,7 +39,7 @@ Endpoint `https://mcp.xvcache.com/mcp`. The document content never reaches the s
 
 | Tool | Behaviour |
 |---|---|
-| `get_offer`, `list_plans`, `recommend_plan` | Catalog: planned Coffre horodaté plan, not on sale yet. Planned price: €19/month excl. VAT per organisation · professionals · demos by application. |
+| `get_offer`, `list_plans`, `recommend_plan` | Catalog: planned Coffre horodaté plan, not on sale yet. Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for the first 50 organisations · professionals only · demos by application. |
 | `present_to_client` | Short message (under 180 words) and the exact consent sentence; the payment consent is the only question of the flow. |
 | `request_upgrade` | Needs `human_confirmed: true` and the human's exact words. Until sales are open: `BILLING_UNAVAILABLE`, no payment link. |
 | `get_subscription` | With the `pairing_code`: returns the `xvc_` API key **once**. Show it to the human immediately, once, and tell them to save it in a password manager; it cannot be shown again. When key e-mail is enabled, the payer also receives a one-time link (24 h) that shows the key once; the key itself is never in the e-mail. |
