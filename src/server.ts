@@ -345,7 +345,7 @@ async function writeAtomic(target: string, content: string, mode: "create" | "ov
   }
 }
 
-const server = new McpServer({ name: "xvcache-mcp", version: "0.3.0" });
+const server = new McpServer({ name: "xvcache-mcp", version: "0.3.1" });
 
 server.registerTool(
   "read_note",

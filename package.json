@@ -1,6 +1,6 @@
 {
   "name": "xvcache-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local MCP server for Markdown vaults: sha256-chained journal, V/X technical verdicts, batched RFC 3161 + OpenTimestamps evidence, one-page PDF report. Default TSA: FreeTSA (FreeTSA timestamp tokens are not qualified electronic timestamps under eIDAS (Regulation (EU) No 910/2014, art. 41-42)). Qualified eIDAS timestamps only when issued by a qualified trust service provider listed on the French trusted list (planned for the hosted Coffre horodat\u00e9 subscription, or with your own account with that provider). The provider's name is available on request at contact@xvcache.com. XVcache is not a qualified trust service provider.",
   "type": "module",
   "main": "dist/server.js",
