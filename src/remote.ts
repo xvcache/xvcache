@@ -5,13 +5,14 @@ import path from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
-import { getOffer, listPlans, presentToClient, recommendPlan, requestUpgradeFlow, PAID_PLAN_ID, type Billing } from "./plans.js";
+import { getOffer, listPlans, presentToClient, recommendPlan, requestUpgradeFlow, PAID_PLAN_ID, isPaidPlanId, type Billing } from "./plans.js";
 import { toolError, type ToolError } from "./errors.js";
 import { SubscriptionStore, existingProofAccess, postTerminationAccessUntil, POST_TERMINATION_ACCESS_DAYS, type SubscriptionRecord } from "./subscriptions.js";
 import { HostedWitness, type HostedProof, type HostedVerification } from "./witness.js";
 import { localizedVerdict, kindWhenFingerprintMatches, type DisplayKind } from "./certificate.js";
 import { EU_LANGS, resolveLang, DEFAULT_TZ } from "./i18n.js";
-import { STRIPE_WEBHOOK_PATH, handleStripeWebhook, type WebhookLog } from "./stripe-webhook.js";
+import { STRIPE_WEBHOOK_PATH, handleStripeWebhook, resolveWebhookPriceTable, type WebhookLog } from "./stripe-webhook.js";
+import type { PriceTable, PriceTableLoad } from "./stripe-price-table.js";
 import { KEY_PAGE_PREFIX, handleKeyPage, type KeyDeliveryService } from "./key-delivery.js";
 
 /**
@@ -42,7 +43,11 @@ export type RemoteOptions = {
   keyDelivery?: KeyDeliveryService;
   /** Clock for post-termination PDF access (tests inject it). Default: the store clock, else now. */
   now?: () => Date;
+  /** A2: correspondence table (price / amount / currency / livemode / plan). Loaded from env if omitted. */
+  stripePriceTable?: PriceTable | PriceTableLoad;
+  stripePriceTablePath?: string;
 };
+
 
 export const HASH_RE = /^[0-9a-fA-F]{64}$/;
 export const MAX_LABEL = 120;
@@ -82,6 +87,8 @@ function publicProof(p: HostedProof): Omit<HostedProof, never> {
 }
 
 export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestListener; setBaseUrl(url: string): void; close(): void } {
+  const priceTableLoad = resolveWebhookPriceTable({ priceTable: opts.stripePriceTable, stripePriceTablePath: opts.stripePriceTablePath });
+  if (!opts.stripePriceTable) opts.stripePriceTable = priceTableLoad;
   const pdfDir = path.join(opts.dataDir, "hosted", "pdf");
   const ttl = opts.pdfTtlMs ?? PDF_TTL_MS;
   const maxItems = opts.maxItems ?? 100;
@@ -277,7 +284,11 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
       const r = await requestUpgradeFlow(input, {
         billing: opts.billing,
         allowTestCheckout: opts.billingTestMode === true,
-        pairingCode: async () => (await opts.store.createPairing({ plan_id: PAID_PLAN_ID, lang: resolveLang(input.lang).lang, consent: { quote: (input.consent_quote ?? "").slice(0, 500), at: new Date().toISOString() } })).pairing_code,
+        pairingCode: async () => {
+          const requested = (input.plan_id ?? "").trim();
+          const plan_id = isPaidPlanId(requested) ? requested : PAID_PLAN_ID;
+          return (await opts.store.createPairing({ plan_id, lang: resolveLang(input.lang).lang, consent: { quote: (input.consent_quote ?? "").slice(0, 500), at: new Date().toISOString() } })).pairing_code;
+        },
       });
       return r.ok === false ? err(r as unknown as ToolError) : json(opts.billingTestMode ? { ...r, test_mode: true, test_mode_note: "Stripe TEST mode: no real payment is possible (test cards only). Tell the human that online subscription is not open yet (sales opening to be confirmed) and that nothing was charged." } : r);
     });
@@ -429,7 +440,7 @@ export function createRemoteApp(opts: RemoteOptions): { handler: http.RequestLis
           return;
         }
         if (url.pathname === STRIPE_WEBHOOK_PATH) {
-          await handleStripeWebhook(req, res, { store: opts.store, secret: opts.stripeWebhookSecret, log: opts.billingLog, onKeyDelivery: opts.keyDelivery ? (d) => opts.keyDelivery!.deliver(d) : undefined });
+          await handleStripeWebhook(req, res, { store: opts.store, secret: opts.stripeWebhookSecret, log: opts.billingLog, onKeyDelivery: opts.keyDelivery ? (d) => opts.keyDelivery!.deliver(d) : undefined, priceTable: opts.stripePriceTable, stripePriceTablePath: opts.stripePriceTablePath });
           return;
         }
         if (url.pathname.startsWith(KEY_PAGE_PREFIX)) {

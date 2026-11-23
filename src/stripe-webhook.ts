@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type http from "node:http";
 import { PAIRING_TTL_MS, checkoutRef, type BillingEvent, type BillingResult, type PendingKeyDelivery, type SubscriptionStatus, type SubscriptionStore } from "./subscriptions.js";
 import type { Billing, CheckoutRequest, CheckoutResult } from "./plans.js";
+import { checkPaidCheckout, loadStripePriceTableFromEnv, priceCheckLogFields, type PriceTable, type PriceTableLoad } from "./stripe-price-table.js";
 
 /**
  * L4 — Stripe billing for the hosted server, with no Stripe SDK and no Stripe secret key on the server:
@@ -9,8 +10,12 @@ import type { Billing, CheckoutRequest, CheckoutResult } from "./plans.js";
  *   (derived from the pairing-code hash; the pairing code itself never goes to Stripe).
  * - Webhook `POST /stripe/webhook`: signature checked with STRIPE_WEBHOOK_SECRET (whsec_…, HMAC-SHA256,
  *   5-minute tolerance, constant-time compare), each event applied exactly once (event id).
- * Env: XVCACHE_STRIPE_PAYMENT_LINK_URL (https://buy.stripe.com/…), STRIPE_WEBHOOK_SECRET.
- * Billing is "live" (request_upgrade returns a checkout_url) only when both are set.
+ * Env: XVCACHE_STRIPE_PAYMENT_LINK_URL (https://buy.stripe.com/…), STRIPE_WEBHOOK_SECRET,
+ *   XVCACHE_STRIPE_PRICE_TABLE (path) or XVCACHE_STRIPE_PRICE_TABLE_JSON (see stripe-price-table.example.json).
+ * Billing is "live" (request_upgrade returns a checkout_url) only when both the link and the webhook secret are set.
+ * A paid checkout is applied only if it matches the price table (price id or lookup_key, amount, currency, livemode, plan).
+ * Non-conforming payments are refused: HTTP 200 with rejected=true (so Stripe does not retry), no key, no subscription,
+ * and a log line without personal data or secrets. A missing/empty table refuses every paid checkout.
  */
 
 export const STRIPE_WEBHOOK_PATH = "/stripe/webhook";
@@ -106,7 +111,26 @@ export function normalizeStripeEvent(evt: Obj): BillingEvent {
 export type WebhookLog = (line: Record<string, unknown>) => void;
 
 /** HTTP handler for POST /stripe/webhook. Never logs secrets nor personal data (ids and types only). */
-export async function handleStripeWebhook(req: http.IncomingMessage, res: http.ServerResponse, o: { store: SubscriptionStore; secret: string | undefined; log?: WebhookLog; now?: () => number; onKeyDelivery?: (d: PendingKeyDelivery) => void }): Promise<void> {
+export type StripeWebhookOptions = {
+  store: SubscriptionStore;
+  secret: string | undefined;
+  log?: WebhookLog;
+  now?: () => number;
+  onKeyDelivery?: (d: PendingKeyDelivery) => void;
+  /** Already-loaded table, or a load result. If omitted, loaded from the env on each process start via the caller. */
+  priceTable?: PriceTable | PriceTableLoad;
+  stripePriceTablePath?: string;
+};
+
+export function resolveWebhookPriceTable(o: { priceTable?: PriceTable | PriceTableLoad; stripePriceTablePath?: string }): PriceTableLoad {
+  if (o.priceTable && "ok" in (o.priceTable as PriceTableLoad) && typeof (o.priceTable as PriceTableLoad).ok === "boolean") return o.priceTable as PriceTableLoad;
+  if (o.priceTable && typeof o.priceTable === "object" && "livemode" in o.priceTable && "entries" in o.priceTable) {
+    return { ok: true, table: o.priceTable as PriceTable, source: "option" };
+  }
+  return loadStripePriceTableFromEnv(o.stripePriceTablePath);
+}
+
+export async function handleStripeWebhook(req: http.IncomingMessage, res: http.ServerResponse, o: StripeWebhookOptions): Promise<void> {
   const log = o.log ?? ((l) => process.stderr.write(`xvcache-billing ${JSON.stringify(l)}\n`));
   const reply = (code: number, body: Record<string, unknown>) => { res.writeHead(code, { "Content-Type": "application/json" }).end(JSON.stringify(body)); };
   if (req.method !== "POST") { res.writeHead(405, { Allow: "POST" }).end(); return; }
@@ -125,6 +149,21 @@ export async function handleStripeWebhook(req: http.IncomingMessage, res: http.S
   try { evt = JSON.parse(raw.toString("utf8")); } catch { reply(400, { ok: false, error: "invalid json" }); return; }
   if (typeof evt.id !== "string" || typeof evt.type !== "string") { reply(400, { ok: false, error: "not an event" }); return; }
   const norm = normalizeStripeEvent(evt);
+  // Paid checkouts must match the configured price table before any key or subscription is created.
+  // HTTP 200 + rejected (not 4xx): the event is understood and will never be honoured, so Stripe
+  // must not retry it for days; a later retry must also not suddenly mint a key if the table changes.
+  // Signature errors stay 400; store failures stay 500 (transient, Stripe may retry).
+  if (norm.kind === "checkout_completed" && norm.paid) {
+    const table = resolveWebhookPriceTable(o);
+    const pairingPlan = typeof o.store.pairingPlanForCheckoutRef === "function" ? await o.store.pairingPlanForCheckoutRef(norm.ref) : undefined;
+    const check = checkPaidCheckout(evt, table, { pairingPlan });
+    if (!check.ok) {
+      log({ ok: false, event: evt.id, type: evt.type, livemode: evt.livemode === true, ...priceCheckLogFields(check) });
+      reply(200, { ok: false, received: evt.id, rejected: true, reason: check.reason });
+      return;
+    }
+    norm.plan_id = check.plan_id;
+  }
   let r: BillingResult;
   try {
     r = await o.store.applyBillingEvent(norm);
@@ -133,7 +172,10 @@ export async function handleStripeWebhook(req: http.IncomingMessage, res: http.S
     reply(500, { ok: false, error: "store error" }); // Stripe retries
     return;
   }
-  log({ ok: true, event: evt.id, type: evt.type, livemode: evt.livemode === true, applied: r.applied, ...(r.delivery ? { key_link_email: o.onKeyDelivery ? "queued" : "disabled" } : {}) });
+  const accepted = norm.kind === "checkout_completed" && norm.paid && r.applied.startsWith("key_minted")
+    ? { price_check: "accepted" as const, plan_id: norm.plan_id }
+    : {};
+  log({ ok: true, event: evt.id, type: evt.type, livemode: evt.livemode === true, applied: r.applied, ...accepted, ...(r.delivery ? { key_link_email: o.onKeyDelivery ? "queued" : "disabled" } : {}) });
   reply(200, { ok: true, received: evt.id, duplicate: r.duplicate });
   // After answering Stripe: email the one-time link (never the key). Failures are logged, retried by the service.
   if (r.delivery && o.onKeyDelivery) o.onKeyDelivery(r.delivery);

@@ -10,6 +10,7 @@ import { TsaTokenLedger, DEFAULT_TOKEN_ALERT_BELOW } from "./tsa-tokens.js";
 import { KeyDeliveryService, cloudflareMailer } from "./key-delivery.js";
 import { startRemoteServer } from "./remote.js";
 import { paymentLinkBilling, isTestPaymentLink } from "./stripe-webhook.js";
+import { loadStripePriceTableFromEnv, priceTableStartupMessage } from "./stripe-price-table.js";
 
 /**
  * Hosted XVcache MCP server (Streamable HTTP, hash-only). Local use only for now (L3):
@@ -18,6 +19,8 @@ import { paymentLinkBilling, isTestPaymentLink } from "./stripe-webhook.js";
  * (~/.xvcache-remote), XVCACHE_PUBLIC_URL, XVCACHE_BATCH_WINDOW_MS (2000), XVCACHE_RETRY_MS (300000),
  * XVCACHE_OTS (on/off), TSA settings as for the local server (XVCACHE_TSA_*; FreeTSA = test by default).
  * L4 billing: XVCACHE_STRIPE_PAYMENT_LINK_URL + STRIPE_WEBHOOK_SECRET (both needed; webhook on POST /stripe/webhook).
+ *   Price table (required to honour paid checkouts): XVCACHE_STRIPE_PRICE_TABLE (JSON file path) or
+ *   XVCACHE_STRIPE_PRICE_TABLE_JSON; see stripe-price-table.example.json (fake ids only). Missing/empty = refuse all paid checkouts.
  * 0.3.0 anchoring: XVCACHE_ANCHOR_MODE (daily | window; default daily = ONE shared Merkle root stamped per day),
  *   XVCACHE_DAILY_ANCHOR_UTC (HH:MM UTC, default 21:50 = 22:50 Paris in winter / 23:50 in summer, always the same Paris day;
  *   avoid values after 21:59 UTC, which cross midnight in Paris in summer).
@@ -99,6 +102,9 @@ const testLink = isTestPaymentLink(linkUrl);
 // Until sales open, request_upgrade must return BILLING_UNAVAILABLE with no payment link.
 // A Stripe TEST link is never served in production unless XVCACHE_STRIPE_ALLOW_TEST_CHECKOUT=1 (local tests only).
 const billing = (webhookSecret && salesOpen && linkUrl && (!testLink || allowTestCheckout)) ? paymentLinkBilling(linkUrl) : undefined;
+const priceTable = loadStripePriceTableFromEnv();
+process.stderr.write(priceTableStartupMessage(priceTable) + "\n");
+if (!priceTable.ok) operatorAlert(priceTableStartupMessage(priceTable));
 const srv = await startRemoteServer({
   store,
   witness,
@@ -110,6 +116,7 @@ const srv = await startRemoteServer({
   port: Number(env.XVCACHE_REMOTE_PORT || 0),
   publicBaseUrl: env.XVCACHE_PUBLIC_URL || undefined,
   keyDelivery,
+  stripePriceTable: priceTable,
 });
 publicBase ||= srv.url.replace(/\/mcp$/, "");
 process.stderr.write(`xvcache-remote listening on ${srv.url} (TSA: ${tsa ? `${tsa.id}${tsa.qualified ? ", qualified" : ", NOT qualified"}` : "off"}; billing: ${billing ? (isTestPaymentLink(linkUrl) ? "Stripe TEST" : "Stripe LIVE") : "off"}; webhook: ${webhookSecret ? "on" : "off"}; anchor: ${anchorMode === "daily" ? `daily ${env.XVCACHE_DAILY_ANCHOR_UTC || DEFAULT_DAILY_ANCHOR_UTC} UTC` : "window"}; key email: ${keyEmail ? "on" : "off"})\n`);

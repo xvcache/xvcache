@@ -1,0 +1,27 @@
+{
+  "_comment": "EXAMPLE ONLY — fake Stripe identifiers, not real prices. Copy this file (do not commit live ids) and point XVCACHE_STRIPE_PRICE_TABLE at it, or set XVCACHE_STRIPE_PRICE_TABLE_JSON to the JSON. Each entry: plan_id (essentiel, cabinet, launch), price_id and/or lookup_key, amount in minor units (centimes), currency. livemode must match the Stripe event (false = test, true = live). amount is compared to line_items.price.unit_amount (tax excluded) when line_items is in the event; if line_items is absent, the webhook does not call the Stripe API and compares amount_total instead (amount_total may include tax — list the charged total in that case). If this table is missing, empty or invalid, paid checkouts are refused with HTTP 200 (no API key, no subscription) so Stripe does not retry forever. Rejected payments are logged without personal data or secrets.",
+  "livemode": false,
+  "entries": [
+    {
+      "plan_id": "essentiel",
+      "price_id": "price_EXAMPLE_essentiel_monthly",
+      "lookup_key": "exemple_essentiel_mensuel",
+      "amount": 2900,
+      "currency": "eur"
+    },
+    {
+      "plan_id": "cabinet",
+      "price_id": "price_EXAMPLE_cabinet_monthly",
+      "lookup_key": "exemple_cabinet_mensuel",
+      "amount": 5900,
+      "currency": "eur"
+    },
+    {
+      "plan_id": "launch",
+      "price_id": "price_EXAMPLE_launch_monthly",
+      "lookup_key": "exemple_lancement_mensuel",
+      "amount": 1900,
+      "currency": "eur"
+    }
+  ]
+}

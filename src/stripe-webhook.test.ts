@@ -9,6 +9,7 @@ import { HostedWitness } from "./witness.js";
 import { SubscriptionStore, checkoutRef } from "./subscriptions.js";
 import { startRemoteServer } from "./remote.js";
 import { verifyStripeSignature, signStripePayload, normalizeStripeEvent, paymentLinkBilling, STRIPE_WEBHOOK_PATH } from "./stripe-webhook.js";
+import { EXAMPLE_PRICE_TABLE, exampleCheckoutPayment } from "./stripe-price-table.js";
 
 const SECRET = "whsec_test_only_not_a_real_secret";
 const LINK = "https://buy.stripe.com/test_xxxxxxxx";
@@ -24,7 +25,7 @@ async function setup(name: string, secret: string | null = SECRET) {
   const store = new SubscriptionStore(path.join(dataDir, "subscriptions.json"));
   const witness = new HostedWitness({ dataDir, tsa: null, ots: { enabled: false, calendars: [] }, batchWindowMs: 20, onAlert: () => {} });
   const logs: Record<string, unknown>[] = [];
-  const srv = await startRemoteServer({ store, witness, dataDir, port: 0, billing: paymentLinkBilling(LINK), stripeWebhookSecret: secret ?? undefined, billingTestMode: true, billingLog: (l) => logs.push(l) });
+  const srv = await startRemoteServer({ store, witness, dataDir, port: 0, billing: paymentLinkBilling(LINK), stripeWebhookSecret: secret ?? undefined, billingTestMode: true, billingLog: (l) => logs.push(l), stripePriceTable: EXAMPLE_PRICE_TABLE });
   const hook = srv.url.replace(/\/mcp$/, STRIPE_WEBHOOK_PATH);
   return { store, srv, hook, logs, dataDir };
 }
@@ -89,7 +90,7 @@ test("webhook end to end: request_upgrade → checkout.session.completed → get
     // subscription.created may arrive BEFORE checkout.session.completed
     const t0 = Math.floor(Date.now() / 1000);
     assert.equal((await post(hook, evt("customer.subscription.created", { id: "sub_1", customer: "cus_1", status: "active" }, t0))).status, 200);
-    const done = evt("checkout.session.completed", { id: "cs_test_1", client_reference_id: ref, customer: "cus_1", subscription: "sub_1", payment_status: "paid" }, t0);
+    const done = evt("checkout.session.completed", { id: "cs_test_1", client_reference_id: ref, customer: "cus_1", subscription: "sub_1", payment_status: "paid", ...exampleCheckoutPayment() }, t0);
     const r1 = await post(hook, done);
     assert.equal(r1.status, 200);
     assert.equal(r1.json.duplicate, false);
@@ -124,7 +125,7 @@ test("webhook end to end: request_upgrade → checkout.session.completed → get
     assert.equal(body(await lawyer.callTool({ name: "certify_hash", arguments: { items: [{ sha256: "a".repeat(64) }] } })).code, "PAYMENT_REQUIRED");
 
     // unlinked checkout is recorded for the operator, no key minted
-    assert.equal((await post(hook, evt("checkout.session.completed", { id: "cs_test_2", client_reference_id: null, customer: "cus_2", subscription: "sub_2", payment_status: "paid" }))).status, 200);
+    assert.equal((await post(hook, evt("checkout.session.completed", { id: "cs_test_2", client_reference_id: null, customer: "cus_2", subscription: "sub_2", payment_status: "paid", ...exampleCheckoutPayment() }))).status, 200);
     const raw = await fs.readFile(path.join(dataDir, "subscriptions.json"), "utf8");
     assert.ok(!raw.includes(sub.api_key), "plain key erased after first read");
     assert.equal(JSON.parse(raw).unlinked_checkouts.length, 1);

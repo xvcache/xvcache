@@ -9,6 +9,7 @@ import { HostedWitness } from "./witness.js";
 import { SubscriptionStore, checkoutRef, hashSecret } from "./subscriptions.js";
 import { startRemoteServer } from "./remote.js";
 import { signStripePayload, paymentLinkBilling, STRIPE_WEBHOOK_PATH } from "./stripe-webhook.js";
+import { EXAMPLE_PRICE_TABLE, exampleCheckoutPayment } from "./stripe-price-table.js";
 import { KeyDeliveryService, cloudflareMailer, keyLinkEmail, type MailMessage, type Mailer, type FetchFn } from "./key-delivery.js";
 
 const SECRET = "whsec_test_only_not_a_real_secret";
@@ -35,7 +36,7 @@ async function setup(name: string, o: { mailer?: Mailer; ttlMs?: number; now?: (
   let base = "";
   const logs: Record<string, unknown>[] = [];
   const keyDelivery = o.mailer ? new KeyDeliveryService({ store, mailer: o.mailer, publicBaseUrl: () => base, retryDelaysMs: [0, 5, 5], log: (l) => logs.push(l) }) : undefined;
-  const srv = await startRemoteServer({ store, witness, dataDir, port: 0, billing: paymentLinkBilling(LINK), stripeWebhookSecret: SECRET, billingTestMode: true, billingLog: () => {}, keyDelivery });
+  const srv = await startRemoteServer({ store, witness, dataDir, port: 0, billing: paymentLinkBilling(LINK), stripeWebhookSecret: SECRET, billingTestMode: true, billingLog: () => {}, keyDelivery, stripePriceTable: EXAMPLE_PRICE_TABLE });
   base = srv.url.replace(/\/mcp$/, "");
   return { store, srv, hook: `${base}${STRIPE_WEBHOOK_PATH}`, base, keyDelivery, logs, dataDir };
 }
@@ -57,7 +58,7 @@ test("paid checkout with email → ONE email with a one-time link, never the key
   const { srv, hook, base, keyDelivery, store, dataDir, logs } = await setup("happy", { mailer: cap.mailer });
   try {
     const { ai, pairing, ref } = await pairingViaAi(srv.url);
-    const r = await post(hook, evt("checkout.session.completed", { id: "cs_1", client_reference_id: ref, customer: "cus_1", subscription: "sub_1", payment_status: "paid", customer_details: { email: "avocate@cabinet.example" }, locale: "fr" }));
+    const r = await post(hook, evt("checkout.session.completed", { id: "cs_1", client_reference_id: ref, customer: "cus_1", subscription: "sub_1", payment_status: "paid", customer_details: { email: "avocate@cabinet.example" }, locale: "fr" , ...exampleCheckoutPayment() }));
     assert.equal(r.status, 200);
     await keyDelivery!.idle();
     assert.equal(cap.sent.length, 1);
@@ -119,7 +120,7 @@ test("link expires after the TTL (24 h by default) → 410, ciphertext erased; S
   const { srv, hook, keyDelivery, store, dataDir } = await setup("expiry", { mailer: cap.mailer, now: () => new Date(now) });
   try {
     const { ai, ref } = await pairingViaAi(srv.url);
-    const e = evt("checkout.session.completed", { id: "cs_2", client_reference_id: ref, customer: "cus_2", subscription: "sub_2", payment_status: "paid", customer_details: { email: "x@y.example" } });
+    const e = evt("checkout.session.completed", { id: "cs_2", client_reference_id: ref, customer: "cus_2", subscription: "sub_2", payment_status: "paid", customer_details: { email: "x@y.example" } , ...exampleCheckoutPayment() });
     await post(hook, e);
     await post(hook, e); // Stripe retry → duplicate
     await keyDelivery!.idle();
@@ -139,11 +140,11 @@ test("feature OFF by default: no email, no delivery record; checkout without ema
   const off = await setup("off");
   try {
     const { ai, ref } = await pairingViaAi(off.srv.url);
-    const r = await post(off.hook, evt("checkout.session.completed", { id: "cs_3", client_reference_id: ref, customer: "cus_3", subscription: "sub_3", payment_status: "paid", customer_details: { email: "a@b.example" } }));
+    const r = await post(off.hook, evt("checkout.session.completed", { id: "cs_3", client_reference_id: ref, customer: "cus_3", subscription: "sub_3", payment_status: "paid", customer_details: { email: "a@b.example" } , ...exampleCheckoutPayment() }));
     assert.equal(r.status, 200);
     const raw = JSON.parse(await fs.readFile(path.join(off.dataDir, "subscriptions.json"), "utf8"));
     assert.equal(raw.key_deliveries, undefined);
-    const unl = await post(off.hook, evt("checkout.session.completed", { id: "cs_4", customer: "cus_4", subscription: "sub_4", payment_status: "paid", customer_details: { email: "c@d.example" } }));
+    const unl = await post(off.hook, evt("checkout.session.completed", { id: "cs_4", customer: "cus_4", subscription: "sub_4", payment_status: "paid", customer_details: { email: "c@d.example" } , ...exampleCheckoutPayment() }));
     assert.equal(unl.status, 200);
     const raw2 = JSON.parse(await fs.readFile(path.join(off.dataDir, "subscriptions.json"), "utf8"));
     assert.equal(raw2.unlinked_checkouts.length, 1, "unchanged 0.2 behaviour when the feature is off");
@@ -154,7 +155,7 @@ test("feature OFF by default: no email, no delivery record; checkout without ema
   const on = await setup("noemail", { mailer: cap.mailer });
   try {
     const { ai, ref } = await pairingViaAi(on.srv.url);
-    await post(on.hook, evt("checkout.session.completed", { id: "cs_5", client_reference_id: ref, customer: "cus_5", subscription: "sub_5", payment_status: "paid" }));
+    await post(on.hook, evt("checkout.session.completed", { id: "cs_5", client_reference_id: ref, customer: "cus_5", subscription: "sub_5", payment_status: "paid" , ...exampleCheckoutPayment() }));
     await on.keyDelivery!.idle();
     assert.equal(cap.sent.length, 0);
     await ai.close();
@@ -165,7 +166,7 @@ test("paid on the public link without AI pairing (website) and feature ON → ke
   const cap = capture();
   const { srv, hook, keyDelivery } = await setup("website", { mailer: cap.mailer });
   try {
-    const r = await post(hook, evt("checkout.session.completed", { id: "cs_6", customer: "cus_6", subscription: "sub_6", payment_status: "paid", customer_details: { email: "pro@firm.example" }, locale: "en" }));
+    const r = await post(hook, evt("checkout.session.completed", { id: "cs_6", customer: "cus_6", subscription: "sub_6", payment_status: "paid", customer_details: { email: "pro@firm.example" }, locale: "en" , ...exampleCheckoutPayment() }));
     assert.equal(r.status, 200);
     await keyDelivery!.idle();
     assert.equal(cap.sent.length, 1);
@@ -187,7 +188,7 @@ test("email send fails → retried, then recorded as failed (no address in logs)
   const { srv, hook, keyDelivery, dataDir, logs } = await setup("fail", { mailer: { async send() { calls++; throw new Error("Cloudflare Email Sending HTTP 403 (10203 email.sending.error.email.sending_disabled)"); } } });
   try {
     const { ai, pairing, ref } = await pairingViaAi(srv.url);
-    await post(hook, evt("checkout.session.completed", { id: "cs_7", client_reference_id: ref, customer: "cus_7", subscription: "sub_7", payment_status: "paid", customer_details: { email: "f@g.example" } }));
+    await post(hook, evt("checkout.session.completed", { id: "cs_7", client_reference_id: ref, customer: "cus_7", subscription: "sub_7", payment_status: "paid", customer_details: { email: "f@g.example" } , ...exampleCheckoutPayment() }));
     await keyDelivery!.idle();
     assert.equal(calls, 3);
     const raw = JSON.parse(await fs.readFile(path.join(dataDir, "subscriptions.json"), "utf8"));

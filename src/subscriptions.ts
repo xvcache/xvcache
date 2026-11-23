@@ -114,7 +114,7 @@ type StoreFile = {
 
 /** Normalised billing event (built from a verified Stripe event by stripe-webhook.ts). */
 export type BillingEvent =
-  | { id: string; created: number; kind: "checkout_completed"; session: string; ref: string | null; customer?: string; subscription?: string; paid: boolean; email?: string; locale?: string }
+  | { id: string; created: number; kind: "checkout_completed"; session: string; ref: string | null; customer?: string; subscription?: string; paid: boolean; email?: string; locale?: string; plan_id?: string }
   | { id: string; created: number; kind: "subscription_status"; subscription: string; customer?: string; status: SubscriptionStatus }
   | { id: string; created: number; kind: "invoice_paid" | "invoice_failed"; subscription?: string; customer?: string }
   | { id: string; created: number; kind: "dispute"; customer?: string; charge?: string }
@@ -439,6 +439,12 @@ export class SubscriptionStore {
     });
   }
 
+  /** Plan requested at request_upgrade, looked up from the public checkout reference (no side effect). */
+  pairingPlanForCheckoutRef(ref: string | null | undefined): Promise<string | undefined> {
+    if (!ref) return Promise.resolve(undefined);
+    return this.tx((data) => data.pairings.find((x) => checkoutRefFromCodeHash(x.code_hash) === ref)?.plan_id, false);
+  }
+
   /**
    * L4: apply one verified billing event, exactly once (event id), in one atomic write.
    * - checkout_completed + known ref → mint the API key for that pairing (returned once by get_subscription),
@@ -485,7 +491,7 @@ export class SubscriptionStore {
             const status: SubscriptionStatus = known?.status ?? "active";
             const lang = (ev.locale ?? "").toLowerCase().startsWith("fr") ? "fr" : "en";
             const api_key = newSecret("xvc_", 32);
-            const rec = this.newRecord(api_key, { plan_id: "coffre-horodate", quota: null, status, default_lang: lang });
+            const rec = this.newRecord(api_key, { plan_id: ev.plan_id ?? "coffre-horodate", quota: null, status, default_lang: lang });
             rec.stripe_customer = ev.customer;
             rec.stripe_subscription = ev.subscription;
             rec.email = email;
