@@ -74,7 +74,9 @@ export const QUALIFIED_TSA_URL = CERTIGNA_URL;
  * Provider selection (env):
  * - XVCACHE_TSA_PROVIDER = freetsa | qualified | custom | off
  *   The historical env value is a legacy alias of `qualified` (same provider object, including stored id).
- *   default: qualified when XVCACHE_TSA_USER is set, otherwise freetsa (not a qualified eIDAS timestamp).
+ *   default (local xvcache-mcp only): qualified when XVCACHE_TSA_USER is set, otherwise freetsa
+ *   (not a qualified eIDAS timestamp). The hosted entry point uses resolveHostedTsaProvider:
+ *   it never falls back to FreeTSA.
  * - XVCACHE_TSA_URL, XVCACHE_TSA_USER, XVCACHE_TSA_PASSWORD (HTTP Basic), XVCACHE_TSA_CA_FILE,
  *   XVCACHE_TSA_UNTRUSTED_FILE (intermediate certs, optional), XVCACHE_TSA_QUALIFIED (custom only).
  * Secrets are read from the environment only and are never written to proofs or logs.
@@ -87,6 +89,20 @@ export function isQualifiedTsaId(id: string): boolean {
 /** True when two stored/config ids refer to the same TSA (legacy alias included). */
 export function sameTsaId(a: string, b: string): boolean {
   return a === b || (isQualifiedTsaId(a) && isQualifiedTsaId(b));
+}
+
+
+function missingQualifiedTsaVars(env: NodeJS.ProcessEnv): string[] {
+  const missing: string[] = [];
+  if (!env.XVCACHE_TSA_USER?.trim()) missing.push("XVCACHE_TSA_USER");
+  if (!env.XVCACHE_TSA_PASSWORD?.trim()) missing.push("XVCACHE_TSA_PASSWORD");
+  return missing;
+}
+
+function qualifiedTsaMissingMessage(missing: string[]): string {
+  const list = missing.join(" et ");
+  const verb = missing.length > 1 ? "sont requis" : "est requis";
+  return `XVCACHE_TSA_PROVIDER=qualified : ${list} ${verb} (compte utilisateur Horodatage).`;
 }
 
 export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaProvider | null | TsaConfigError {
@@ -106,8 +122,9 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
     };
   }
   if (isQualifiedTsaId(wanted)) {
-    if (!env.XVCACHE_TSA_USER || !env.XVCACHE_TSA_PASSWORD) {
-      return { error: "XVCACHE_TSA_PROVIDER=qualified : XVCACHE_TSA_USER et XVCACHE_TSA_PASSWORD sont requis (compte utilisateur Horodatage)." };
+    const missingQualified = missingQualifiedTsaVars(env);
+    if (missingQualified.length) {
+      return { error: qualifiedTsaMissingMessage(missingQualified) };
     }
     return {
       // Stored in proofs and the token ledger. Kept stable so existing proofs and installations stay valid.
@@ -143,6 +160,37 @@ export function resolveTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaPro
     };
   }
   return { error: `XVCACHE_TSA_PROVIDER inconnu : ${wanted} (freetsa, qualified, custom, off).` };
+}
+
+
+/**
+ * Hosted entry (xvcache-remote): never fall back to FreeTSA.
+ * Default and `qualified` (plus the legacy alias) require XVCACHE_TSA_USER and
+ * XVCACHE_TSA_PASSWORD. `off` / `none` is an explicit test/demo opt-out, never a default.
+ * `freetsa` and `custom` are refused so the public "no fallback to FreeTSA" promise holds.
+ */
+export function resolveHostedTsaProvider(env: NodeJS.ProcessEnv = process.env): TsaProvider | null | TsaConfigError {
+  const raw = (env.XVCACHE_TSA_PROVIDER || "").trim().toLowerCase();
+  if (raw === "off" || raw === "none") return null;
+  if (raw === "freetsa") {
+    return {
+      error: "FreeTSA n'est pas autorisé en mode hébergé (aucun repli). Définir XVCACHE_TSA_PROVIDER=qualified avec XVCACHE_TSA_USER et XVCACHE_TSA_PASSWORD, ou XVCACHE_TSA_PROVIDER=off pour un test ou une démo sans TSA.",
+    };
+  }
+  if (raw && !isQualifiedTsaId(raw)) {
+    return {
+      error: `XVCACHE_TSA_PROVIDER=${raw} n'est pas autorisé en mode hébergé. Valeurs autorisées : qualified (ou l'alias héritée), ou off (test/démo, jamais par défaut).`,
+    };
+  }
+  const missing = missingQualifiedTsaVars(env);
+  if (missing.length) {
+    const list = missing.join(" et ");
+    const noun = missing.length > 1 ? "Variables manquantes" : "Variable manquante";
+    return {
+      error: `le service hébergé exige un horodatage qualifié, sans repli sur FreeTSA. ${noun} : ${list}. Définir XVCACHE_TSA_PROVIDER=qualified avec ces identifiants, ou XVCACHE_TSA_PROVIDER=off pour un test ou une démo sans TSA.`,
+    };
+  }
+  return resolveTsaProvider({ ...env, XVCACHE_TSA_PROVIDER: raw || "qualified" });
 }
 
 export function buildTimeStampReq(digest: Buffer, nonce: Buffer): Buffer {

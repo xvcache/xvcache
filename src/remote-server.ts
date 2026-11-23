@@ -2,7 +2,7 @@
 import path from "node:path";
 import os from "node:os";
 import { loadLocalEnv } from "./env.js";
-import { resolveTsaProvider } from "./tsa.js";
+import { resolveHostedTsaProvider } from "./tsa.js";
 import { DEFAULT_CALENDARS } from "./ots.js";
 import { SubscriptionStore, KEY_DELIVERY_TTL_MS } from "./subscriptions.js";
 import { HostedWitness, DEFAULT_DAILY_ANCHOR_UTC, type AnchorMode } from "./witness.js";
@@ -17,7 +17,7 @@ import { loadStripePriceTableFromEnv, priceTableStartupMessage } from "./stripe-
  * no deployment, no domain (L5/L7), no billing (L4: request_upgrade answers BILLING_UNAVAILABLE).
  * Env: XVCACHE_REMOTE_HOST (127.0.0.1), XVCACHE_REMOTE_PORT (0 = free port), XVCACHE_REMOTE_DATA
  * (~/.xvcache-remote), XVCACHE_PUBLIC_URL, XVCACHE_BATCH_WINDOW_MS (2000), XVCACHE_RETRY_MS (300000),
- * XVCACHE_OTS (on/off), TSA settings as for the local server (XVCACHE_TSA_*; FreeTSA = test by default).
+ * XVCACHE_OTS (on/off), TSA: qualified credentials required (XVCACHE_TSA_USER, XVCACHE_TSA_PASSWORD); no FreeTSA fallback. XVCACHE_TSA_PROVIDER=off is an explicit test/demo opt-out only.
  * L4 billing: XVCACHE_STRIPE_PAYMENT_LINK_URL + STRIPE_WEBHOOK_SECRET (both needed; webhook on POST /stripe/webhook).
  *   Price table (required to honour paid checkouts): XVCACHE_STRIPE_PRICE_TABLE (JSON file path) or
  *   XVCACHE_STRIPE_PRICE_TABLE_JSON; see stripe-price-table.example.json (fake ids only). Missing/empty = refuse all paid checkouts.
@@ -53,7 +53,7 @@ if (process.argv[2] === "--create-key") {
   process.exit(0);
 }
 
-const tsa = resolveTsaProvider(env);
+const tsa = resolveHostedTsaProvider(env);
 if (tsa && "error" in tsa) {
   process.stderr.write(`xvcache-remote: ${tsa.error}\n`);
   process.exit(1);
