@@ -85,7 +85,7 @@
     "price_label": "monthly subscription; professional price",
     "price_display": "Planned pricing, not on sale yet: Essentiel €29 excl. VAT / month · Cabinet €59 excl. VAT / month · launch price €19 excl. VAT / month for Essentiel, for the first 50 organisations, while the subscription stays active · professionals only · demos by application.",
     "includes": [
-      "In the planned subscription, qualified eIDAS timestamps issued by a qualified trust service provider listed on the French trusted list: one Merkle root shared by all subscribers, stamped once a day; proofs are not capped (pending proofs are never counted). The hosted endpoint, currently in demo, requests the qualified timestamp, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
+      "In the planned subscription, qualified eIDAS timestamps issued by a qualified trust service provider listed on the French trusted list: one Merkle root shared by all subscribers, stamped once a day; proofs are not capped (pending proofs are never counted). As of 23 November 2026, the hosted endpoint is a demonstration and requests the qualified timestamp, with no fallback to FreeTSA. The Coffre horodaté subscription is not on sale yet. Local version: FreeTSA by default, not qualified.",
       "Document content stays on your computer; the hosted server receives the fingerprint and an optional label, and processes the IP address",
       "V/X verdict and a one-page PDF report in 24 EU languages; verification is free for anyone"
     ],

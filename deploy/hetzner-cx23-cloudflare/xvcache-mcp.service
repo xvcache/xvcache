@@ -3,7 +3,6 @@
 # Modèle : install-or-update.sh remplace @NODE_BIN@ par le chemin absolu de node.
 [Unit]
 Description=XVcache MCP remote server (hash-only, Streamable HTTP on 127.0.0.1)
-Documentation=file:///opt/xvcache/current/deploy/hetzner-cx23-cloudflare/DEPLOIEMENT.md
 After=network-online.target
 Wants=network-online.target
 

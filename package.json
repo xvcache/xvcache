@@ -1,7 +1,7 @@
 {
   "name": "xvcache-mcp",
   "version": "0.3.0",
-  "description": "Local MCP server for Markdown vaults: sha256-chained journal, V/X technical verdicts, batched RFC 3161 + OpenTimestamps evidence, one-page PDF report. Default TSA: FreeTSA (FreeTSA timestamp tokens are not qualified electronic timestamps under eIDAS (Regulation (EU) No 910/2014, art. 41-42)). Qualified eIDAS timestamps only when issued by a qualified trust service provider listed on the French trusted list (planned for the hosted Coffre horodaté subscription, or with your own account with that provider). The provider's name is available on request at contact@xvcache.com. XVcache is not a qualified trust service provider.",
+  "description": "Local MCP server for Markdown vaults: sha256-chained journal, V/X technical verdicts, batched RFC 3161 + OpenTimestamps evidence, one-page PDF report. Default TSA: FreeTSA (FreeTSA timestamp tokens are not qualified electronic timestamps under eIDAS (Regulation (EU) No 910/2014, art. 41-42)). Qualified eIDAS timestamps only when issued by a qualified trust service provider listed on the French trusted list (planned for the hosted Coffre horodat\u00e9 subscription, or with your own account with that provider). The provider's name is available on request at contact@xvcache.com. XVcache is not a qualified trust service provider.",
   "type": "module",
   "main": "dist/server.js",
   "bin": {
@@ -39,7 +39,8 @@
     "llms-full.txt",
     "scripts/demo-ui.mjs",
     "dist/i18n.js",
-    "locales/*.json",
+    "locales/en.json",
+    "locales/fr.json",
     "fonts/*.ttf",
     "fonts/LICENSE-DejaVu.txt",
     "dist/errors.js",
@@ -57,7 +58,7 @@
   "scripts": {
     "build": "tsc && chmod +x dist/server.js dist/export-certificate.js dist/remote-server.js",
     "start": "node dist/server.js",
-    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/offer.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js dist/certificate-i18n.test.js dist/subscriptions.test.js dist/witness.test.js dist/remote.test.js dist/stripe-webhook.test.js dist/stripe-price-check.test.js dist/qualification.test.js dist/daily-anchor.test.js dist/key-delivery.test.js dist/pack.test.js dist/public-texts.test.js dist/verdict-label.test.js dist/post-termination-pdf.test.js",
+    "test": "npm run build && node dist/test-client.js && node --test dist/journal.test.js dist/plans.test.js dist/offer.test.js dist/merkle.test.js dist/certify.test.js dist/env.test.js dist/certify.integration.test.js dist/certificate.test.js dist/certificate-i18n.test.js dist/subscriptions.test.js dist/witness.test.js dist/remote.test.js dist/stripe-webhook.test.js dist/stripe-price-check.test.js dist/qualification.test.js dist/daily-anchor.test.js dist/key-delivery.test.js dist/pack.test.js dist/public-texts.test.js dist/locale-fallback.test.js dist/verdict-label.test.js dist/post-termination-pdf.test.js",
     "demo:certify": "npm run build && node scripts/demo-certify.mjs",
     "demo:ui": "npm run build && node scripts/demo-ui.mjs",
     "certificate": "npm run build && node dist/export-certificate.js",

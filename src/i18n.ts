@@ -40,8 +40,16 @@ export type Locale = {
   offer: Record<string, string | string[]>;
 };
 
+let localesDirOverride: string | undefined;
+
 export function localesDir(): string {
-  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "locales");
+  return localesDirOverride ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "locales");
+}
+
+/** Test-only: point loadLocale at another directory and drop the in-memory cache. */
+export function setLocalesDirForTests(dir: string | undefined): void {
+  localesDirOverride = dir;
+  cache.clear();
 }
 
 const cache = new Map<string, Locale>();

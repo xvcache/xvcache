@@ -100,7 +100,7 @@ preflight() {
     elif (( major < RECOMMENDED_NODE_MAJOR )); then warn "Node $major accepté ; Node $RECOMMENDED_NODE_MAJOR LTS recommandé"; fi
     log "node $(node -v) ($(command -v node)), npm $(npm -v)"
   else
-    warn "node/npm introuvables : voir DEPLOIEMENT.md § 2 (Node $RECOMMENDED_NODE_MAJOR LTS)"; ok=0
+    warn "node/npm introuvables : installer Node $RECOMMENDED_NODE_MAJOR LTS"; ok=0
   fi
   local port; port="$(env_port)"
   env_host_is_local || { warn "XVCACHE_REMOTE_HOST n'est pas local dans $ENV_FILE : refusé (le tunnel doit être le seul accès)"; ok=0; }
@@ -293,7 +293,7 @@ tunnel_token_state() {
 
 tunnel_status() {
   log "Tunnel Cloudflare (mode jeton)"
-  if command -v cloudflared >/dev/null; then log "cloudflared : $(cloudflared --version 2>/dev/null | head -n1)"; else warn "cloudflared non installé (DEPLOIEMENT.md § 7.1)"; fi
+  if command -v cloudflared >/dev/null; then log "cloudflared : $(cloudflared --version 2>/dev/null | head -n1)"; else warn "cloudflared non installé"; fi
   if [[ -e "$TUNNEL_ENV" ]]; then
     log "fichier du jeton : $TUNNEL_ENV ($(stat -c '%U:%G %a' "$TUNNEL_ENV"), jeton : $(tunnel_token_state))"
     [[ "$(stat -c '%a' "$TUNNEL_ENV")" == "600" ]] || warn "droits de $TUNNEL_ENV différents de 600"
@@ -302,14 +302,14 @@ tunnel_status() {
   fi
   log "service $TUNNEL_UNIT : $(systemctl is-active "$TUNNEL_UNIT" 2>/dev/null || true)"
   if systemctl is-enabled cloudflared.service >/dev/null 2>&1; then
-    warn "cloudflared.service (créé par 'cloudflared service install <TOKEN>') est aussi actif : garder un seul connecteur (DEPLOIEMENT.md § 7.4)"
+    warn "cloudflared.service (créé par 'cloudflared service install <TOKEN>') est aussi actif : garder un seul connecteur"
   fi
 }
 
 setup_tunnel() {
   local unit_dir changed=0 state tmp
   unit_dir="$(dirname "$UNIT_PATH")"
-  command -v cloudflared >/dev/null || die "cloudflared absent : l'installer d'abord (DEPLOIEMENT.md § 7.1)"
+  command -v cloudflared >/dev/null || die "cloudflared absent : l'installer d'abord"
   [[ -x /usr/bin/cloudflared ]] || warn "cloudflared n'est pas dans /usr/bin : adapter ExecStart de $TUNNEL_UNIT"
   run install -d -o root -g root -m 0755 "$(dirname "$TUNNEL_ENV")"
   if [[ -e "$TUNNEL_ENV" ]]; then
@@ -333,7 +333,7 @@ setup_tunnel() {
     return 0
   fi
   if systemctl is-enabled cloudflared.service >/dev/null 2>&1; then
-    warn "cloudflared.service existe déjà (installé par 'cloudflared service install') : deux connecteurs pour le même tunnel. En garder un seul (DEPLOIEMENT.md § 7.4)."
+    warn "cloudflared.service existe déjà (installé par 'cloudflared service install') : deux connecteurs pour le même tunnel. En garder un seul."
   fi
   run systemctl enable "$TUNNEL_UNIT" >/dev/null
   if [[ $changed -eq 1 ]] || ! systemctl is-active --quiet "$TUNNEL_UNIT" 2>/dev/null; then run systemctl restart "$TUNNEL_UNIT"; fi

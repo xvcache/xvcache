@@ -167,3 +167,9 @@ test("packed public texts do not name Certigna, Dhimyotis, or the policy OID (ex
   await walk(extractDir);
   assert.equal(hits.length, 0, `forbidden public-text hits in the npm tarball (${hits.length}):\n${hits.join("\n")}`);
 });
+
+test("the npm tarball ships only locales/en.json and locales/fr.json", async () => {
+  const locDir = path.join(extractDir, "package", "locales");
+  const names = (await fs.readdir(locDir)).filter((n) => n.endsWith(".json")).sort();
+  assert.deepEqual(names, ["en.json", "fr.json"], `unexpected locales in the tarball: ${names.join(", ")}`);
+});

@@ -85,7 +85,7 @@
     "price_label": "abonnement mensuel ; tarif professionnel",
     "price_display": "Tarifs prévus, pas encore en vente : Essentiel 29 € HT / mois · Cabinet 59 € HT / mois · prix de lancement 19 € HT / mois pour l'Essentiel, réservé aux 50 premières organisations, tant que l'abonnement reste actif · professionnels · démos sur candidature.",
     "includes": [
-      "Dans l'abonnement prévu, horodatages qualifiés eIDAS émis par un prestataire de services de confiance qualifié inscrit sur la liste de confiance française : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; les preuves ne sont pas plafonnées (une preuve en attente n'est jamais décomptée). Le point d'accès hébergé, aujourd'hui en démonstration, demande l'horodatage qualifié, sans repli vers FreeTSA. L'abonnement Coffre horodaté n'est pas encore en vente. Version locale : FreeTSA par défaut, non qualifié.",
+      "Dans l'abonnement prévu, horodatages qualifiés eIDAS émis par un prestataire de services de confiance qualifié inscrit sur la liste de confiance française : une racine de Merkle commune à tous les abonnés, horodatée une fois par jour ; les preuves ne sont pas plafonnées (une preuve en attente n'est jamais décomptée). Au 23 novembre 2026, le service hébergé est une démonstration et demande l'horodatage qualifié, sans repli sur FreeTSA. L'abonnement Coffre horodaté n'est pas encore en vente. Version locale : FreeTSA par défaut, non qualifié.",
       "Le contenu des documents reste sur votre ordinateur ; le serveur hébergé reçoit l'empreinte et un libellé facultatif, et traite l'adresse IP",
       "Verdict V/X et rapport PDF d'une page en 24 langues de l'UE ; vérification gratuite pour tous"
     ],
